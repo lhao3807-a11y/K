@@ -110,68 +110,28 @@
 
   <script src="./echarts.min.js"></script>
   <script>window.echarts||document.write('<script src="https:\/\/cdn.jsdelivr.net\/npm\/echarts@5.5.0\/dist\/echarts.min.js"><\/script>')</script>
+  <!-- 数据层：由 database/dynasty.db 导出，勿手改；改数据请编辑数据库后运行 python database/manage.py export -->
+  <script src="./data.js"></script>
   <script>
   (function(){
     const mono = "Consolas,'Courier New',monospace";
     const round1 = x => Math.round(x*10)/10;
     const dirColor = d => d==='bull' ? '#f23645' : d==='bear' ? '#089981' : d==='vol' ? '#f0b90b' : '#8b93a7';
 
-    // ---- 事件集（shot 16 事件为基准 + 补充），人工标注 ----
-    const EVENTS = [
-      {year:960, title:'陈桥兵变 · 黄袍加身', term:'IPO 上市', dir:'bull', mag:'+大', desc:'赵匡胤黄袍加身，代周建宋，国运指数以发行价 100 点挂牌上市。'},
-      {year:979, title:'灭北汉 · 完成统一', term:'跳空高开', dir:'bull', mag:'+大', desc:'太宗灭北汉，中原基本归一，市场情绪亢奋，指数追高超买。'},
-      {year:980, title:'高粱河惨败 · 太宗飙驴车', term:'闪崩', dir:'bear', mag:'-大', desc:'攻辽于高粱河大败，太宗股中两箭、乘驴车南逃，指数重挫。（史实为 979 年，为避让上方标注顺移一年）'},
-      {year:1004, title:'澶州之战 · 真宗亲征', term:'绝地反击', dir:'bull', mag:'+大', desc:'辽军大举南下，王钦若主张迁都避敌；寇准力促真宗亲征，澶州城下床子弩射杀辽帅萧挞凛，士气大振，指数绝地反击。'},
-      {year:1005, title:'澶渊之盟 · 岁币换和平', term:'利好出尽', dir:'bear', mag:'-中', desc:'宋辽约为兄弟之国，换来百年和平，但岁输银十万两、绢二十万匹，长期负担落地，和平红利兑现后指数回吐。'},
-      {year:1043, title:'庆历新政 · 范仲淹', term:'改革题材', dir:'vol', mag:'±小', desc:'范仲淹推行新政，整顿吏治触动既得利益，改革题材炒作，波动加大。'},
-      {year:1069, title:'王安石变法 · 熙宁新法', term:'多空拉锯', dir:'vol', mag:'±中', desc:'熙宁变法历时十余年，新旧党争反复拉锯，指数高波动、方向不明。'},
-      {year:1082, title:'永乐城之败 · 神宗痛哭', term:'见顶回落', dir:'bear', mag:'-大', desc:'大举攻西夏永乐城惨败，士卒伤亡数十万，神宗临朝痛哭，变法成果受挫。国运指数于此见顶，由盛转衰。'},
-      {year:1102, title:'徽宗即位 · 蔡京专权', term:'趋势反转', dir:'bear', mag:'-中', desc:'徽宗即位，起用蔡京，立元祐党籍碑、兴花石纲，朝政日坏，指数自高位趋势反转、步入长期下行。'},
-      {year:1127, title:'靖康之变 · 二帝北狩', term:'闪崩 -50%', dir:'bear', mag:'-巨', desc:'金兵攻破汴京，徽、钦二帝被掳北去，北宋就此退市，指数腰斩。'},
-      {year:1128, title:'南宋建立 · 偏安临安', term:'借壳重组', dir:'neutral', mag:'+小', desc:'赵构南渡称帝，南宋重新挂牌，缩量企稳，进入下半场。'},
-      {year:1140, title:'岳飞北伐 · 郾城大捷', term:'强势反弹', dir:'bull', mag:'+大', desc:'岳家军连败金军，兵锋直指故都，指数走出最强劲一波反弹。'},
-      {year:1141, title:'绍兴和议 · 岳飞冤死', term:'利空落地', dir:'bear', mag:'-中', desc:'十二道金牌召回，岳飞以“莫须有”遇害，纳贡称臣，指数回吐。'},
-      {year:1162, title:'孝宗即位 · 隆兴北伐', term:'题材反弹', dir:'bull', mag:'+小', desc:'孝宗锐意恢复，为岳飞平反，隆兴北伐先胜后败，指数小幅冲高。'},
-      {year:1187, title:'乾淳之治 · 南宋鼎盛', term:'慢牛 · 黄金顶', dir:'bull', mag:'+中', desc:'孝宗乾道、淳熙年间南宋鼎盛，经济文化繁荣，指数创历史高位区。'},
-      {year:1206, title:'开禧北伐 · 韩侂胄冒进', term:'冲高回落', dir:'bear', mag:'-中', desc:'韩侂胄仓促发动开禧北伐，全线溃败，指数冲高回落。'},
-      {year:1234, title:'联蒙灭金 · 引狼入室', term:'利好出尽', dir:'bear', mag:'-中', desc:'与蒙古联手灭金，端平入洛惨败，唇亡齿寒，蒙古旋即大举南侵。'},
-      {year:1259, title:'钓鱼城 · 击毙蒙哥', term:'超跌反弹', dir:'bull', mag:'+小', desc:'合州钓鱼城下蒙哥汗殒命，蒙古暂缓南下，指数短线反弹。'},
-      {year:1273, title:'襄阳失守 · 门户洞开', term:'破位下跌', dir:'bear', mag:'-大', desc:'襄樊坚守六年终告陷落，长江门户洞开，指数破位下行。'},
-      {year:1276, title:'临安陷落 · 恭帝出降', term:'加速赶底', dir:'bear', mag:'-大', desc:'元军入临安，恭帝出降，太皇太后奉玺请降，指数加速探底。'},
-      {year:1279, title:'崖山海战 · 负帝投海', term:'摘牌退市', dir:'bear', mag:'-巨', desc:'崖山海战宋军覆灭，陆秀夫负幼帝赵昺投海，宋朝摘牌退市，指数归零。'}
-    ];
-
-    // ---- 皇帝在位区间（不重叠、全覆盖 960-1279）----
-    const EMPERORS = [
-      {name:'太祖', full:'宋太祖 赵匡胤', s:960,  e:976},
-      {name:'太宗', full:'宋太宗 赵匡义', s:977,  e:997},
-      {name:'真宗', full:'宋真宗 赵恒',   s:998,  e:1022},
-      {name:'仁宗', full:'宋仁宗 赵祯',   s:1023, e:1063},
-      {name:'英宗', full:'宋英宗 赵曙',   s:1064, e:1067},
-      {name:'神宗', full:'宋神宗 赵顼',   s:1068, e:1085},
-      {name:'哲宗', full:'宋哲宗 赵煦',   s:1086, e:1100},
-      {name:'徽宗', full:'宋徽宗 赵佶',   s:1101, e:1125},
-      {name:'钦宗', full:'宋钦宗 赵桓',   s:1126, e:1127},
-      {name:'高宗', full:'宋高宗 赵构',   s:1128, e:1161},
-      {name:'孝宗', full:'宋孝宗 赵昚',   s:1162, e:1189},
-      {name:'光宗', full:'宋光宗 赵惇',   s:1190, e:1194},
-      {name:'宁宗', full:'宋宁宗 赵扩',   s:1195, e:1224},
-      {name:'理宗', full:'宋理宗 赵昀',   s:1225, e:1264},
-      {name:'度宗', full:'宋度宗 赵禥',   s:1265, e:1274},
-      {name:'恭帝', full:'宋恭帝 赵㬎',   s:1275, e:1276},
-      {name:'端宗', full:'宋端宗 赵昰',   s:1277, e:1278},
-      {name:'末帝', full:'宋末帝 赵昺',   s:1279, e:1279}
-    ];
-
-    // ---- 锚点（年, 国运指数目标值）----
-    // 澶渊段：1000 战云密布下跌 → 1004 亲征绝地反击 → 1005 岁币回吐 → 1022 和平慢牛
-    // 见顶段：1069 变法启动 → 1082 永乐城之败钉顶 → 1085 回落 → 1100 趋势反转
-    const ANCHORS = [
-      [960,100],[979,135],[980,112],[1000,124],[1003,112],[1004,138],[1005,126],[1022,146],
-      [1043,178],[1069,186],[1082,222],[1085,204],[1100,168],[1124,150],[1126,70],[1130,90],
-      [1140,118],[1142,96],[1165,150],[1187,165],[1207,128],[1234,112],[1259,120],[1272,100],
-      [1273,58],[1276,26],[1279,2]
-    ];
+    // ---- 数据层：与 database/dynasty.db 表字段一一对应 ----
+    //   events   表 -> EVENTS（year/title/term/dir/mag/desc）
+    //   emperors 表 -> EMPERORS（name/full/s/e）
+    //   anchors  表 -> ANCHORS（[year, value]）
+    //   dynasties 表 -> 王朝参数（START/END/PEAK/发行价/随机种子）
+    if(!window.DYNASTY_DATA){
+      document.body.innerHTML='<p style="padding:40px;color:#f23645;font-family:Consolas,monospace">缺少 data.js —— 请先运行：python database/manage.py export</p>';
+      return;
+    }
+    const D = window.DYNASTY_DATA;
+    const ISSUE = D.dynasty.issuePrice;
+    const EVENTS = D.events;
+    const EMPERORS = D.emperors;
+    const ANCHORS = D.anchors;
 
     function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
     const rand = mulberry32(9601279);
@@ -210,7 +170,7 @@
     let mode='year', cur=null, chart=null;
 
     function buildSeries(){
-      if(mode==='year') return {cats:years.slice(), data:candles.slice(), ma:ma(candles,20), maName:'MA20'};
+      if(mode==='year') return {cats:years.slice(), data:candles.slice(), ma:ma(candles,D.config.maYear), maName:'MA'+D.config.maYear};
       const cats=[], data=[];
       EMPERORS.forEach(em=>{
         cats.push(em.name);
@@ -349,7 +309,7 @@
             itemStyle:{color:'#f23645',color0:'#089981',borderColor:'#f23645',borderColor0:'#089981'},
             markPoint:{data:marks},
             markLine:{symbol:'none',lineStyle:{color:'#f0b90b',type:'dashed',width:1},
-              label:{color:'#f0b90b',formatter:'发行价 100',position:'insideEndTop',fontFamily:mono},
+              label:{color:'#f0b90b',formatter:'发行价 '+ISSUE,position:'insideEndTop',fontFamily:mono},
               data:[{yAxis:100}]}},
           {name:cur.maName,type:'line',data:cur.ma,smooth:true,symbol:'none',
             lineStyle:{color:'#f0b90b',width:1.3,opacity:.9},z:3}
