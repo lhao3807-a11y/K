@@ -67,6 +67,8 @@
   .dynsel{background:var(--panel);color:var(--txt);border:1px solid var(--line);border-radius:7px;font-family:inherit;font-size:13px;padding:7px 10px;cursor:pointer;align-self:flex-start;max-width:220px}
   .dynsel:focus{outline:none;border-color:var(--amber)}
   .dynsel option{background:var(--panel);color:var(--txt)}
+  .backbtn{background:none;border:1px solid var(--line);border-radius:7px;color:var(--mut);font-size:13px;padding:7px 12px;cursor:pointer;font-family:inherit;align-self:flex-start;transition:color .15s,border-color .15s}
+  .backbtn:hover{color:var(--amber);border-color:var(--amber)}
   .tip{font-family:var(--mono);font-size:12px}
   .tip .y{font-weight:700;margin-bottom:5px;font-size:13px}
   .tip .r{display:flex;justify-content:space-between;gap:22px;line-height:1.6}
@@ -76,6 +78,7 @@
 </head>
 <body data-page-node-id="rEox1yUHMSGYIUwZBmsZoT">
   <header data-page-node-id="5n57z1Et1Rr2DJnU1Rvtti">
+    <button id="backHome" class="backbtn" title="返回王朝交易所">‹ 交易所</button>
     <select id="dynSwitch" class="dynsel" style="display:none" title="切换王朝标的"></select>
     <div class="tick" data-page-node-id="7z5zK6p0wcdqMAdNqnj4kK">
       <h1 data-page-node-id="8llUxRhEC9GRkEbCwoYNOP"><span id="dynName">--</span> <span class="code" id="dynCode">--</span></h1>
@@ -454,6 +457,7 @@
 
     // ---- 一次性全局监听（跨王朝复用） ----
     document.getElementById('cardClose').addEventListener('click',()=>card.classList.add('hidden'));
+    document.getElementById('backHome').addEventListener('click',()=>{ window.location.href='dynasty-exchange.html'; });
     window.addEventListener('resize', ()=>{ if(chart) chart.resize(); });
     Array.prototype.forEach.call(document.querySelectorAll('.seg button'),b=>{
       b.addEventListener('click',()=>{
@@ -487,10 +491,13 @@
           if(!list.length){ showFatal('数据库中暂无王朝数据 —— 请先运行：python database/manage.py init'); return; }
           sel.style.display='';
           sel.innerHTML=list.map(d=>'<option value="'+d.code+'">'+d.name+' '+d.code+'</option>').join('');
-          const active=list.find(d=>d.isActive)||list[0];
+          // 深链优先：dynasty-exchange.html 跳转时带 #CODE
+          const want=decodeURIComponent((location.hash||'').replace('#',''));
+          const active=list.find(d=>d.code===want) || list.find(d=>d.isActive) || list[0];
           sel.value=active.code;
           mount(JSON.parse(await api.get_dynasty(active.code)));
           sel.addEventListener('change', async ()=>{
+            if(location.hash) location.hash='';   // 手动切换后清除深链，避免刷新跳回
             const d=JSON.parse(await api.get_dynasty(sel.value));
             if(d && !d.error) mount(d);
           });

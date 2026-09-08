@@ -70,6 +70,24 @@ def test_index_html_is_offline_only():
     assert "cdn.jsdelivr.net" not in html
 
 
+def test_exchange_home_wired_to_js_api_and_navigation():
+    """首页动态化：js_api 驱动 + 卡片/芯片跳转 K 线页深链。"""
+    with open(app.resource_path("dynasty-exchange.html"), encoding="utf-8") as f:
+        js = f.read()
+    assert "list_dynasties" in js and "get_dynasty(" in js
+    assert "index.html#" in js          # 卡片/芯片 → 盘面页深链
+    assert "buildCandles" in js         # 行情数字由真实数据计算（与盘面页同算法）
+    assert "miniKlineSVG" in js         # 迷你 K 线动态生成
+
+
+def test_chart_page_supports_deep_link_and_back():
+    """盘面页：hash 深链选王朝 + 返回交易所入口。"""
+    with open(app.resource_path("index.html"), encoding="utf-8") as f:
+        js = f.read()
+    assert "location.hash" in js
+    assert "dynasty-exchange.html" in js and 'backHome' in js
+
+
 def test_index_html_boot_uses_js_api_with_demo_fallback():
     """前端架构：桌面端 js_api 优先，data.js 仅作浏览器演示回退。"""
     with open(app.resource_path("index.html"), encoding="utf-8") as f:
