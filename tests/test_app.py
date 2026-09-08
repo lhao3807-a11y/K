@@ -20,10 +20,15 @@ APP = os.path.join(PROJECT, "app.py")
 
 
 def test_resource_path_resolves_bundled_assets():
-    for rel in ("index.html", "data.js", "echarts.min.js",
-                "database/dynasty.db"):
+    for rel in ("dynasty-exchange.html", "index.html", "data.js",
+                "echarts.min.js", "database/dynasty.db"):
         p = app.resource_path(rel)
         assert os.path.exists(p), f"打包资源缺失: {rel} -> {p}"
+
+
+def test_home_page_is_exchange_design():
+    """启动首页为王朝交易所设计稿。"""
+    assert app.HOME_PAGE == "dynasty-exchange.html"
 
 
 def test_api_list_dynasties():

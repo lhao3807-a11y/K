@@ -25,7 +25,8 @@ BASE_DIR = pathlib.Path(__file__).resolve().parent
 # PyInstaller --onefile 模式下，资源解压到 sys._MEIPASS 临时目录
 RESOURCE_BASE = pathlib.Path(getattr(sys, "_MEIPASS", BASE_DIR))
 
-WINDOW_TITLE = "王朝 K 线图 · DASONG.960"
+WINDOW_TITLE = "王朝交易所 · DYNASTY EXCHANGE"
+HOME_PAGE = "dynasty-exchange.html"   # 启动首页（设计稿）；index.html 为行情盘面页
 MIN_SIZE = (960, 640)
 DEFAULT_SIZE = (1280, 860)
 
@@ -173,7 +174,7 @@ def main() -> int:
         alert_missing_webview2()
         return 1
 
-    index_uri = pathlib.Path(resource_path("index.html")).as_uri()
+    index_uri = pathlib.Path(resource_path(HOME_PAGE)).as_uri()
     window = webview.create_window(
         WINDOW_TITLE,
         index_uri,
