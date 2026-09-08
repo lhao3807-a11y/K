@@ -3,3 +3,8 @@
 
 # 截图参考素材
 shot/
+
+# PyInstaller 打包产物
+build/
+dist/
+*.spec
