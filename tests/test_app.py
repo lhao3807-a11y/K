@@ -100,6 +100,17 @@ def test_exchange_home_wired_to_js_api_and_navigation():
     assert "miniKlineSVG" in js         # 迷你 K 线动态生成
 
 
+def test_exchange_home_featured_peak_trough_and_motion():
+    """首页焦点区：波峰/波谷标注（与盘面页同算法）+ 动效与交互。"""
+    with open(app.resource_path("dynasty-exchange.html"), encoding="utf-8") as f:
+        js = f.read()
+    assert "extMap" in js and "RANK=" in js   # 极值→事件绑定（巨>大>中>小）
+    assert "pt-mark" in js                    # 极值标注样式钩子
+    assert "countUp" in js                    # 关键数字滚动动画
+    assert "animation-delay" in js            # 卡片错峰入场
+    assert "prefers-reduced-motion" in js     # 尊重系统减弱动效设置
+
+
 def test_chart_page_supports_deep_link_and_back():
     """盘面页：hash 深链选王朝 + 返回交易所入口。"""
     with open(app.resource_path("index.html"), encoding="utf-8") as f:

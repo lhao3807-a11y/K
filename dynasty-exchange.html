@@ -495,7 +495,7 @@
   <section class="list-section" data-page-node-id="91XUgynCcYXoF904mSKL0K">
     <div class="section-head" data-page-node-id="esYF9s9jNUFXaeZ5WtpEwF">
       <span class="section-title" data-page-node-id="t5zgKyVM9VFjNcrGsSVItJ">全部王朝</span>
-      <span class="section-sub" data-page-node-id="EGRWn6pG7mpu4eLNo1jNqU">按上市时间排序 · 发行价统一为 100</span>
+      <span class="section-sub" id="subCount" data-page-node-id="EGRWn6pG7mpu4eLNo1jNqU">按上市时间排序 · 发行价统一为 100</span>
     </div>
     <div class="card-grid" id="cardGrid" data-page-node-id="8YBgDQLl8j3y5UkGfd2uNm">
 
@@ -871,6 +871,33 @@
         s+='<line x1="'+xi+'" y1="64" x2="'+xi+'" y2="'+Y1+'" stroke="'+col+'" stroke-width="1" opacity="0.7"/>';
         s+='<text x="'+xi+'" y="56" font-size="12" fill="'+col+'" text-anchor="middle">'+ev.title+' · '+ev.term+'</text>';
       });
+      // 波峰/波谷：锚点局部极值绑定 ±3 年内冲击最大的事件（与盘面页同算法），按幅度取前 4
+      var RANK={'巨':4,'大':3,'中':2,'小':1};
+      function sig(ev){ return RANK[(ev.mag||' ').charAt(1)]||0; }
+      var A=D.anchors||[], extMap={};
+      if(A.length>=3){
+        for(var ai=1;ai<A.length-1;ai++){
+          var t=A[ai][1]>A[ai-1][1]&&A[ai][1]>A[ai+1][1]?'peak'
+              :A[ai][1]<A[ai-1][1]&&A[ai][1]<A[ai+1][1]?'trough':null;
+          if(!t) continue;
+          var ay=A[ai][0], bb=null;
+          evs.forEach(function(ev){ if(Math.abs(ev.year-ay)<=3 && (!bb||sig(ev)>sig(bb))) bb=ev; });
+          if(bb && (!extMap[bb.year]||sig(bb)>sig(extMap[bb.year].ev))) extMap[bb.year]={type:t,ev:bb};
+        }
+      }
+      Object.keys(extMap).map(function(k){ return extMap[k]; })
+        .sort(function(a,b){ return sig(b.ev)-sig(a.ev); })
+        .slice(0,4)
+        .forEach(function(m,ri){
+          var idx=m.ev.year-D.dynasty.startYear;
+          if(idx<0||idx>=cs.length) return;
+          var xi=X(idx), yi=Y(m.type==='peak'?cs[idx][3]:cs[idx][2]);
+          var col=dirColor(m.ev.dir);
+          var ly=m.type==='peak' ? Math.max(16, yi-14-(ri%2)*13) : Math.min(318, yi+20+(ri%2)*13);
+          s+='<circle class="pt-mark" cx="'+xi.toFixed(1)+'" cy="'+yi.toFixed(1)+'" r="4" fill="'+col+'" stroke="#0B0E11" stroke-width="1.5"/>';
+          s+='<text class="pt-mark" x="'+xi.toFixed(1)+'" y="'+ly.toFixed(1)+'" font-size="11" fill="'+col+'" text-anchor="middle">'+(m.type==='peak'?'▲ ':'▼ ')+m.ev.title+'</text>';
+        });
+
       // X 轴起止标签
       var mid=Math.round((D.dynasty.startYear+D.dynasty.endYear)/2);
       s+='<text x="'+X0+'" y="324" font-size="11" fill="#5A6472">'+fmtYear(D.dynasty.startYear)+'</text>';
@@ -960,9 +987,11 @@
         if(d.isActive) act++;
         var c=statsOf(full[d.code]).chg; if(c>0)up++; else if(c<0)down++;
       });
-      document.getElementById('mListed').textContent=list.length+' 支';
+      countUp(document.getElementById('mListed'), list.length, 0, ' 支');
       document.getElementById('mListedSub').textContent='在市 '+act+' · 退市 '+(list.length-act-pend)
         +(pend?(' · 筹备 '+pend):'');
+      document.getElementById('subCount').textContent='按上市时间排序 · 共 '+list.length
+        +' 支 · 发行价统一 100'+(pend?(' · '+pend+' 支筹备中'):'');
       document.getElementById('mUp').textContent='涨 '+up;
       document.getElementById('mDown').textContent='跌 '+down;
       document.getElementById('mFlat').textContent='平 '+(list.length-up-down-pend);
@@ -1021,19 +1050,19 @@
         return;
       }
       var pEl=document.getElementById('fPrice');
-      pEl.textContent=st.last.toFixed(2); pEl.className='price-now '+c;
+      pEl.className='price-now '+c; countUp(pEl, st.last, 2);
       var chgEl=document.getElementById('fChg');
       chgEl.textContent='较发行 '+fmtPct(st.chg); chgEl.className='price-chg '+c;
       document.getElementById('fKline').innerHTML=featuredKlineSVG(D, st.candles);
-      document.getElementById('sIssueLabel').textContent='发行价（'+st.start+'）';
-      document.getElementById('sIssue').textContent=st.issue.toFixed(2);
+      document.getElementById('sIssueLabel').textContent='发行价（'+fmtYear(st.start)+'）';
+      countUp(document.getElementById('sIssue'), st.issue, 2);
       document.getElementById('sHighLabel').textContent='历史最高（'+fmtYear(st.hiY)+'）';
       var hiEl=document.getElementById('sHigh');
-      hiEl.textContent=st.hi.toFixed(2); hiEl.className='stat-value up';
+      hiEl.className='stat-value up'; countUp(hiEl, st.hi, 2, '', 900);
       document.getElementById('sDur').textContent=st.dur+' 年';
-      document.getElementById('sLastLabel').textContent='终值（'+st.end+'）';
+      document.getElementById('sLastLabel').textContent='终值（'+fmtYear(st.end)+'）';
       var laEl=document.getElementById('sLast');
-      laEl.textContent=st.last.toFixed(2); laEl.className='stat-value '+c;
+      laEl.className='stat-value '+c; countUp(laEl, st.last, 2);
       var dwEl=document.getElementById('sDraw');
       dwEl.textContent=fmtPct(st.dd); dwEl.className='stat-value down';
       var reEl=document.getElementById('sRet');
