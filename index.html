@@ -171,27 +171,51 @@
       return {cats, data, ma:ma(data,D.config.maEmperor), maName:'MA'+D.config.maEmperor};
     }
 
-    // 标注点：缩放跨度 <=SPAN_FULL 年时展开「事件名 —— 金融术语」（两行），全览时只显示术语
-    function mkPoint(x,y,e,i){
+    // 波峰/波谷：锚点局部极值 + ±3 年内冲击最大的事件（巨>大>中>小）
+    // K 线由锚点插值生成，锚点局部极值即走势的波峰/波谷
+    const MAG_RANK = {'巨':4,'大':3,'中':2,'小':1};
+    const magSig = e => MAG_RANK[(e.mag||'').slice(1)] || 0;
+    function extremeEvents(){
+      const out={};                       // 事件年份 -> {type, e, i}
+      if(ANCHORS.length<3) return out;
+      for(let i=1;i<ANCHORS.length-1;i++){
+        const y1=ANCHORS[i][0], v0=ANCHORS[i-1][1], v1=ANCHORS[i][1], v2=ANCHORS[i+1][1];
+        const type = (v1>v0 && v1>v2) ? 'peak' : (v1<v0 && v1<v2) ? 'trough' : null;
+        if(!type) continue;
+        let best=null;
+        EVENTS.forEach((e,idx)=>{
+          if(Math.abs(e.year-y1)<=3 && (!best || magSig(e)>magSig(best.e))) best={e,i:idx};
+        });
+        if(best && (!out[best.e.year] || magSig(best.e)>magSig(out[best.e.year].e)))
+          out[best.e.year]={type, e:best.e, i:best.i};
+      }
+      return out;
+    }
+
+    // 标注点：缩放跨度 <=SPAN_FULL 年时展开「事件名 —— 金融术语」（两行），全览时只显示术语；
+    // 波峰/波谷事件始终展开完整标注并带 ▲/▼ 前缀
+    function mkPoint(x,y,e,i,ext){
       const bear = e.dir==='bear', c = dirColor(e.dir);
-      const fmt = labelFull
-        ? '{t|'+e.title+'}\n{m|—— '+e.term+'}'
+      const tag = ext ? (ext.type==='peak' ? '波峰 ▲ · ' : '波谷 ▼ · ') : '';
+      const fmt = (labelFull || ext)
+        ? (tag?'{x|'+tag+'}':'')+'{t|'+e.title+'}\n{m|—— '+e.term+'}'
         : '{m|'+e.term+'}';
       return {coord:[x,round1(y)], value:e.title+' —— '+e.term, eventIndex:i,
-        symbol:'circle', symbolSize:9, z:12,
+        symbol:'circle', symbolSize:ext?11:9, z:12,
         itemStyle:{color:c,borderColor:'#0d1117',borderWidth:1.5},
-        label:{show:true,position:bear?'bottom':'top',distance:8,align:'center',
+        label:{show:true,position:ext?(ext.type==='peak'?'top':'bottom'):(bear?'bottom':'top'),
+          distance:8,align:'center',
           formatter:fmt,
-          rich:{
+          rich:Object.assign({
             t:{color:'#e6e9ef',fontSize:10,lineHeight:13,fontFamily:mono},
             m:{color:c,fontSize:10,fontWeight:'bold',lineHeight:13,fontFamily:mono}
-          },
+          }, ext ? {x:{color:c,fontSize:10,fontWeight:'bold',lineHeight:13,fontFamily:mono}} : {}),
           backgroundColor:'rgba(18,24,33,.94)',
           borderColor:c,borderWidth:1,padding:[4,7],borderRadius:5}};
     }
 
     function buildMarks(cats,data){
-      const marks=[];
+      const marks=[], extMap = mode==='year' ? extremeEvents() : {};
       if(mode==='year'){
         // 年份相近的事件纵向错开（最多 3 档），避免长标签叠在一起
         let lastYr=null, slot=0;
@@ -200,7 +224,11 @@
           slot = (lastYr!==null && e.year-lastYr<=5) ? slot+1 : 0;
           lastYr = e.year;
           const off = 0.06 + (slot%3)*0.13;
-          marks.push(mkPoint(String(e.year), e.dir==='bear'? Math.max(k[2]*(1-off),0.8) : k[3]*(1+off), e, i));
+          const ext = extMap[e.year];
+          const y = ext
+            ? (ext.type==='peak' ? k[3]*(1+off) : Math.max(k[2]*(1-off),0.8))
+            : (e.dir==='bear' ? Math.max(k[2]*(1-off),0.8) : k[3]*(1+off));
+          marks.push(mkPoint(String(e.year), y, e, i, ext));
         });
       }else{
         const cnt={};

@@ -106,6 +106,16 @@ def test_chart_page_supports_deep_link_and_back():
     assert "dynasty-exchange.html" in js and 'backHome' in js
 
 
+def test_chart_page_peak_trough_event_marks():
+    """波峰/波谷标注：锚点局部极值绑定邻近最大冲击事件，不随缩放折叠。"""
+    with open(app.resource_path("index.html"), encoding="utf-8") as f:
+        js = f.read()
+    assert "function extremeEvents" in js       # 极值检测来自锚点序列
+    assert "MAG_RANK" in js                     # 冲击幅度分级 巨>大>中>小
+    assert "波峰" in js and "波谷" in js
+    assert "labelFull || ext" in js             # 极值标注始终展开完整两行
+
+
 def test_index_html_boot_uses_js_api_with_demo_fallback():
     """前端架构：桌面端 js_api 优先，data.js 仅作浏览器演示回退。"""
     with open(app.resource_path("index.html"), encoding="utf-8") as f:
