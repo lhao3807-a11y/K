@@ -4,6 +4,7 @@
 覆盖：秦、汉、隋、唐、宋、元、明、清（分裂期 SG/JIN/NBC/WUDAI 为占位，不校验）。
 """
 import os
+import shutil
 import sqlite3
 import subprocess
 import sys
@@ -34,14 +35,18 @@ def next_year(y):
 
 
 @pytest.fixture(scope="session")
-def conn():
-    """确保数据已导入后返回一个只读连接。"""
+def conn(tmp_path_factory):
+    """在临时副本上导入并校验，避免测试污染主库（主库只在显式导入时才变）。"""
     if not os.path.exists(DB):
         pytest.skip("数据库未初始化")
-    r = subprocess.run([sys.executable, IMPORT], capture_output=True,
-                       encoding="utf-8", errors="replace")
+    tmp_db = str(tmp_path_factory.mktemp("all") / "dynasty.db")
+    shutil.copy(DB, tmp_db)
+
+    r = subprocess.run([sys.executable, IMPORT, "--db", tmp_db],
+                       capture_output=True, encoding="utf-8", errors="replace")
     assert r.returncode == 0, f"导入失败：\n{r.stdout}\n{r.stderr}"
-    c = sqlite3.connect(DB)
+
+    c = sqlite3.connect(tmp_db)
     c.row_factory = sqlite3.Row
     yield c
     c.close()
