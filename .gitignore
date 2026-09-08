@@ -1,0 +1,5 @@
+# WorkBuddy 本地记忆与配置（含敏感信息，不入库）
+.workbuddy/
+
+# 截图参考素材
+shot/
