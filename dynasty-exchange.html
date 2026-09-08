@@ -172,7 +172,7 @@
     transition: border-color .15s ease, transform .15s ease;
     cursor: pointer;
   }
-  .dynasty-card:hover { border-color: #2E3947; transform: translateY(-2px); }
+  .dynasty-card:hover { border-color: #334052; transform: translateY(-3px); box-shadow: 0 12px 28px rgba(0,0,0,.45); }
   .card-head { display: flex; align-items: flex-start; justify-content: space-between; }
   .card-name-group { display: flex; flex-direction: column; gap: 4px; }
   .card-name { font-size: 16px; font-weight: 700; }
@@ -199,6 +199,31 @@
   }
   .footer { display: flex; justify-content: center; padding: 28px 32px; }
   .footer p { font-size: 12px; color: var(--text-faint); }
+
+  /* ============ 动效与交互 ============ */
+  @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(46,189,133,.45); }
+    50% { opacity: .55; box-shadow: 0 0 0 5px rgba(46,189,133,0); }
+  }
+  .featured-card { animation: rise .55s cubic-bezier(.22,.61,.36,1) both; }
+  .side-panel   { animation: rise .55s .08s cubic-bezier(.22,.61,.36,1) both; }
+  .list-section { animation: rise .60s .14s cubic-bezier(.22,.61,.36,1) both; }
+  .teaser       { animation: rise .60s .20s cubic-bezier(.22,.61,.36,1) both; }
+  #fKline       { animation: fadeIn .7s ease both; }
+  .status-dot   { animation: pulse 2.6s ease-in-out infinite; }
+  .dynasty-card { animation: rise .5s cubic-bezier(.22,.61,.36,1) both; }
+  .chip { transition: background .15s ease, transform .15s ease, border-color .15s ease; }
+  .chip:hover { transform: translateY(-1px); }
+  .chip:active { transform: translateY(0) scale(.97); }
+  .summary .metric { transition: transform .15s ease; }
+  .summary .metric:hover { transform: translateY(-1px); }
+  .summary .metric:hover .metric-label { color: var(--text-mid); }
+  .pt-mark { animation: fadeIn .8s .35s ease both; }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
 </style>
 </head>
 <body data-page-node-id="GQPrCGIzw2hTcBMGzRWmU2">
@@ -853,11 +878,12 @@
       s+='<text x="'+X1+'" y="324" font-size="11" fill="#5A6472" text-anchor="end">'+fmtYear(D.dynasty.endYear)+'</text>';
       return s;
     }
-    function cardHTML(d, D){
+    function cardHTML(d, D, i){
       var meta='<span class="card-meta">'+d.code+' · '+fmtYear(d.startYear)+'—'+fmtYear(d.endYear)
         +(hasData(D) ? ' · 存续'+(d.endYear-d.startYear+1)+'年' : '')+'</span>';
+      var delay=' style="animation-delay:'+((i||0)*70)+'ms"';   // 错峰入场
       if(!hasData(D)){
-        return '<div class="dynasty-card" data-code="'+d.code+'">'
+        return '<div class="dynasty-card" data-code="'+d.code+'"'+delay+'>'
           +'<div class="card-head"><div class="card-name-group">'
           +'<span class="card-name">'+d.name+'</span>'+meta+'</div>'
           +'<span class="status-tag pending">筹备中</span></div>'
@@ -868,7 +894,7 @@
           +pendingKlineSVG(false)+'</svg></div>';
       }
       var st=statsOf(D), c=cls(st.chg), act=d.isActive;
-      return '<div class="dynasty-card" data-code="'+d.code+'">'
+      return '<div class="dynasty-card" data-code="'+d.code+'"'+delay+'>'
         +'<div class="card-head"><div class="card-name-group">'
         +'<span class="card-name">'+d.name+'</span>'+meta+'</div>'
         +'<span class="status-tag">'+(act?'在市':'已退市')+'</span></div>'
@@ -888,6 +914,18 @@
         })();
       });
     }
+    // 数字滚动（ease-out cubic），suffix 可选
+    function countUp(el, target, dec, suffix, dur){
+      if(!el) return;
+      var t0=null;
+      function step(ts){
+        if(t0===null) t0=ts;
+        var p=Math.min(1,(ts-t0)/(dur||700)), e=1-Math.pow(1-p,3);
+        el.textContent=(target*(0.4+0.6*e)).toFixed(dec)+(suffix||'');
+        if(p<1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
 
     (async function(){
       var api=await waitForApi(2500);
@@ -902,6 +940,8 @@
       list.forEach(function(d){
         var chip=document.createElement('div');
         chip.className='chip';
+        chip.setAttribute('data-code', d.code);
+        chip.title='查看 '+d.name+' 盘面';
         chip.innerHTML='<span class="chip-name">'+shortName(d.name)+'</span><span class="chip-code">'+d.code+'</span>';
         chip.addEventListener('click', function(){ gotoChart(d.code); });
         subnav.insertBefore(chip, more);
@@ -927,9 +967,9 @@
       document.getElementById('mDown').textContent='跌 '+down;
       document.getElementById('mFlat').textContent='平 '+(list.length-up-down-pend);
 
-      // 全部王朝卡片
+      // 全部王朝卡片（index 用于错峰入场）
       var grid=document.getElementById('cardGrid');
-      grid.innerHTML=list.map(function(d){ return cardHTML(d, full[d.code]); }).join('');
+      grid.innerHTML=list.map(function(d,i){ return cardHTML(d, full[d.code], i); }).join('');
       grid.addEventListener('click', function(e){
         var c=e.target.closest('.dynasty-card');
         if(c) gotoChart(c.getAttribute('data-code'));
@@ -939,7 +979,15 @@
       var feat=(list.find(function(d){return d.isActive && hasData(full[d.code])})
              || list.find(function(d){return hasData(full[d.code])})
              || list[0]);
-      var D=full[feat.code], st=statsOf(D), c=cls(st.chg);
+      var D=full[feat.code];
+      // 芯片选中态 / 提示文案与焦点王朝同步
+      subnav.querySelectorAll('.chip').forEach(function(ch){
+        var dc=ch.getAttribute('data-code');
+        if(!dc) return;
+        ch.classList.toggle('active', dc===feat.code);
+        ch.title=hasData(full[dc]) ? '查看 '+full[dc].dynasty.name+' 盘面' : '筹备中 · 数据入库后挂牌';
+      });
+      var st=hasData(D)?statsOf(D):null, c=st?cls(st.chg):'';
       document.getElementById('fBread').textContent=feat.name+' '+feat.code;
       document.getElementById('fName').textContent=feat.name;
       document.getElementById('fCode').textContent=feat.code;
