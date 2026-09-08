@@ -136,6 +136,9 @@
     background: rgba(246, 70, 93, 0.14);
     font-size: 11px; font-weight: 500; color: var(--up);
   }
+  .status-tag.pending {
+    background: rgba(217, 164, 65, 0.14); color: var(--gold, #D9A441);
+  }
   .price-group { display: flex; align-items: baseline; gap: 10px; }
   .price-now { font-family: var(--font-num); font-size: 24px; font-weight: 700; }
   .price-chg { font-family: var(--font-num); font-size: 13px; font-weight: 500; }
@@ -722,6 +725,19 @@
     function cls(x){ return x>=0 ? 'up' : 'down'; }
     function shortName(n){ return n.replace(/^大/, '').replace(/王朝$/, ''); }
     function gotoChart(code){ window.location.href = 'index.html#' + encodeURIComponent(code); }
+    function fmtYear(y){ return y<0 ? '前'+(-y) : String(y); }   // 公元前年份（DB 负数存储）
+    // 锚点 >=2 个才能生成 K 线；否则按"筹备中"占位渲染
+    function hasData(D){ return !!(D && D.anchors && D.anchors.length>=2); }
+    function pendingKlineSVG(big){
+      // 筹备中占位图：金色虚线基准 + 提示文案（big=焦点区尺寸 / 卡片尺寸）
+      return big
+        ? '<line x1="38" y1="170" x2="815" y2="170" stroke="#2A323E" stroke-width="1" stroke-dasharray="5 5"/>'
+          +'<text x="426" y="164" font-size="13" fill="#5A6472" text-anchor="middle">锚点数据入库后自动生成 K 线</text>'
+          +'<text x="38" y="324" font-size="11" fill="#5A6472">—</text>'
+          +'<text x="815" y="324" font-size="11" fill="#5A6472" text-anchor="end">—</text>'
+        : '<line x1="14" y1="55" x2="394" y2="55" stroke="#2A323E" stroke-width="1" stroke-dasharray="5 5"/>'
+          +'<text x="204" y="59" font-size="12" fill="#5A6472" text-anchor="middle">数据筹备中</text>';
+    }
 
     function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
     function interpOn(list,y){
@@ -832,17 +848,29 @@
       });
       // X 轴起止标签
       var mid=Math.round((D.dynasty.startYear+D.dynasty.endYear)/2);
-      s+='<text x="'+X0+'" y="324" font-size="11" fill="#5A6472">'+D.dynasty.startYear+'</text>';
-      s+='<text x="'+((X0+X1)/2).toFixed(0)+'" y="324" font-size="11" fill="#5A6472" text-anchor="middle">'+mid+'</text>';
-      s+='<text x="'+X1+'" y="324" font-size="11" fill="#5A6472" text-anchor="end">'+D.dynasty.endYear+'</text>';
+      s+='<text x="'+X0+'" y="324" font-size="11" fill="#5A6472">'+fmtYear(D.dynasty.startYear)+'</text>';
+      s+='<text x="'+((X0+X1)/2).toFixed(0)+'" y="324" font-size="11" fill="#5A6472" text-anchor="middle">'+fmtYear(mid)+'</text>';
+      s+='<text x="'+X1+'" y="324" font-size="11" fill="#5A6472" text-anchor="end">'+fmtYear(D.dynasty.endYear)+'</text>';
       return s;
     }
     function cardHTML(d, D){
+      var meta='<span class="card-meta">'+d.code+' · '+fmtYear(d.startYear)+'—'+fmtYear(d.endYear)
+        +(hasData(D) ? ' · 存续'+(d.endYear-d.startYear+1)+'年' : '')+'</span>';
+      if(!hasData(D)){
+        return '<div class="dynasty-card" data-code="'+d.code+'">'
+          +'<div class="card-head"><div class="card-name-group">'
+          +'<span class="card-name">'+d.name+'</span>'+meta+'</div>'
+          +'<span class="status-tag pending">筹备中</span></div>'
+          +'<div class="card-price"><span class="card-price-label">终值</span>'
+          +'<span class="card-price-num">—</span>'
+          +'<span class="card-price-chg">数据筹备中</span></div>'
+          +'<svg class="kline" width="408" height="110" viewBox="0 0 408 110" fill="none" xmlns="http://www.w3.org/2000/svg">'
+          +pendingKlineSVG(false)+'</svg></div>';
+      }
       var st=statsOf(D), c=cls(st.chg), act=d.isActive;
       return '<div class="dynasty-card" data-code="'+d.code+'">'
         +'<div class="card-head"><div class="card-name-group">'
-        +'<span class="card-name">'+d.name+'</span>'
-        +'<span class="card-meta">'+d.code+' · '+st.start+'—'+st.end+' · 存续'+st.dur+'年</span></div>'
+        +'<span class="card-name">'+d.name+'</span>'+meta+'</div>'
         +'<span class="status-tag">'+(act?'在市':'已退市')+'</span></div>'
         +'<div class="card-price"><span class="card-price-label">终值</span>'
         +'<span class="card-price-num '+c+'">'+st.last.toFixed(2)+'</span>'
@@ -885,15 +913,19 @@
         full[list[i].code]=JSON.parse(await api.get_dynasty(list[i].code));
       }
 
-      // 摘要条：挂牌数 / 市况
-      var act=list.filter(function(d){return d.isActive}).length;
+      // 摘要条：挂牌数 / 市况（筹备中不参与涨跌统计）
+      var act=0, up=0, down=0, pend=0;
+      list.forEach(function(d){
+        if(!hasData(full[d.code])){ pend++; return; }
+        if(d.isActive) act++;
+        var c=statsOf(full[d.code]).chg; if(c>0)up++; else if(c<0)down++;
+      });
       document.getElementById('mListed').textContent=list.length+' 支';
-      document.getElementById('mListedSub').textContent='在市 '+act+' · 退市 '+(list.length-act);
-      var up=0, down=0;
-      list.forEach(function(d){ var c=statsOf(full[d.code]).chg; if(c>0)up++; else if(c<0)down++; });
+      document.getElementById('mListedSub').textContent='在市 '+act+' · 退市 '+(list.length-act-pend)
+        +(pend?(' · 筹备 '+pend):'');
       document.getElementById('mUp').textContent='涨 '+up;
       document.getElementById('mDown').textContent='跌 '+down;
-      document.getElementById('mFlat').textContent='平 '+(list.length-up-down);
+      document.getElementById('mFlat').textContent='平 '+(list.length-up-down-pend);
 
       // 全部王朝卡片
       var grid=document.getElementById('cardGrid');
@@ -903,14 +935,43 @@
         if(c) gotoChart(c.getAttribute('data-code'));
       });
 
-      // 焦点行情区：在市王朝优先
-      var feat=(list.find(function(d){return d.isActive}) || list[0]);
+      // 焦点行情区：在市且有数据者优先，其次任一有数据王朝，全筹备中取第一支
+      var feat=(list.find(function(d){return d.isActive && hasData(full[d.code])})
+             || list.find(function(d){return hasData(full[d.code])})
+             || list[0]);
       var D=full[feat.code], st=statsOf(D), c=cls(st.chg);
       document.getElementById('fBread').textContent=feat.name+' '+feat.code;
       document.getElementById('fName').textContent=feat.name;
       document.getElementById('fCode').textContent=feat.code;
       var stEl=document.getElementById('fStatus');
       stEl.textContent=feat.isActive?'在市':'已退市';
+
+      // 焦点区筹备中占位态
+      if(!hasData(D)){
+        stEl.textContent='筹备中'; stEl.className='status-tag pending';
+        var p0=document.getElementById('fPrice'); p0.textContent='—'; p0.className='price-now';
+        var chg0=document.getElementById('fChg'); chg0.textContent='数据筹备中'; chg0.className='price-chg';
+        document.getElementById('fKline').innerHTML=pendingKlineSVG(true);
+        document.getElementById('sIssueLabel').textContent='发行价';
+        document.getElementById('sIssue').textContent='—';
+        document.getElementById('sHighLabel').textContent='历史最高';
+        var hi0=document.getElementById('sHigh'); hi0.textContent='—'; hi0.className='stat-value';
+        document.getElementById('sDur').textContent='—';
+        document.getElementById('sLastLabel').textContent='终值';
+        var la0=document.getElementById('sLast'); la0.textContent='—'; la0.className='stat-value';
+        var dw0=document.getElementById('sDraw'); dw0.textContent='—'; dw0.className='stat-value';
+        var re0=document.getElementById('sRet'); re0.textContent='—'; re0.className='stat-value';
+        var ev0=(D.events||[]);
+        document.getElementById('fEventRows').innerHTML= ev0.length ? ev0.map(function(ev){
+          return '<div class="event-row"><span class="event-year">'+fmtYear(ev.year)+'</span>'
+            +'<span class="event-name">'+ev.title+' · '+ev.term+'</span>'
+            +'<span class="event-impact '+(ev.dir==='bear'?'down':ev.dir==='bull'?'up':'')+'">'+ev.mag+'</span></div>';
+        }).join('') : '<div class="event-row"><span class="event-name">锚点/事件数据入库后在此展示</span></div>';
+        var fc0=document.querySelector('.featured-card');
+        fc0.style.cursor='pointer';
+        fc0.addEventListener('click', function(){ gotoChart(feat.code); });
+        return;
+      }
       var pEl=document.getElementById('fPrice');
       pEl.textContent=st.last.toFixed(2); pEl.className='price-now '+c;
       var chgEl=document.getElementById('fChg');
@@ -918,7 +979,7 @@
       document.getElementById('fKline').innerHTML=featuredKlineSVG(D, st.candles);
       document.getElementById('sIssueLabel').textContent='发行价（'+st.start+'）';
       document.getElementById('sIssue').textContent=st.issue.toFixed(2);
-      document.getElementById('sHighLabel').textContent='历史最高（'+st.hiY+'）';
+      document.getElementById('sHighLabel').textContent='历史最高（'+fmtYear(st.hiY)+'）';
       var hiEl=document.getElementById('sHigh');
       hiEl.textContent=st.hi.toFixed(2); hiEl.className='stat-value up';
       document.getElementById('sDur').textContent=st.dur+' 年';
@@ -930,7 +991,7 @@
       var reEl=document.getElementById('sRet');
       reEl.textContent=fmtPct(st.chg); reEl.className='stat-value '+c;
       document.getElementById('fEventRows').innerHTML=(D.events||[]).map(function(ev){
-        return '<div class="event-row"><span class="event-year">'+ev.year+'</span>'
+        return '<div class="event-row"><span class="event-year">'+fmtYear(ev.year)+'</span>'
           +'<span class="event-name">'+ev.title+' · '+ev.term+'</span>'
           +'<span class="event-impact '+(ev.dir==='bear'?'down':ev.dir==='bull'?'up':'')+'">'+ev.mag+'</span></div>';
       }).join('');

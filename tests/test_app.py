@@ -39,7 +39,25 @@ def test_api_list_dynasties():
     assert "DASONG.960" in codes
     assert any(d["isActive"] for d in lst)
     assert all({"code", "name", "rangeLabel", "startYear", "endYear",
-                "isActive"} <= set(d) for d in lst)
+                "isActive", "hasData"} <= set(d) for d in lst)
+
+
+def test_api_list_dynasties_has_data_flag():
+    """hasData：锚点>=2 才能生成 K 线；秦→清注册表已入库，逐支判定。"""
+    lst = json.loads(app.Api().list_dynasties())
+    by = {d["code"]: d for d in lst}
+    assert by["DASONG.960"]["hasData"] is True
+    # 有完整数据的大秦/大汉（若已录入）应为 True，纯元数据王朝为 False
+    for code in ("DAQIN.221", "DAHAN.202"):
+        if code in by:
+            assert by[code]["hasData"] is True
+    for code in ("SG.220", "SUI.581", "TANG.618", "MING.1368", "QING.1644"):
+        if code in by:
+            assert by[code]["hasData"] is False
+    # 按 start_year 升序，覆盖秦→清
+    years = [d["startYear"] for d in lst]
+    assert years == sorted(years)
+    assert lst[0]["startYear"] == -221 and lst[-1]["startYear"] == 1644
 
 
 def test_api_get_dynasty_returns_frontend_schema():

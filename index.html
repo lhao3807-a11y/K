@@ -382,6 +382,23 @@
       document.getElementById('dynCode').textContent = D.dynasty.code;
       document.getElementById('dynRange').textContent = D.dynasty.rangeLabel;
 
+      // ---- 筹备中占位态：锚点 >=2 个才能生成 K 线；数据入库后自动挂牌 ----
+      if(!ANCHORS || ANCHORS.length<2){
+        candles=[]; years=[]; yearIndex={}; byYear={}; cur=null;
+        document.getElementById('px').textContent='—';
+        const chgEl=document.getElementById('chg');
+        chgEl.textContent='筹备中'; chgEl.className='';
+        document.getElementById('hi').textContent='—';
+        buildTimeline();
+        if(chart) chart.dispose();
+        chart = echarts.init(document.getElementById('chart'));
+        chart.setOption({graphic:[
+          {type:'text',left:'center',top:'44%',style:{text:'数据筹备中',fill:'#8b93a7',font:'600 22px Consolas, monospace'}},
+          {type:'text',left:'center',top:'52%',style:{text:'锚点/皇帝/事件数据入库后，K 线自动生成',fill:'#5a6472',font:'13px Consolas, monospace'}},
+        ]});
+        return;
+      }
+
       buildCandles();
       buildTimeline();
       updateHeaderStats();
@@ -471,6 +488,7 @@
         Array.prototype.forEach.call(document.querySelectorAll('.seg button'),x=>x.classList.remove('on'));
         b.classList.add('on');
         mode=b.dataset.mode;
+        if(mode==='emperor' && !EMPERORS.length){ mode='year'; b.classList.remove('on'); return; }  // 无皇帝数据保持年K
         card.classList.add('hidden');
         render();
       });

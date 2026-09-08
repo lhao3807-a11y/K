@@ -158,6 +158,42 @@ def test_anchor_update(env, tmp_path):
     assert load_datajs(out3)["anchors"][0] == [960, 101]
 
 
+# ---------- 王朝注册表 scaffold ----------
+
+
+def test_scaffold_registry_and_idempotent(env, tmp_path):
+    import sqlite3
+
+    db, _ = env
+    s1 = run(["--db", db, "scaffold"])
+    assert "新增 11 支" in s1
+    # 幂等：重复执行不再新增
+    s2 = run(["--db", db, "scaffold"])
+    assert "新增 0 支" in s2 and "跳过 11 支" in s2
+
+    conn = sqlite3.connect(db)
+    rows = conn.execute(
+        "SELECT code, name, start_year, end_year, is_active, notes "
+        "FROM dynasties ORDER BY start_year").fetchall()
+    conn.close()
+    codes = [r[0] for r in rows]
+    # 秦→清全覆盖（宋为种子自带），公元前为负数年份
+    assert codes[0] == "DAQIN.221" and codes[-1] == "QING.1644" and len(codes) == 12
+    by = {r[0]: r for r in rows}
+    assert by["DAQIN.221"][2] == -221 and by["DAQIN.221"][3] == -207
+    assert by["DAHAN.202"][2] == -202 and by["DAHAN.202"][3] == 220
+    # 仅大宋 active，其余筹备中
+    assert by["DASONG.960"][4] == 1
+    assert all(r[4] == 0 for r in rows if r[0] != "DASONG.960")
+    assert all("数据筹备中" in r[5] for r in rows if r[0] != "DASONG.960")
+
+    # scaffold 不影响 active 王朝导出
+    out3 = str(tmp_path / "d4.js")
+    run(["--db", db, "export", "--out", out3])
+    d = load_datajs(out3)
+    assert d["dynasty"]["code"] == "DASONG.960" and len(d["anchors"]) == 27
+
+
 # ---------- 前端文件 ----------
 
 
@@ -170,3 +206,15 @@ def test_index_html_reads_data_layer():
     # 前端不再硬编码事件/皇帝/锚点数据集
     assert "const EVENTS = [" not in html and "const EMPERORS = [" not in html
     assert "const ANCHORS = [" not in html
+
+
+def test_frontend_pending_state_support():
+    """秦→清框架先行：两页面须支持"筹备中"占位态与公元前纪年。"""
+    with open(os.path.join(PROJECT, "index.html"), encoding="utf-8") as f:
+        idx = f.read()
+    assert "ANCHORS.length<2" in idx and "数据筹备中" in idx
+    assert "const fmtYear" in idx and "fmtYear(e.year)" in idx
+    with open(os.path.join(PROJECT, "dynasty-exchange.html"), encoding="utf-8") as f:
+        home = f.read()
+    assert "function hasData" in home and "function pendingKlineSVG" in home
+    assert "筹备中" in home and "function fmtYear" in home
