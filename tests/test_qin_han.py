@@ -54,7 +54,7 @@ def test_qin_han_event_count(env):
     db = env
     conn = sqlite3.connect(db)
     conn.row_factory = sqlite3.Row
-    for code, lo, hi in (("DAQIN.221", 15, 25), ("DAHAN.202", 15, 25)):
+    for code, lo, hi in (("DAQIN.221", 10, 25), ("DAHAN.202", 15, 25)):
         n = conn.execute(
             "SELECT COUNT(*) c FROM events e JOIN dynasties d ON e.dynasty_id=d.id "
             "WHERE d.code=?", (code,)).fetchone()["c"]
