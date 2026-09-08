@@ -553,6 +553,15 @@
             const d=JSON.parse(await api.get_dynasty(sel.value));
             if(d && !d.error) mount(d);
           });
+          // 同页 hash 变化（如从别处改链直达另一王朝）也响应
+          window.addEventListener('hashchange', async ()=>{
+            const c=decodeURIComponent(location.hash.replace('#',''));
+            if(!c || c===sel.value) return;
+            const hit=list.find(d=>d.code===c);
+            if(!hit) return;
+            sel.value=c;
+            mount(JSON.parse(await api.get_dynasty(c)));
+          });
         }else if(window.DYNASTY_DATA){
           mount(window.DYNASTY_DATA);   // 浏览器演示模式
         }else{

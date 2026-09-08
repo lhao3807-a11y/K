@@ -80,7 +80,13 @@
     height: 56px; padding: 0 32px;
     background: var(--bg-subnav);
     border-bottom: 1px solid var(--line);
+    flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden;
+    scrollbar-width: thin; scrollbar-color: #2A3441 transparent;
   }
+  .subnav::-webkit-scrollbar { height: 5px; }
+  .subnav::-webkit-scrollbar-thumb { background: #2A3441; border-radius: 3px; }
+  .subnav::-webkit-scrollbar-track { background: transparent; }
+  .subnav > * { flex-shrink: 0; }
   .subnav-prefix { display: flex; align-items: center; gap: 8px; padding-right: 6px; }
   .subnav-prefix span { font-size: 12px; color: var(--text-dim); }
   .chip {
@@ -773,11 +779,11 @@
       }
       return list[list.length-1][1];
     }
-    // 与 index.html 逐位一致：round1 时机 / 见顶年冲高 / prevClose 取未取整 close
+    // 与 index.html 逐位一致：round1 时机 / 见顶年冲高 / prevClose 取未取整 close / 跳过 0 年
     function buildCandles(D){
       var A=D.anchors, START=D.dynasty.startYear, END=D.dynasty.endYear, PEAK=D.dynasty.peakYear;
       var rand=mulberry32(D.dynasty.seed), out=[], prevClose=A[0][1];
-      for(var y=START;y<=END;y++){
+      for(var y=START;y<=END;y=(y===-1?1:y+1)){
         var target=interpOn(A,y);
         var open = y===START ? A[0][1] : prevClose;
         var close = target*(1+(rand()-0.5)*0.03) * (y===PEAK ? 1.07 : 1);
@@ -786,16 +792,28 @@
       }
       return out;
     }
+    // 与 K 线序列一一对应的年份序列（跳 0 年）
+    function yearsOf(D){
+      var ys=[], y=D.dynasty.startYear;
+      while(y<=D.dynasty.endYear){ ys.push(y); y=(y===-1?1:y+1); }
+      return ys;
+    }
+    // 事件年单年冲击：事件年收盘 vs 前一交易日收盘（与盘面页口径一致）
+    function impactPct(D, cs, year){
+      var ys=yearsOf(D), i=ys.indexOf(year);
+      if(i<1) return null;
+      return (cs[i][1]-cs[i-1][1])/cs[i-1][1]*100;
+    }
     function statsOf(D){
-      var cs=buildCandles(D), issue=D.dynasty.issuePrice;
-      var last=cs[cs.length-1][1], hi=-Infinity, hiY=D.dynasty.startYear;
+      var cs=buildCandles(D), issue=D.dynasty.issuePrice, ys=yearsOf(D);
+      var last=cs[cs.length-1][1], hi=-Infinity, hiY=ys[0];
       var peak=-Infinity, dd=0;
       cs.forEach(function(k,i){
-        if(k[3]>hi){ hi=k[3]; hiY=D.dynasty.startYear+i; }
+        if(k[3]>hi){ hi=k[3]; hiY=ys[i]; }
         if(k[3]>peak) peak=k[3];
         var d=(k[2]-peak)/peak*100; if(d<dd) dd=d;
       });
-      return { candles:cs, last:r1(last), hi:r1(hi), hiY:hiY,
+      return { candles:cs, years:ys, last:r1(last), hi:r1(hi), hiY:hiY,
                chg:(last-issue)/issue*100, dd:dd, issue:issue,
                start:D.dynasty.startYear, end:D.dynasty.endYear,
                dur:D.dynasty.endYear-D.dynasty.startYear+1 };
@@ -1040,9 +1058,12 @@
         var re0=document.getElementById('sRet'); re0.textContent='—'; re0.className='stat-value';
         var ev0=(D.events||[]);
         document.getElementById('fEventRows').innerHTML= ev0.length ? ev0.map(function(ev){
+          var p=impactPct(D, st.candles, ev.year);
+          var cls = p==null ? '' : (p>=0?'up':'down');
+          var txt = p==null ? ev.mag : fmtPct(p);
           return '<div class="event-row"><span class="event-year">'+fmtYear(ev.year)+'</span>'
             +'<span class="event-name">'+ev.title+' · '+ev.term+'</span>'
-            +'<span class="event-impact '+(ev.dir==='bear'?'down':ev.dir==='bull'?'up':'')+'">'+ev.mag+'</span></div>';
+            +'<span class="event-impact '+cls+'">'+txt+'</span></div>';
         }).join('') : '<div class="event-row"><span class="event-name">锚点/事件数据入库后在此展示</span></div>';
         var fc0=document.querySelector('.featured-card');
         fc0.style.cursor='pointer';
@@ -1068,9 +1089,12 @@
       var reEl=document.getElementById('sRet');
       reEl.textContent=fmtPct(st.chg); reEl.className='stat-value '+c;
       document.getElementById('fEventRows').innerHTML=(D.events||[]).map(function(ev){
+        var p=impactPct(D, st.candles, ev.year);
+        var ic = p==null ? (ev.dir==='bear'?'down':ev.dir==='bull'?'up':'') : (p>=0?'up':'down');
+        var tx = p==null ? ev.mag : fmtPct(p);
         return '<div class="event-row"><span class="event-year">'+fmtYear(ev.year)+'</span>'
           +'<span class="event-name">'+ev.title+' · '+ev.term+'</span>'
-          +'<span class="event-impact '+(ev.dir==='bear'?'down':ev.dir==='bull'?'up':'')+'">'+ev.mag+'</span></div>';
+          +'<span class="event-impact '+ic+'">'+tx+'</span></div>';
       }).join('');
 
       // 焦点区点击 → K 线页

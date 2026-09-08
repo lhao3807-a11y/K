@@ -98,6 +98,16 @@ def test_exchange_home_wired_to_js_api_and_navigation():
     assert "index.html#" in js          # 卡片/芯片 → 盘面页深链
     assert "buildCandles" in js         # 行情数字由真实数据计算（与盘面页同算法）
     assert "miniKlineSVG" in js         # 迷你 K 线动态生成
+    # 跨 0 年王朝（大汉 前202~220）：K 线循环必须跳过 0 年，否则比 exe 多 1 根
+    # 且随机序列错位，两页数字不一致
+    assert "y=(y===-1?1:y+1)" in js
+    # 历史最高年份 / 事件冲击百分比须经 yearsOf 序列（跳 0）计算
+    assert "function yearsOf" in js and "function impactPct" in js
+    assert "hiY=ys[i]" in js
+    # 大事记冲击列显示计算百分比而非 mag 原文
+    assert "impactPct(D, st.candles, ev.year)" in js
+    # 12 支芯片单行放不下：横向滚动而非换行（换行会撑爆 56px 导航条）
+    assert "flex-wrap: nowrap" in js and ".subnav > * { flex-shrink: 0; }" in js
 
 
 def test_exchange_home_featured_peak_trough_and_motion():
@@ -112,11 +122,13 @@ def test_exchange_home_featured_peak_trough_and_motion():
 
 
 def test_chart_page_supports_deep_link_and_back():
-    """盘面页：hash 深链选王朝 + 返回交易所入口。"""
+    """盘面页：hash 深链选王朝 + 返回交易所入口 + 同页 hash 变化响应。"""
     with open(app.resource_path("index.html"), encoding="utf-8") as f:
         js = f.read()
     assert "location.hash" in js
     assert "dynasty-exchange.html" in js and 'backHome' in js
+    # 同页 hashchange（#A → #B 不触发 reload）也要切换王朝
+    assert "hashchange" in js
 
 
 def test_chart_page_peak_trough_event_marks():
