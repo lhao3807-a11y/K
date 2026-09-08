@@ -273,9 +273,9 @@
       let hiIdx=0; data.forEach((k,i)=>{ if(k[3]>data[hiIdx][3]) hiIdx=i; });
       const hv=data[hiIdx][3];
       const hiTag='历史最高 '+hv+' · '+cats[hiIdx];
-      marks.push({coord:[cats[hiIdx],hv], value:hiTag, symbol:'pin', symbolSize:36, z:20,
+      marks.push({coord:[cats[hiIdx],hv], value:hiTag, symbol:'pin', symbolSize:26, z:20,
         itemStyle:{color:'#f0b90b'},
-        label:{show:true,formatter:hiTag,position:'top',distance:10,
+        label:{show:true,formatter:hiTag,position:'top',distance:6,
           color:'#0d1117',fontSize:11,fontWeight:'bold',
           backgroundColor:'#f0b90b',padding:[3,7],borderRadius:4}});
       return marks;
@@ -323,12 +323,14 @@
       chart.setOption({
         backgroundColor:'transparent',
         animationDuration:600,
-        grid:{left:56,right:20,top:26,bottom:70},
+        grid:{left:56,right:20,top:52,bottom:70},
         xAxis:{type:'category',data:cur.cats,boundaryGap:true,
           axisLine:{lineStyle:{color:'#2a3342'}},axisTick:{show:false},
           axisLabel:{color:'#8b93a7',fontFamily:mono,interval:mode==='year'?Math.floor(cur.cats.length/14):0},
           splitLine:{show:false}},
         yAxis:{scale:true,position:'left',
+          // 顶部留 25% 余量，避免历史最高 pin 及其标签被上边缘裁掉
+          max:function(v){ return Math.ceil((v.max + (v.max-v.min)*0.25)/5)*5; },
           axisLabel:{color:'#8b93a7',fontFamily:mono},
           splitLine:{lineStyle:{color:'#1c2431'}},axisLine:{show:false}},
         dataZoom:[
