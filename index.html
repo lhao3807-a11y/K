@@ -64,6 +64,9 @@
   .cprice.hide{display:none}
   #card p{font-size:13px;line-height:1.75;color:#c6cde0;white-space:pre-line}
   footer{padding:12px 22px;border-top:1px solid var(--line);color:var(--mut);font-size:11px;background:#0f141b}
+  .dynsel{background:var(--panel);color:var(--txt);border:1px solid var(--line);border-radius:7px;font-family:inherit;font-size:13px;padding:7px 10px;cursor:pointer;align-self:flex-start;max-width:220px}
+  .dynsel:focus{outline:none;border-color:var(--amber)}
+  .dynsel option{background:var(--panel);color:var(--txt)}
   .tip{font-family:var(--mono);font-size:12px}
   .tip .y{font-weight:700;margin-bottom:5px;font-size:13px}
   .tip .r{display:flex;justify-content:space-between;gap:22px;line-height:1.6}
@@ -73,9 +76,10 @@
 </head>
 <body data-page-node-id="rEox1yUHMSGYIUwZBmsZoT">
   <header data-page-node-id="5n57z1Et1Rr2DJnU1Rvtti">
+    <select id="dynSwitch" class="dynsel" style="display:none" title="切换王朝标的"></select>
     <div class="tick" data-page-node-id="7z5zK6p0wcdqMAdNqnj4kK">
-      <h1 data-page-node-id="8llUxRhEC9GRkEbCwoYNOP">大宋王朝 <span class="code" data-page-node-id="RtqoUNPQ5k1Ek44GriZIoc">DASONG.960</span></h1>
-      <div class="range" data-page-node-id="QzhilpVSdQ2x8lPPX1zkbL">960 — 1279 · 国运指数 · 年 K / 皇帝 K</div>
+      <h1 data-page-node-id="8llUxRhEC9GRkEbCwoYNOP"><span id="dynName">--</span> <span class="code" id="dynCode">--</span></h1>
+      <div class="range" id="dynRange" data-page-node-id="QzhilpVSdQ2x8lPPX1zkbL"></div>
     </div>
     <div class="stats" data-page-node-id="qbiOZGAcCxPJk3qB2rxPjW">
       <div class="stat" data-page-node-id="fcqOgB8zceSBovdE38UQjS"><label data-page-node-id="8GQp9FmchGi0Mhwuih5eFN">现价</label><span id="px" data-page-node-id="zkH1wl1cV8pxlBg1z7DDnJ">--</span></div>
@@ -109,7 +113,7 @@
   <footer data-page-node-id="xT2XXSEL0C0cZ2iUSlppei">国运指数为叙事化演绎，非真实历史数据 · 事件线索参考《上下五千年》，市场标注为人工策划</footer>
 
   <script src="./echarts.min.js"></script>
-  <!-- 数据层：由 database/dynasty.db 导出，勿手改；改数据请编辑数据库后运行 python database/manage.py export -->
+  <!-- 演示模式回退数据：桌面端运行时优先走 pywebview js_api 直读 SQLite -->
   <script src="./data.js"></script>
   <script>
   (function(){
@@ -117,23 +121,20 @@
     const round1 = x => Math.round(x*10)/10;
     const dirColor = d => d==='bull' ? '#f23645' : d==='bear' ? '#089981' : d==='vol' ? '#f0b90b' : '#8b93a7';
 
-    // ---- 数据层：与 database/dynasty.db 表字段一一对应 ----
-    //   events   表 -> EVENTS（year/title/term/dir/mag/desc）
-    //   emperors 表 -> EMPERORS（name/full/s/e）
-    //   anchors  表 -> ANCHORS（[year, value]）
-    //   dynasties 表 -> 王朝参数（START/END/PEAK/发行价/随机种子）
-    if(!window.DYNASTY_DATA){
-      document.body.innerHTML='<p style="padding:40px;color:#f23645;font-family:Consolas,monospace">缺少 data.js —— 请先运行：python database/manage.py export</p>';
-      return;
-    }
-    const D = window.DYNASTY_DATA;
-    const ISSUE = D.dynasty.issuePrice;
-    const EVENTS = D.events;
-    const EMPERORS = D.emperors;
-    const ANCHORS = D.anchors;
-
     function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
-    const rand = mulberry32(9601279);
+
+    // ---- 全局盘面状态：mount(王朝数据) 时整体重建 ----
+    // 数据来源（二选一，由 boot 决定）：
+    //   桌面端  -> pywebview js_api 直接读 SQLite（唯一数据源）
+    //   浏览器  -> window.DYNASTY_DATA（data.js，演示模式）
+    let D=null, ISSUE=100, START=0, END=0, PEAK=null, rand=null, SPAN_FULL=120;
+    let EVENTS=[], EMPERORS=[], ANCHORS=[];
+    let years=[], candles=[], yearIndex={}, byYear={};
+    let mode='year', cur=null, chart=null, labelFull=false;
+
+    function showFatal(msg){
+      document.body.innerHTML='<p style="padding:40px;color:#f23645;font-family:Consolas,monospace">'+msg+'</p>';
+    }
 
     function interpOn(list,y){
       if(y<=list[0][0]) return list[0][1];
@@ -144,29 +145,9 @@
       return list[list.length-1][1];
     }
 
-    // ---- 生成年 K 线 [open, close, low, high] ----
-    // 纯实体 K 线：不画上下影线，high/low 收敛到实体两端
-    const START=960, END=1279, PEAK=1082;   // PEAK = 见顶年（永乐城之败）
-    const years=[], candles=[];
-    let prevClose = ANCHORS[0][1];
-    for(let y=START;y<=END;y++){
-      years.push(String(y));
-      const target = interpOn(ANCHORS,y);
-      const open  = y===START ? ANCHORS[0][1] : prevClose;
-      const close = target*(1+(rand()-0.5)*0.03) * (y===PEAK ? 1.07 : 1);  // 见顶年冲高
-      const high  = Math.max(open,close);
-      const low   = Math.min(open,close);
-      candles.push([round1(open),round1(close),round1(low),round1(high)]);
-      prevClose = close;
-    }
-
-    const yearIndex = {}; years.forEach((y,i)=>yearIndex[y]=i);
-    const byYear = {}; EVENTS.forEach(e=>{(byYear[e.year]=byYear[e.year]||[]).push(e)});
     const emperorIndex = y => { for(let i=0;i<EMPERORS.length;i++){ if(y>=EMPERORS[i].s && y<=EMPERORS[i].e) return i; } return EMPERORS.length-1; };
 
     function ma(data,n){const r=[];for(let i=0;i<data.length;i++){if(i<n-1){r.push('-');continue}let s=0;for(let j=0;j<n;j++)s+=data[i-j][1];r.push(round1(s/n))}return r}
-
-    let mode='year', cur=null, chart=null;
 
     function buildSeries(){
       if(mode==='year') return {cats:years.slice(), data:candles.slice(), ma:ma(candles,D.config.maYear), maName:'MA'+D.config.maYear};
@@ -183,11 +164,10 @@
         }
         data.push([round1(o),round1(c),round1(lo),round1(hi)]);
       });
-      return {cats, data, ma:ma(data,3), maName:'MA3'};
+      return {cats, data, ma:ma(data,D.config.maEmperor), maName:'MA'+D.config.maEmperor};
     }
 
-    // 标注点：缩放跨度 <=120 年时展开「事件名 —— 金融术语」（两行），全览时只显示术语
-    let labelFull = false;
+    // 标注点：缩放跨度 <=SPAN_FULL 年时展开「事件名 —— 金融术语」（两行），全览时只显示术语
     function mkPoint(x,y,e,i){
       const bear = e.dir==='bear', c = dirColor(e.dir);
       const fmt = labelFull
@@ -309,7 +289,7 @@
             markPoint:{data:marks},
             markLine:{symbol:'none',lineStyle:{color:'#f0b90b',type:'dashed',width:1},
               label:{color:'#f0b90b',formatter:'发行价 '+ISSUE,position:'insideEndTop',fontFamily:mono},
-              data:[{yAxis:100}]}},
+              data:[{yAxis:ISSUE}]}},
           {name:cur.maName,type:'line',data:cur.ma,smooth:true,symbol:'none',
             lineStyle:{color:'#f0b90b',width:1.3,opacity:.9},z:3}
         ]
@@ -317,15 +297,12 @@
       updateHint();
     }
 
-    chart = echarts.init(document.getElementById('chart'));
-    render();
-    window.addEventListener('resize', ()=>chart.resize());
+    const tl=document.getElementById('timeline'), card=document.getElementById('card');
 
-    // ---- 标注详略自适应：缩放跨度 <=120 年展开完整标注，全览只显示术语 ----
-    const SPAN_FULL = 120;
+    // ---- 标注详略自适应：缩放跨度 <=SPAN_FULL 年展开完整标注，全览只显示术语 ----
     function updateHint(){
       document.getElementById('lbHint').textContent =
-        labelFull ? '完整标注' : '滚轮放大至 120 年内展开完整标注';
+        labelFull ? '完整标注' : '滚轮放大至 '+SPAN_FULL+' 年内展开完整标注';
     }
     function applyMarks(){
       chart.setOption({series:[{id:'k', markPoint:{data: buildMarks(cur.cats, cur.data)}}]});
@@ -339,27 +316,79 @@
       const full = span <= SPAN_FULL;
       if(full!==labelFull){ labelFull=full; applyMarks(); }
     }
-    chart.on('dataZoom', syncLabelMode);
 
-    // ---- 头部统计 ----
-    const last = candles[candles.length-1][1];
-    const hi   = Math.max.apply(null, candles.map(c=>c[3]));
-    const chg  = (last-100)/100*100;
-    document.getElementById('px').textContent = last.toFixed(1);
-    const chgEl = document.getElementById('chg');
-    chgEl.textContent = (chg>=0?'+':'')+chg.toFixed(1)+'%';
-    chgEl.className = chg>=0?'up':'down';
-    document.getElementById('hi').textContent = hi.toFixed(1);
+    // ---- 生成年 K 线 [open, close, low, high] ----
+    // 纯实体 K 线：不画上下影线，high/low 收敛到实体两端
+    function buildCandles(){
+      years=[]; candles=[];
+      let prevClose = ANCHORS[0][1];
+      for(let y=START;y<=END;y++){
+        years.push(String(y));
+        const target = interpOn(ANCHORS,y);
+        const open  = y===START ? ANCHORS[0][1] : prevClose;
+        const close = target*(1+(rand()-0.5)*0.03) * (y===PEAK ? 1.07 : 1);  // 见顶年冲高
+        const high  = Math.max(open,close);
+        const low   = Math.min(open,close);
+        candles.push([round1(open),round1(close),round1(low),round1(high)]);
+        prevClose = close;
+      }
+      yearIndex={}; years.forEach((y,i)=>yearIndex[y]=i);
+      byYear={}; EVENTS.forEach(e=>{(byYear[e.year]=byYear[e.year]||[]).push(e)});
+    }
 
-    // ---- 事件时间轴 ----
-    const tl=document.getElementById('timeline'), card=document.getElementById('card');
-    EVENTS.forEach((e,i)=>{
-      const d=document.createElement('div');
-      d.className='ev ev-'+e.dir; d.dataset.i=i;
-      d.innerHTML='<span class="yr">'+e.year+'</span><span class="tt">'+e.title+'</span><span class="tm">'+e.term+'</span>';
-      d.addEventListener('click',()=>selectEvent(i,true));
-      tl.appendChild(d);
-    });
+    function updateHeaderStats(){
+      const last = candles[candles.length-1][1];
+      const hi   = Math.max.apply(null, candles.map(c=>c[3]));
+      const chg  = (last-ISSUE)/ISSUE*100;
+      document.getElementById('px').textContent = last.toFixed(1);
+      const chgEl = document.getElementById('chg');
+      chgEl.textContent = (chg>=0?'+':'')+chg.toFixed(1)+'%';
+      chgEl.className = chg>=0?'up':'down';
+      document.getElementById('hi').textContent = hi.toFixed(1);
+    }
+
+    function buildTimeline(){
+      tl.innerHTML='';
+      EVENTS.forEach((e,i)=>{
+        const d=document.createElement('div');
+        d.className='ev ev-'+e.dir; d.dataset.i=i;
+        d.innerHTML='<span class="yr">'+e.year+'</span><span class="tt">'+e.title+'</span><span class="tm">'+e.term+'</span>';
+        d.addEventListener('click',()=>selectEvent(i,true));
+        tl.appendChild(d);
+      });
+    }
+
+    // ---- 挂载一个王朝：盘面数据 / 图表 / 时间轴 / 统计全部重建 ----
+    function mount(dyn){
+      D=dyn;
+      ISSUE=D.dynasty.issuePrice;
+      START=D.dynasty.startYear; END=D.dynasty.endYear; PEAK=D.dynasty.peakYear;
+      rand=mulberry32(D.dynasty.seed);
+      const cfg=D.config||{};
+      SPAN_FULL=cfg.spanFull||120;
+      EVENTS=D.events; EMPERORS=D.emperors; ANCHORS=D.anchors;
+      mode='year'; labelFull=false; cur=null;
+
+      document.title = D.dynasty.name+' K线图 · '+D.dynasty.code;
+      document.getElementById('dynName').textContent = D.dynasty.name;
+      document.getElementById('dynCode').textContent = D.dynasty.code;
+      document.getElementById('dynRange').textContent = D.dynasty.rangeLabel;
+
+      buildCandles();
+      buildTimeline();
+      updateHeaderStats();
+
+      // 粒度按钮复位到年 K
+      Array.prototype.forEach.call(document.querySelectorAll('.seg button'),
+        b=>b.classList.toggle('on', b.dataset.mode==='year'));
+      card.classList.add('hidden');
+
+      if(chart) chart.dispose();
+      chart = echarts.init(document.getElementById('chart'));
+      chart.on('dataZoom', syncLabelMode);
+      chart.on('click', onChartClick);
+      render();
+    }
 
     // ---- 详情卡价位块：事件看当年 K，皇帝看即位/退位 ----
     const priceBox = document.getElementById('cPrice');
@@ -413,9 +442,19 @@
       Array.prototype.forEach.call(tl.children,el=>el.classList.remove('active'));
     }
 
-    document.getElementById('cardClose').addEventListener('click',()=>card.classList.add('hidden'));
+    function onChartClick(p){
+      if(p.componentType==='markPoint' && p.data && p.data.eventIndex!=null){ selectEvent(p.data.eventIndex,false); return; }
+      if(p.seriesType==='candlestick'){
+        if(mode==='year'){
+          const y=Number(cur.cats[p.dataIndex]); const i=EVENTS.findIndex(e=>e.year===y);
+          if(i>=0) selectEvent(i,false);
+        }else{ showEmperor(p.dataIndex); }
+      }
+    }
 
-    // ---- 粒度切换 ----
+    // ---- 一次性全局监听（跨王朝复用） ----
+    document.getElementById('cardClose').addEventListener('click',()=>card.classList.add('hidden'));
+    window.addEventListener('resize', ()=>{ if(chart) chart.resize(); });
     Array.prototype.forEach.call(document.querySelectorAll('.seg button'),b=>{
       b.addEventListener('click',()=>{
         if(b.classList.contains('on')) return;
@@ -427,15 +466,41 @@
       });
     });
 
-    chart.on('click',(p)=>{
-      if(p.componentType==='markPoint' && p.data && p.data.eventIndex!=null){ selectEvent(p.data.eventIndex,false); return; }
-      if(p.seriesType==='candlestick'){
-        if(mode==='year'){
-          const y=Number(cur.cats[p.dataIndex]); const i=EVENTS.findIndex(e=>e.year===y);
-          if(i>=0) selectEvent(i,false);
-        }else{ showEmperor(p.dataIndex); }
-      }
-    });
+    // ---- 启动：桌面端走 pywebview js_api（SQLite 唯一数据源），浏览器回退 data.js ----
+    function waitForApi(timeout){
+      return new Promise(resolve=>{
+        const t0=Date.now();
+        (function check(){
+          if(window.pywebview && window.pywebview.api) return resolve(window.pywebview.api);
+          if(Date.now()-t0>timeout) return resolve(null);
+          setTimeout(check,80);
+        })();
+      });
+    }
+
+    (async function boot(){
+      const sel=document.getElementById('dynSwitch');
+      try{
+        const api=await waitForApi(2500);
+        if(api){
+          const list=JSON.parse(await api.list_dynasties());
+          if(!list.length){ showFatal('数据库中暂无王朝数据 —— 请先运行：python database/manage.py init'); return; }
+          sel.style.display='';
+          sel.innerHTML=list.map(d=>'<option value="'+d.code+'">'+d.name+' '+d.code+'</option>').join('');
+          const active=list.find(d=>d.isActive)||list[0];
+          sel.value=active.code;
+          mount(JSON.parse(await api.get_dynasty(active.code)));
+          sel.addEventListener('change', async ()=>{
+            const d=JSON.parse(await api.get_dynasty(sel.value));
+            if(d && !d.error) mount(d);
+          });
+        }else if(window.DYNASTY_DATA){
+          mount(window.DYNASTY_DATA);   // 浏览器演示模式
+        }else{
+          showFatal('缺少数据源 —— 桌面端请通过 python app.py 启动；浏览器演示请先运行 python database/manage.py export');
+        }
+      }catch(err){ showFatal('数据加载失败：'+err); }
+    })();
   })();
   </script>
 </body>

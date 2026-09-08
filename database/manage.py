@@ -38,6 +38,21 @@ DEFAULT_OUT = os.path.join(PROJECT_DIR, "data.js")
 DIRS = ("bull", "bear", "vol", "neutral")
 MAG_RE = re.compile(r"^[+±-][大小中巨]$")
 
+
+def camel(key):
+    """config 表键名 snake_case -> camelCase（span_full -> spanFull）。"""
+    parts = key.split("_")
+    return parts[0] + "".join(p.title() for p in parts[1:])
+
+
+def coerce(v):
+    """config 值：纯整数 -> int，小数 -> float，其余保留字符串。"""
+    if v.lstrip("-").isdigit():
+        return int(v)
+    if re.match(r"^-?\d+\.\d+$", v):
+        return float(v)
+    return v
+
 # ---------------- 种子数据（与原 index.html 完全一致，一一对应） ----------------
 
 SEED_DYNASTY = dict(
@@ -269,8 +284,7 @@ def cmd_export(args):
                "WHERE dynasty_id=? ORDER BY sort", (dyn["id"],))]
     anchors = [[r["year"], r["value"]] for r in conn.execute(
         "SELECT year,value FROM anchors WHERE dynasty_id=? ORDER BY sort", (dyn["id"],))]
-    cfg = {r["key"]: (int(r["value"]) if r["value"].lstrip("-").isdigit() else
-                      float(r["value"]) if re.match(r"^-?\d+\.\d+$", r["value"]) else r["value"])
+    cfg = {camel(r["key"]): coerce(r["value"])
            for r in conn.execute("SELECT key,value FROM config")}
     conn.close()
 

@@ -54,21 +54,59 @@ def ensure_data_js() -> str:
     return str(data_js)
 
 
-class Api:
-    """暴露给前端 JS 的接口（pywebview js_api）。MVP 预留，前端尚未调用。"""
+def _camel(key: str) -> str:
+    """config 表键名 snake_case -> camelCase（与 manage.py 导出规则一致）。"""
+    parts = key.split("_")
+    return parts[0] + "".join(p.title() for p in parts[1:])
 
-    def get_dynasty(self) -> str:
-        """
-        从打包的 SQLite 返回王朝数据 JSON（前端可直接 JSON.parse）。
-        输出结构与 data.js（window.DYNASTY_DATA）完全一致，方便前端
-        后续从"读文件"平滑切换到"调接口"。
-        """
-        db = resource_path("database/dynasty.db")
-        conn = sqlite3.connect(db)
+
+def _coerce(v: str):
+    """config 值：纯整数 -> int，小数 -> float，其余保留字符串。"""
+    import re
+    if v.lstrip("-").isdigit():
+        return int(v)
+    if re.match(r"^-?\d+\.\d+$", v):
+        return float(v)
+    return v
+
+
+class Api:
+    """
+    暴露给前端 JS 的接口（pywebview js_api）。
+    数据唯一来源是打包的 SQLite；data.js 仅作为浏览器演示模式的回退。
+    输出结构与 window.DYNASTY_DATA 完全一致，前端一套渲染逻辑通吃。
+    """
+
+    def _connect(self):
+        conn = sqlite3.connect(resource_path("database/dynasty.db"))
         conn.row_factory = sqlite3.Row
+        return conn
+
+    def list_dynasties(self) -> str:
+        """王朝列表（类似股票自选列表），供头部下拉切换。"""
+        conn = self._connect()
+        try:
+            rows = conn.execute(
+                "SELECT code, name, range_label, start_year, end_year, is_active "
+                "FROM dynasties ORDER BY start_year").fetchall()
+        finally:
+            conn.close()
+        return json.dumps([{
+            "code": r["code"], "name": r["name"],
+            "rangeLabel": r["range_label"],
+            "startYear": r["start_year"], "endYear": r["end_year"],
+            "isActive": bool(r["is_active"]),
+        } for r in rows], ensure_ascii=False)
+
+    def get_dynasty(self, code: str) -> str:
+        """按代码返回单个王朝的完整盘面数据 JSON。"""
+        conn = self._connect()
         try:
             row = conn.execute(
-                "SELECT * FROM dynasties WHERE is_active=1 LIMIT 1").fetchone()
+                "SELECT * FROM dynasties WHERE code=? LIMIT 1", (code,)).fetchone()
+            if row is None:
+                return json.dumps({"error": f"unknown dynasty: {code}"},
+                                  ensure_ascii=False)
             dynasty = {
                 "code": row["code"], "name": row["name"],
                 "rangeLabel": row["range_label"],
@@ -78,18 +116,23 @@ class Api:
             }
             events = [dict(r) for r in conn.execute(
                 'SELECT year, title, term, dir, mag, description AS "desc" '
-                "FROM events ORDER BY sort, year")]
+                "FROM events WHERE dynasty_id=? ORDER BY sort, year",
+                (row["id"],))]
             emperors = [{"name": r["name"], "full": r["full_name"],
                          "s": r["start_year"], "e": r["end_year"]}
                         for r in conn.execute(
-                "SELECT name, full_name, start_year, end_year FROM emperors ORDER BY sort")]
+                "SELECT name, full_name, start_year, end_year FROM emperors "
+                "WHERE dynasty_id=? ORDER BY sort", (row["id"],))]
             anchors = [list(r) for r in conn.execute(
-                "SELECT year, value FROM anchors ORDER BY sort, year")]
+                "SELECT year, value FROM anchors WHERE dynasty_id=? "
+                "ORDER BY sort, year", (row["id"],))]
+            config = {_camel(r["key"]): _coerce(r["value"])
+                      for r in conn.execute("SELECT key, value FROM config")}
         finally:
             conn.close()
         return json.dumps({
             "dynasty": dynasty, "events": events,
-            "emperors": emperors, "anchors": anchors,
+            "emperors": emperors, "anchors": anchors, "config": config,
         }, ensure_ascii=False)
 
 

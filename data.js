@@ -402,8 +402,8 @@ window.DYNASTY_DATA = {
     ]
   ],
   "config": {
-    "span_full": 120,
-    "ma_year": 20,
-    "ma_emperor": 3
+    "spanFull": 120,
+    "maYear": 20,
+    "maEmperor": 3
   }
 };

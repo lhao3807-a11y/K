@@ -69,7 +69,7 @@ def test_export_structure_matches_frontend(env):
                               "desc": "赵匡胤黄袍加身，代周建宋，国运指数以发行价 100 点挂牌上市。"}
     assert d["events"][-1]["year"] == 1279 and d["events"][-1]["term"] == "摘牌退市"
     assert d["anchors"][0] == [960, 100] and d["anchors"][-1] == [1279, 2]
-    assert d["config"] == {"span_full": 120, "ma_year": 20, "ma_emperor": 3}
+    assert d["config"] == {"spanFull": 120, "maYear": 20, "maEmperor": 3}
 
 
 def test_emperor_coverage_seamless(env):
@@ -145,7 +145,7 @@ def test_config_set_reflected_in_export(env, tmp_path):
     run(["--db", db, "config", "set", "span_full", "80"])
     out2 = str(tmp_path / "d2.js")
     run(["--db", db, "export", "--out", out2])
-    assert load_datajs(out2)["config"]["span_full"] == 80
+    assert load_datajs(out2)["config"]["spanFull"] == 80
 
 
 def test_anchor_update(env, tmp_path):

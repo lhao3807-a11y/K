@@ -26,10 +26,22 @@ def test_resource_path_resolves_bundled_assets():
         assert os.path.exists(p), f"打包资源缺失: {rel} -> {p}"
 
 
+def test_api_list_dynasties():
+    """王朝列表接口：桌面端头部下拉的数据源。"""
+    lst = json.loads(app.Api().list_dynasties())
+    assert isinstance(lst, list) and len(lst) >= 1
+    codes = {d["code"] for d in lst}
+    assert "DASONG.960" in codes
+    assert any(d["isActive"] for d in lst)
+    assert all({"code", "name", "rangeLabel", "startYear", "endYear",
+                "isActive"} <= set(d) for d in lst)
+
+
 def test_api_get_dynasty_returns_frontend_schema():
     """js_api 输出与 data.js（window.DYNASTY_DATA）结构完全一致。"""
-    d = json.loads(app.Api().get_dynasty())
-    assert set(d.keys()) == {"dynasty", "emperors", "events", "anchors"}
+    api = app.Api()
+    d = json.loads(api.get_dynasty("DASONG.960"))
+    assert set(d.keys()) == {"dynasty", "emperors", "events", "anchors", "config"}
     assert d["dynasty"]["code"] == "DASONG.960"
     assert d["dynasty"]["startYear"] == 960 and d["dynasty"]["endYear"] == 1279
     assert d["dynasty"]["issuePrice"] == 100 and d["dynasty"]["peakYear"] == 1082
@@ -37,6 +49,13 @@ def test_api_get_dynasty_returns_frontend_schema():
                for e in d["events"])
     assert all(set(x) == {"name", "full", "s", "e"} for x in d["emperors"])
     assert d["anchors"][0] == [960, 100]
+    # config 与 data.js 导出一致（camelCase）
+    assert d["config"] == {"spanFull": 120, "maYear": 20, "maEmperor": 3}
+
+
+def test_api_get_dynasty_unknown_code():
+    d = json.loads(app.Api().get_dynasty("NOPE.0000"))
+    assert "error" in d
 
 
 def test_index_html_is_offline_only():
@@ -44,6 +63,17 @@ def test_index_html_is_offline_only():
     with open(app.resource_path("index.html"), encoding="utf-8") as f:
         html = f.read()
     assert "cdn.jsdelivr.net" not in html
+
+
+def test_index_html_boot_uses_js_api_with_demo_fallback():
+    """前端架构：桌面端 js_api 优先，data.js 仅作浏览器演示回退。"""
+    with open(app.resource_path("index.html"), encoding="utf-8") as f:
+        js = f.read()
+    assert "list_dynasties" in js and "get_dynasty(" in js
+    assert "pywebview" in js
+    assert "window.DYNASTY_DATA" in js          # 演示模式仍在
+    # 关键参数不再硬编码为大宋专属值
+    assert "const START=960" not in js and "mulberry32(9601279)" not in js
 
 
 # ---------- WebView2 预检 ----------
