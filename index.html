@@ -123,6 +123,7 @@
     const mono = "Consolas,'Courier New',monospace";
     const round1 = x => Math.round(x*10)/10;
     const dirColor = d => d==='bull' ? '#f23645' : d==='bear' ? '#089981' : d==='vol' ? '#f0b90b' : '#8b93a7';
+    const fmtYear = y => y<0 ? '前'+(-y) : String(y);   // 公元前年份（DB 负数存储）
 
     function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 
@@ -158,8 +159,8 @@
       EMPERORS.forEach(em=>{
         cats.push(em.name);
         let hi=-Infinity, lo=Infinity, o=0, c=0;
-        for(let y=em.s;y<=em.e;y++){
-          const k=candles[y-START];
+        for(let y=em.s;y<=em.e;y = (y===-1 ? 1 : y+1)){
+          const k=candleAt(y);
           if(y===em.s) o=k[0];
           c=k[1];
           if(k[3]>hi) hi=k[3];
@@ -195,7 +196,7 @@
         // 年份相近的事件纵向错开（最多 3 档），避免长标签叠在一起
         let lastYr=null, slot=0;
         EVENTS.forEach((e,i)=>{
-          const k=candles[e.year-START];
+          const k=candleAt(e.year);
           slot = (lastYr!==null && e.year-lastYr<=5) ? slot+1 : 0;
           lastYr = e.year;
           const off = 0.06 + (slot%3)*0.13;
@@ -325,8 +326,9 @@
     function buildCandles(){
       years=[]; candles=[];
       let prevClose = ANCHORS[0][1];
-      for(let y=START;y<=END;y++){
-        years.push(String(y));
+      // 纪年连续：公元纪年无 0 年（-1 之后是 1）
+      for(let y=START;y<=END;y = (y===-1 ? 1 : y+1)){
+        years.push(fmtYear(y));
         const target = interpOn(ANCHORS,y);
         const open  = y===START ? ANCHORS[0][1] : prevClose;
         const close = target*(1+(rand()-0.5)*0.03) * (y===PEAK ? 1.07 : 1);  // 见顶年冲高
@@ -338,6 +340,9 @@
       yearIndex={}; years.forEach((y,i)=>yearIndex[y]=i);
       byYear={}; EVENTS.forEach(e=>{(byYear[e.year]=byYear[e.year]||[]).push(e)});
     }
+
+    // 年份 -> 对应 K 线（跨公元前/公元后时用 yearIndex 精确映射，避免 0 年错位）
+    const candleAt = y => candles[yearIndex[fmtYear(y)]];
 
     function updateHeaderStats(){
       const last = candles[candles.length-1][1];
@@ -407,17 +412,18 @@
       term.textContent=e.term; term.className='cterm '+e.dir;
       document.getElementById('cTitle').textContent=e.title;
       document.getElementById('cMagLabel').textContent='冲击';
-      document.getElementById('cYear').textContent=e.year+' 年';
+      document.getElementById('cYear').textContent=fmtYear(e.year)+' 年';
       document.getElementById('cMag').textContent=e.mag;
       document.getElementById('cDesc').textContent=e.desc;
-      const k=candles[e.year-START];                       // 当年 K 线
-      const prev=(e.year-1>=START) ? candles[e.year-1-START][1] : k[0];
+      const k=candleAt(e.year);                            // 当年 K 线
+      const prevYr = e.year===-1 ? 1 : e.year-1;           // 前一纪年（无 0 年）
+      const prev = (e.year>START) ? candleAt(prevYr)[1] : k[0];
       const pct=(k[1]-prev)/prev*100, col=k[1]>=prev?'#f23645':'#089981';
       setPrice([['当年开盘',k[0]],['当年收盘',k[1],col],['当年涨跌幅',(pct>=0?'+':'')+pct.toFixed(2)+'%',col]]);
       card.classList.remove('hidden');
       Array.prototype.forEach.call(tl.children,(el,k2)=>el.classList.toggle('active',k2===i));
       if(focus){
-        if(mode==='year'){ const idx=yearIndex[String(e.year)];
+        if(mode==='year'){ const idx=yearIndex[fmtYear(e.year)];
           chart.dispatchAction({type:'dataZoom',startValue:Math.max(0,idx-18),endValue:Math.min(cur.cats.length-1,idx+18)});
         }else{ const idx=emperorIndex(e.year);
           chart.dispatchAction({type:'dataZoom',startValue:Math.max(0,idx-3),endValue:Math.min(cur.cats.length-1,idx+3)});
@@ -431,7 +437,7 @@
       term.textContent=em.name; term.className='cterm neutral';
       document.getElementById('cTitle').textContent=em.full;
       document.getElementById('cMagLabel').textContent='事件';
-      document.getElementById('cYear').textContent=em.s+'–'+em.e;
+      document.getElementById('cYear').textContent=fmtYear(em.s)+'–'+fmtYear(em.e);
       const evs=EVENTS.filter(e=>e.year>=em.s&&e.year<=em.e);
       document.getElementById('cMag').textContent=evs.length+' 个';
 

@@ -9,6 +9,7 @@
   python database/manage.py export               # 导出 ../data.js（--out 指定路径）
   python database/manage.py show                 # 概览：王朝信息 + 各表统计
   python database/manage.py validate             # 数据一致性校验（导出前自动执行）
+  python database/manage.py scaffold             # 注册秦→清王朝元数据（框架先行，数据后填）
 
 事件 CRUD：
   python database/manage.py event list [--year 960]
@@ -134,6 +135,40 @@ SEED_CONFIG = [
     ("ma_emperor", "3", "皇帝K均线周期（MA3）"),
 ]
 
+# ---------------- 王朝注册表（秦 → 清）：框架先行，锚点/事件数据后填 ----------------
+# 仅注册元数据（起止年/发行价/种子），皇帝/事件/锚点留空 —— 前端显示"筹备中"，
+# 数据入库后自动长出 K 线，前端零改动。公元前年份用负数存储（如 -221 = 前221年）。
+REGISTRY = [
+    # (code, name, start_year, end_year, seed, notes)
+    ("QIN.221",   "秦王朝",   -221, -207, 22100207,
+     "前221年秦灭六国挂牌，前207年刘邦入关摘牌；短命高波动标的"),
+    ("HAN.202",   "大汉王朝", -202,  220, 20200220,
+     "含西汉（前202–8）、新莽（9–23）、东汉（25–220）"),
+    ("SG.220",    "三国",      220,  280, 22000280,
+     "魏蜀吴三足鼎立，可视作同一板块的三只成分股"),
+    ("JIN.266",   "大晋王朝",  266,  420, 26600420,
+     "含西晋（266–316）与东晋（317–420）；永嘉之乱深度回撤"),
+    ("NBC.420",   "南北朝",    420,  589, 42000589,
+     "南朝与北朝并立，板块轮动剧烈、方向不明"),
+    ("SUI.581",   "大隋王朝",  581,  618, 58100618,
+     "短牛快熊：开皇之治冲高，二世即退市"),
+    ("TANG.618",  "大唐王朝",  618,  907, 61800907,
+     "贞观开元长牛，安史之乱见顶回落"),
+    ("WUDAI.907", "五代十国",  907,  979, 90700979,
+     "政权更迭频繁的高波动垃圾时间"),
+    ("YUAN.1271", "大元王朝", 1271, 1368, 12711368,
+     "蒙古汗国1206年立，1271年定国号元，1368年北退"),
+    ("MING.1368", "大明王朝", 1368, 1644, 13681644,
+     "洪武挂牌，土木堡闪崩，甲申之变摘牌"),
+    ("QING.1644", "大清王朝", 1644, 1912, 16441912,
+     "康乾盛世长牛，鸦片战争转熊，1912年退市"),
+]
+
+
+def fmt_year(y):
+    """公元前用 '前N' 显示，存储为负数。"""
+    return f"前{-y}" if y < 0 else str(y)
+
 # ---------------- 基础工具 ----------------
 
 
@@ -186,8 +221,13 @@ def validate_emperor(conn, dyn, start, end, exclude_id=None):
             fail(f"与 {r['name']}（{r['start_year']}–{r['end_year']}）在位区间重叠")
 
 
+def next_year(y):
+    """纪年的下一个年份（公元纪年无 0 年：-1 之后是 1）。"""
+    return 1 if y == -1 else y + 1
+
+
 def check_coverage(conn, dyn):
-    """皇帝在位区间须无缝覆盖王朝起止年。"""
+    """皇帝在位区间须无缝覆盖王朝起止年（支持公元前/公元后跨界）。"""
     rows = conn.execute(
         "SELECT start_year, end_year FROM emperors WHERE dynasty_id=? ORDER BY start_year",
         (dyn["id"],)).fetchall()
@@ -199,8 +239,8 @@ def check_coverage(conn, dyn):
         for r in rows:
             if r["start_year"] != cur:
                 problems.append(f"区间断裂：期望从 {cur} 开始，实际 {r['start_year']}")
-            cur = r["end_year"] + 1
-        if cur != dyn["end_year"] + 1:
+            cur = next_year(r["end_year"])
+        if cur != next_year(dyn["end_year"]):
             problems.append(f"区间未覆盖到 {dyn['end_year']}（止于 {cur-1}）")
     return problems
 
@@ -521,6 +561,32 @@ def cmd_dynasty(args):
     conn.close()
 
 
+# ---------------- 王朝注册表：scaffold ----------------
+
+
+def cmd_scaffold(args):
+    """注册秦→清王朝（仅元数据，幂等）：前端框架先行，数据后填。"""
+    conn = connect(args.db)
+    n_new = n_skip = 0
+    try:
+        for code, name, s, e, seed, notes in REGISTRY:
+            if conn.execute("SELECT 1 FROM dynasties WHERE code=?", (code,)).fetchone():
+                n_skip += 1
+                continue
+            label = f"{fmt_year(s)} — {fmt_year(e)} · 国运指数 · 年 K / 皇帝 K"
+            conn.execute(
+                "INSERT INTO dynasties(code,name,range_label,start_year,end_year,"
+                "issue_price,peak_year,seed,is_active,notes) "
+                "VALUES(?,?,?,?,?,100,NULL,?,0,?)",
+                (code, name, label, s, e, seed, "数据筹备中：" + notes))
+            n_new += 1
+        conn.commit()
+    finally:
+        conn.close()
+    ok(f"王朝注册表就绪：新增 {n_new} 支，跳过 {n_skip} 支"
+       f"（锚点/皇帝/事件数据入库后自动挂牌，前端零改动）")
+
+
 # ---------------- 参数解析 ----------------
 
 
@@ -570,6 +636,9 @@ def build_parser():
 
     sp = sub.add_parser("validate", help="数据一致性校验")
     sp.set_defaults(fn=cmd_validate)
+
+    sp = sub.add_parser("scaffold", help="注册秦→清王朝元数据（框架先行，数据后填）")
+    sp.set_defaults(fn=cmd_scaffold)
 
     sp = sub.add_parser("event", help="事件 CRUD")
     es = sp.add_subparsers(dest="action", required=True)

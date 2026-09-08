@@ -84,12 +84,17 @@ class Api:
         return conn
 
     def list_dynasties(self) -> str:
-        """王朝列表（类似股票自选列表），供头部下拉切换。"""
+        """王朝列表（类似股票自选列表），供头部下拉切换。
+
+        hasData：锚点数 >=2 才能生成 K 线；否则前端按"筹备中"占位渲染。
+        """
         conn = self._connect()
         try:
             rows = conn.execute(
-                "SELECT code, name, range_label, start_year, end_year, is_active "
-                "FROM dynasties ORDER BY start_year").fetchall()
+                "SELECT d.code, d.name, d.range_label, d.start_year, d.end_year, "
+                "       d.is_active, "
+                "       (SELECT COUNT(*) FROM anchors a WHERE a.dynasty_id=d.id) AS n_anchor "
+                "FROM dynasties d ORDER BY d.start_year").fetchall()
         finally:
             conn.close()
         return json.dumps([{
@@ -97,6 +102,7 @@ class Api:
             "rangeLabel": r["range_label"],
             "startYear": r["start_year"], "endYear": r["end_year"],
             "isActive": bool(r["is_active"]),
+            "hasData": r["n_anchor"] >= 2,
         } for r in rows], ensure_ascii=False)
 
     def get_dynasty(self, code: str) -> str:
