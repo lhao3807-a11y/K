@@ -1,0 +1,64 @@
+#!/bin/sh
+# hooks/post-commit —— 提交后自动推送，并落实 AGENTS.md 规范
+#
+# 启用方式（本仓库已配置）：
+#   git config core.hooksPath hooks
+# 其他机器 clone 后也执行上面一行即可启用（钩子脚本随仓库共享）。
+#
+# AGENTS.md 规范（本钩子负责在推送前落实第 2 条）：
+#   1) 每次改动必须对应一个 Git commit
+#   2) 每次改动必须编写/更新测试，交付前所有测试与验证通过
+
+# 加载 AGENTS.md 规范提示
+if [ -f AGENTS.md ]; then
+  echo "[post-commit] 依据 AGENTS.md：改动须先 commit，且测试通过才推送/交付"
+fi
+
+branch=$(git rev-parse --abbrev-ref HEAD)
+
+# 未配置 upstream 则跳过自动推送
+if ! git rev-parse --abbrev-ref --symbolic-full-name @{u} >/dev/null 2>&1; then
+  echo "[post-commit] 分支 $branch 未设置 upstream，跳过自动 push。"
+  exit 0
+fi
+
+# 运行项目测试：优先级 PYTEST_BIN 环境变量 > 本机 managed venv > PATH 中的 pytest/python
+run_tests() {
+  if [ -n "$PYTEST_BIN" ] && [ -x "$PYTEST_BIN" ]; then
+    echo "[post-commit] 运行测试：$PYTEST_BIN -q"
+    "$PYTEST_BIN" -q
+    return $?
+  fi
+  PV=/c/Users/20578/.workbuddy/binaries/python
+  if [ -x "$PV/envs/default/Scripts/pytest" ]; then
+    echo "[post-commit] 运行测试：$PV/envs/default/Scripts/pytest -q"
+    "$PV/envs/default/Scripts/pytest" -q
+    return $?
+  fi
+  if command -v pytest >/dev/null 2>&1; then
+    echo "[post-commit] 运行测试：pytest -q"
+    pytest -q
+    return $?
+  fi
+  if command -v python >/dev/null 2>&1; then
+    echo "[post-commit] 运行测试：python -m pytest -q"
+    python -m pytest -q
+    return $?
+  fi
+  echo "[post-commit] 未检测到 pytest，跳过测试（AGENTS.md 建议尽快补充测试）。"
+  return 0
+}
+
+if ! run_tests; then
+  echo "[post-commit] 测试未通过，按 AGENTS.md 规范中止自动 push。修复后重新提交即可触发再次推送。"
+  exit 1
+fi
+
+# 调试用：设置 SKIP_AUTO_PUSH=1 可只跑测试不真正推送
+if [ -n "$SKIP_AUTO_PUSH" ]; then
+  echo "[post-commit] SKIP_AUTO_PUSH 已设置，跳过实际推送（测试已运行）。"
+  exit 0
+fi
+
+echo "[post-commit] 测试通过，推送到 $branch ..."
+git push
