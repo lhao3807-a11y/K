@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>王朝交易所 · 首页 | DYNASTY EXCHANGE</title>
+<style>
+  :root {
+    --bg: #0B0E11;
+    --bg-header: #0E1218;
+    --bg-subnav: #0D1117;
+    --card: #10151C;
+    --card-alt: #0E1319;
+    --fill-dark: #131920;
+    --fill-badge: #161C24;
+    --fill-chip-active: #1C2430;
+    --line: #1E242C;
+    --line-strong: #232A33;
+    --line-teaser: #2A323D;
+    --grid: #1B212B;
+    --text-hi: #EAECEF;
+    --text-mid: #C7CDD6;
+    --text-sub: #848E9C;
+    --text-dim: #5A6472;
+    --text-faint: #3E4754;
+    --gold: #D9A441;
+    --up: #F6465D;      /* 涨 · 红 */
+    --down: #2EBD85;    /* 跌 · 绿 */
+    --ma: #9AA4B2;
+    --event-blue: #7C8DB5;
+    --font-cn: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", "微软雅黑", sans-serif;
+    --font-num: "Geist Mono", "JetBrains Mono", "Cascadia Mono", Consolas, monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { background: var(--bg); }
+  body { font-family: var(--font-cn); color: var(--text-hi); -webkit-font-smoothing: antialiased; }
+  #viewport { overflow: hidden; }
+  #page { width: 1440px; transform-origin: top left; background: var(--bg); }
+
+  /* ============ 顶部导航（第一层：王朝 / 人物） ============ */
+  .header {
+    display: flex; align-items: center; justify-content: space-between;
+    height: 64px; padding: 0 32px; gap: 24px;
+    background: var(--bg-header);
+    border-bottom: 1px solid var(--line);
+  }
+  .logo-group { display: flex; align-items: center; gap: 10px; }
+  .logo-mark { display: flex; }
+  .logo-text { display: flex; flex-direction: column; gap: 2px; }
+  .logo-cn { font-size: 16px; font-weight: 700; color: var(--text-hi); line-height: 1.2; }
+  .logo-en { font-family: var(--font-num); font-size: 9px; color: var(--text-dim); letter-spacing: 2px; }
+  .main-nav { display: flex; align-items: center; gap: 4px; height: 100%; }
+  .tab {
+    display: flex; align-items: center; gap: 8px;
+    height: 100%; padding: 0 16px; cursor: pointer; user-select: none;
+  }
+  .tab-label { font-size: 14px; color: var(--text-dim); }
+  .tab.active { flex-direction: column; justify-content: center; gap: 0; }
+  .tab.active .tab-label { color: var(--text-hi); font-weight: 500; }
+  .tab-indicator { width: 100%; height: 3px; border-radius: 2px 2px 0 0; background: var(--gold); margin-top: auto; }
+  .tab-badge {
+    background: var(--fill-badge); border-radius: 4px; padding: 2px 6px;
+    font-size: 10px; color: var(--text-dim);
+  }
+  .header-right { display: flex; align-items: center; gap: 16px; }
+  .search {
+    display: flex; align-items: center; gap: 8px;
+    width: 220px; height: 36px; padding: 0 12px;
+    background: var(--fill-dark); border: 1px solid var(--line-strong); border-radius: 6px;
+  }
+  .search svg { flex: none; }
+  .search span { font-size: 13px; color: var(--text-dim); }
+  .market-status { display: flex; align-items: center; gap: 8px; }
+  .status-dot { width: 8px; height: 8px; border-radius: 99px; background: var(--down); }
+  .status-text { font-size: 13px; font-weight: 500; color: var(--down); }
+
+  /* ============ 二级导航（第二层：王朝标的） ============ */
+  .subnav {
+    display: flex; align-items: center; gap: 10px;
+    height: 56px; padding: 0 32px;
+    background: var(--bg-subnav);
+    border-bottom: 1px solid var(--line);
+  }
+  .subnav-prefix { display: flex; align-items: center; gap: 8px; padding-right: 6px; }
+  .subnav-prefix span { font-size: 12px; color: var(--text-dim); }
+  .chip {
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 14px; border-radius: 6px;
+    background: var(--fill-dark); cursor: pointer; user-select: none;
+    transition: background .15s ease;
+  }
+  .chip:hover { background: #1A212B; }
+  .chip-name { font-size: 13px; font-weight: 500; color: var(--text-mid); }
+  .chip-code { font-family: var(--font-num); font-size: 11px; color: var(--text-dim); }
+  .chip.active { background: var(--fill-chip-active); border: 1px solid var(--gold); padding: 6px 13px; }
+  .chip.active .chip-name { font-weight: 700; color: var(--text-hi); }
+  .chip.active .chip-code { font-weight: 500; color: var(--gold); }
+  .chip-more { font-size: 12px; color: var(--text-faint); margin-left: 2px; }
+
+  /* ============ 市场概览条 ============ */
+  .summary { display: flex; align-items: center; height: 84px; padding: 0 32px; background: var(--bg); }
+  .metric { display: flex; flex-direction: column; gap: 6px; }
+  .metric.pad-l { padding-left: 36px; }
+  .metric.pad-r { padding-right: 36px; }
+  .metric-pad { padding-left: 36px; padding-right: 36px; }
+  .metric-label { font-size: 12px; color: var(--text-sub); }
+  .metric-value { display: flex; align-items: baseline; gap: 10px; }
+  .metric-num { font-family: var(--font-num); font-size: 20px; font-weight: 700; color: var(--text-hi); }
+  .metric-sub { font-size: 12px; color: var(--text-sub); }
+  .metric-sub-mono { font-family: var(--font-num); font-size: 13px; font-weight: 500; }
+  .summary-divider { width: 1px; height: 40px; background: var(--line); flex: none; }
+  .up { color: var(--up); }
+  .down { color: var(--down); }
+
+  /* ============ 焦点行情区 ============ */
+  .featured { display: flex; gap: 20px; padding: 24px 32px 0; }
+  .featured-card {
+    width: 900px; flex: none;
+    display: flex; flex-direction: column; gap: 12px;
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 20px;
+  }
+  .breadcrumb { display: flex; align-items: center; gap: 8px; }
+  .breadcrumb .crumb { font-size: 12px; color: var(--text-dim); cursor: pointer; }
+  .breadcrumb .crumb:hover { color: var(--text-mid); }
+  .breadcrumb .sep { font-family: var(--font-num); font-size: 13px; color: var(--text-faint); }
+  .breadcrumb .current { font-size: 12px; font-weight: 500; color: var(--gold); cursor: default; }
+  .featured-head { display: flex; align-items: center; justify-content: space-between; }
+  .name-group { display: flex; align-items: center; gap: 10px; }
+  .dynasty-name { font-size: 20px; font-weight: 700; }
+  .code-badge {
+    background: var(--fill-badge); border-radius: 4px; padding: 3px 8px;
+    font-family: var(--font-num); font-size: 12px; color: var(--text-sub);
+  }
+  .status-tag {
+    border-radius: 4px; padding: 3px 8px;
+    background: rgba(246, 70, 93, 0.14);
+    font-size: 11px; font-weight: 500; color: var(--up);
+  }
+  .price-group { display: flex; align-items: baseline; gap: 10px; }
+  .price-now { font-family: var(--font-num); font-size: 24px; font-weight: 700; }
+  .price-chg { font-family: var(--font-num); font-size: 13px; font-weight: 500; }
+  .kline { display: block; }
+
+  /* ============ 右侧数据面板 ============ */
+  .side-panel {
+    flex: 1; display: flex; flex-direction: column; gap: 14px;
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 20px;
+  }
+  .panel-title { font-size: 14px; font-weight: 700; }
+  .panel-divider { width: 100%; height: 1px; background: var(--line); }
+  .stat-row { display: flex; align-items: center; justify-content: space-between; }
+  .stat-label { font-size: 13px; color: var(--text-sub); }
+  .stat-value { font-family: var(--font-num); font-size: 14px; font-weight: 500; color: var(--text-mid); }
+  .event-row { display: flex; align-items: center; gap: 10px; }
+  .event-year { font-family: var(--font-num); font-size: 12px; color: var(--text-dim); flex: none; }
+  .event-name { font-size: 13px; color: var(--text-mid); flex: 1; }
+  .event-impact { font-family: var(--font-num); font-size: 12px; font-weight: 500; flex: none; }
+
+  /* ============ 王朝列表区 ============ */
+  .list-section { display: flex; flex-direction: column; gap: 14px; padding: 24px 32px 0; }
+  .section-head { display: flex; align-items: center; justify-content: space-between; }
+  .section-title { font-size: 16px; font-weight: 700; }
+  .section-sub { font-size: 12px; color: var(--text-dim); }
+  .card-grid { display: flex; flex-wrap: wrap; gap: 16px; }
+  .dynasty-card {
+    width: 448px;
+    display: flex; flex-direction: column; gap: 12px;
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 20px;
+    transition: border-color .15s ease, transform .15s ease;
+    cursor: pointer;
+  }
+  .dynasty-card:hover { border-color: #2E3947; transform: translateY(-2px); }
+  .card-head { display: flex; align-items: flex-start; justify-content: space-between; }
+  .card-name-group { display: flex; flex-direction: column; gap: 4px; }
+  .card-name { font-size: 16px; font-weight: 700; }
+  .card-meta { font-family: var(--font-num); font-size: 12px; color: var(--text-dim); }
+  .card-price { display: flex; align-items: baseline; gap: 10px; }
+  .card-price-label { font-size: 12px; color: var(--text-dim); }
+  .card-price-num { font-family: var(--font-num); font-size: 20px; font-weight: 700; }
+  .card-price-chg { font-family: var(--font-num); font-size: 13px; font-weight: 500; }
+
+  /* ============ 人物板块预告 + 页脚 ============ */
+  .teaser-wrap { padding: 24px 32px 0; }
+  .teaser {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--card-alt); border: 1px solid var(--line-teaser); border-radius: 12px; padding: 24px;
+  }
+  .teaser-text { display: flex; flex-direction: column; gap: 6px; }
+  .teaser-title-row { display: flex; align-items: center; gap: 8px; }
+  .teaser-title { font-size: 16px; font-weight: 700; color: var(--text-mid); }
+  .teaser-desc { font-size: 13px; color: var(--text-dim); }
+  .teaser-btn {
+    background: var(--fill-badge); border: 1px solid var(--line-strong); border-radius: 6px;
+    padding: 10px 20px; font-size: 13px; color: var(--text-dim);
+    cursor: default; user-select: none;
+  }
+  .footer { display: flex; justify-content: center; padding: 28px 32px; }
+  .footer p { font-size: 12px; color: var(--text-faint); }
+</style>
+</head>
+<body>
+<div id="viewport">
+<div id="page">
+
+  <!-- ==================== 第一层导航：顶部栏 ==================== -->
+  <header class="header">
+    <div class="logo-group">
+      <div class="logo-mark">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="28" height="28" rx="6" fill="#D9A441"/>
+          <line x1="9" y1="6" x2="9" y2="22" stroke="#0B0E11" stroke-width="1.5"/>
+          <rect x="6.5" y="10" width="5" height="8" rx="1" fill="#0B0E11"/>
+          <line x1="19" y1="8" x2="19" y2="24" stroke="#0B0E11" stroke-width="1.5"/>
+          <rect x="16.5" y="12" width="5" height="7" rx="1" fill="#0B0E11"/>
+        </svg>
+      </div>
+      <div class="logo-text">
+        <div class="logo-cn">王朝交易所</div>
+        <div class="logo-en">DYNASTY EXCHANGE</div>
+      </div>
+    </div>
+    <nav class="main-nav">
+      <div class="tab active">
+        <span class="tab-label">王朝行情</span>
+        <div class="tab-indicator"></div>
+      </div>
+      <div class="tab">
+        <span class="tab-label">人物</span>
+        <span class="tab-badge">即将上线</span>
+      </div>
+    </nav>
+    <div class="header-right">
+      <div class="search">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="7" cy="7" r="5" stroke="#5A6472" stroke-width="1.5"/>
+          <path d="M11 11L14.5 14.5" stroke="#5A6472" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span>搜索王朝 / 人物</span>
+      </div>
+      <div class="market-status">
+        <div class="status-dot"></div>
+        <span class="status-text">开市中</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==================== 第二层导航：王朝标的 ==================== -->
+  <nav class="subnav">
+    <div class="subnav-prefix">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="1" y="1.5" width="12" height="4" rx="1" stroke="#D9A441" stroke-width="1.2"/>
+        <rect x="3.5" y="8.5" width="7" height="4" rx="1" stroke="#D9A441" stroke-width="1.2" opacity="0.5"/>
+        <line x1="7" y1="5.5" x2="7" y2="8.5" stroke="#D9A441" stroke-width="1.2" opacity="0.5"/>
+      </svg>
+      <span>王朝标的</span>
+    </div>
+    <div class="chip"><span class="chip-name">全部行情</span></div>
+    <div class="chip"><span class="chip-name">秦</span><span class="chip-code">QIN.221</span></div>
+    <div class="chip"><span class="chip-name">汉</span><span class="chip-code">HAN.202</span></div>
+    <div class="chip"><span class="chip-name">唐</span><span class="chip-code">TANG.618</span></div>
+    <div class="chip active"><span class="chip-name">宋</span><span class="chip-code">SONG.960</span></div>
+    <div class="chip"><span class="chip-name">元</span><span class="chip-code">YUAN.1271</span></div>
+    <div class="chip"><span class="chip-name">明</span><span class="chip-code">MING.1368</span></div>
+    <div class="chip"><span class="chip-name">清</span><span class="chip-code">QING.1644</span></div>
+    <span class="chip-more">+ 隋 · 晋 · 三国 等 5 支</span>
+  </nav>
+
+  <!-- ==================== 市场概览条 ==================== -->
+  <section class="summary">
+    <div class="metric pad-r">
+      <div class="metric-label">国运综合指数 CNHX</div>
+      <div class="metric-value">
+        <span class="metric-num">1,842.65</span>
+        <span class="metric-sub-mono up">+23.16&nbsp;&nbsp;+1.28%</span>
+      </div>
+    </div>
+    <div class="summary-divider"></div>
+    <div class="metric metric-pad">
+      <div class="metric-label">挂牌王朝</div>
+      <div class="metric-value">
+        <span class="metric-num">13 支</span>
+        <span class="metric-sub">在市 0 · 退市 13</span>
+      </div>
+    </div>
+    <div class="summary-divider"></div>
+    <div class="metric metric-pad">
+      <div class="metric-label">国祚总值</div>
+      <div class="metric-value">
+        <span class="metric-num">¥4.83 万亿</span>
+        <span class="metric-sub-mono up">+1.90%</span>
+      </div>
+    </div>
+    <div class="summary-divider"></div>
+    <div class="metric metric-pad">
+      <div class="metric-label">今日成交额</div>
+      <div class="metric-value">
+        <span class="metric-num">¥382.6 亿</span>
+        <span class="metric-sub">量比 1.24</span>
+      </div>
+    </div>
+    <div class="summary-divider"></div>
+    <div class="metric">
+      <div class="metric-label">市况（史册口径）</div>
+      <div class="metric-value">
+        <span class="metric-sub-mono up">涨 3</span>
+        <span class="metric-sub-mono down">跌 10</span>
+        <span class="metric-sub-mono" style="color:#5A6472;">平 0</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== 焦点行情区：大宋王朝 SONG.960 ==================== -->
+  <section class="featured">
+    <div class="featured-card">
+      <div class="breadcrumb">
+        <span class="crumb">王朝行情</span><span class="sep">›</span>
+        <span class="crumb">全部王朝</span><span class="sep">›</span>
+        <span class="current">大宋王朝 SONG.960</span>
+      </div>
+      <div class="featured-head">
+        <div class="name-group">
+          <span class="dynasty-name">大宋王朝</span>
+          <span class="code-badge">SONG.960</span>
+          <span class="status-tag">已退市</span>
+        </div>
+        <div class="price-group">
+          <span class="price-now down">55.00</span>
+          <span class="price-chg down">终值 -45.00%</span>
+        </div>
+      </div>
+      <svg class="kline" width="860" height="340" viewBox="0 0 860 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <line x1="38" y1="90" x2="815" y2="90" stroke="#1B212B" stroke-width="1"/>
+        <line x1="38" y1="150" x2="815" y2="150" stroke="#1B212B" stroke-width="1"/>
+        <line x1="38" y1="210" x2="815" y2="210" stroke="#1B212B" stroke-width="1"/>
+        <line x1="38" y1="270" x2="815" y2="270" stroke="#D9A441" stroke-width="1" stroke-dasharray="4 4" opacity="0.45"/>
+        <text x="6" y="94" font-size="11" fill="#5A6472">700</text>
+        <text x="6" y="154" font-size="11" fill="#5A6472">500</text>
+        <text x="6" y="214" font-size="11" fill="#5A6472">300</text>
+        <text x="38" y="324" font-size="11" fill="#5A6472">960 · 建隆</text>
+        <text x="269" y="324" font-size="11" fill="#5A6472" text-anchor="middle">1060</text>
+        <text x="521" y="324" font-size="11" fill="#5A6472" text-anchor="middle">1127 · 靖康</text>
+        <text x="766" y="324" font-size="11" fill="#5A6472">1279 · 祥兴</text>
+        <path d="M38 271 C 130 250 230 232 330 222 S 420 214 460 228 S 510 262 550 252 S 630 244 690 246 S 790 260 815 286" stroke="#9AA4B2" stroke-width="2" opacity="0.4" fill="none"/>
+        <line x1="38" y1="204" x2="38" y2="260" stroke="#D9A441" stroke-width="1" opacity="0.7"/>
+        <text x="20" y="196" font-size="12" fill="#D9A441">陈桥兵变 · IPO上市</text>
+        <line x1="521" y1="138" x2="521" y2="235" stroke="#7C8DB5" stroke-width="1" opacity="0.7"/>
+        <text x="430" y="130" font-size="12" fill="#7C8DB5">靖康之难 · 一字跌停</text>
+        <line x1="815" y1="64" x2="815" y2="276" stroke="#F6465D" stroke-width="1" opacity="0.7"/>
+        <text x="648" y="56" font-size="12" fill="#F6465D">崖山海战 · 清盘退市</text>
+        <text x="716" y="229" font-size="11" fill="#D9A441" opacity="0.9">发行价 100</text>
+        <line x1="38" y1="264" x2="38" y2="272" stroke="#F6465D"/>
+        <rect x="32" y="265.5" width="12" height="4.5" rx="1" fill="#F6465D"/>
+        <line x1="59" y1="257.5" x2="59" y2="263" stroke="#F6465D"/>
+        <rect x="53" y="259.5" width="12" height="6" rx="1" fill="#F6465D"/>
+        <line x1="80" y1="256" x2="80" y2="263" stroke="#2EBD85"/>
+        <rect x="74" y="259.5" width="12" height="3" rx="1" fill="#2EBD85"/>
+        <line x1="101" y1="252" x2="101" y2="258.5" stroke="#F6465D"/>
+        <rect x="95" y="255" width="12" height="6.6" rx="1" fill="#F6465D"/>
+        <line x1="122" y1="245" x2="122" y2="251.5" stroke="#F6465D"/>
+        <rect x="116" y="248.4" width="12" height="6.6" rx="1" fill="#F6465D"/>
+        <line x1="143" y1="244" x2="143" y2="252" stroke="#2EBD85"/>
+        <rect x="137" y="248.4" width="12" height="3" rx="1" fill="#2EBD85"/>
+        <line x1="164" y1="239.5" x2="164" y2="246.5" stroke="#F6465D"/>
+        <rect x="158" y="243" width="12" height="7.5" rx="1" fill="#F6465D"/>
+        <line x1="185" y1="233.5" x2="185" y2="240.5" stroke="#F6465D"/>
+        <rect x="179" y="237" width="12" height="6" rx="1" fill="#F6465D"/>
+        <line x1="206" y1="233" x2="206" y2="240" stroke="#2EBD85"/>
+        <rect x="200" y="237" width="12" height="3.6" rx="1" fill="#2EBD85"/>
+        <line x1="227" y1="229" x2="227" y2="236" stroke="#F6465D"/>
+        <rect x="221" y="232.5" width="12" height="8.1" rx="1" fill="#F6465D"/>
+        <line x1="248" y1="223" x2="248" y2="230" stroke="#F6465D"/>
+        <rect x="242" y="226.5" width="12" height="6" rx="1" fill="#F6465D"/>
+        <line x1="269" y1="222" x2="269" y2="230.5" stroke="#2EBD85"/>
+        <rect x="263" y="226.5" width="12" height="4.5" rx="1" fill="#2EBD85"/>
+        <line x1="290" y1="220" x2="290" y2="227.5" stroke="#F6465D"/>
+        <rect x="284" y="223.5" width="12" height="7.5" rx="1" fill="#F6465D"/>
+        <line x1="311" y1="224" x2="311" y2="231.5" stroke="#2EBD85"/>
+        <rect x="305" y="228" width="12" height="4.5" rx="1" fill="#2EBD85"/>
+        <line x1="332" y1="217" x2="332" y2="224.5" stroke="#F6465D"/>
+        <rect x="326" y="220.5" width="12" height="7.5" rx="1" fill="#F6465D"/>
+        <line x1="353" y1="221" x2="353" y2="229" stroke="#2EBD85"/>
+        <rect x="347" y="225" width="12" height="4.5" rx="1" fill="#2EBD85"/>
+        <line x1="374" y1="212" x2="374" y2="219.5" stroke="#F6465D"/>
+        <rect x="368" y="216" width="12" height="9" rx="1" fill="#F6465D"/>
+        <line x1="395" y1="206.5" x2="395" y2="214" stroke="#F6465D"/>
+        <rect x="389" y="210" width="12" height="6" rx="1" fill="#F6465D"/>
+        <line x1="416" y1="213" x2="416" y2="221.5" stroke="#2EBD85"/>
+        <rect x="410" y="217.5" width="12" height="7.5" rx="1" fill="#2EBD85"/>
+        <line x1="437" y1="208" x2="437" y2="215.5" stroke="#F6465D"/>
+        <rect x="431" y="211.5" width="12" height="6" rx="1" fill="#F6465D"/>
+        <line x1="458" y1="203" x2="458" y2="211" stroke="#F6465D"/>
+        <rect x="452" y="207" width="12" height="4.5" rx="1" fill="#F6465D"/>
+        <line x1="479" y1="218" x2="479" y2="236" stroke="#2EBD85"/>
+        <rect x="473" y="222" width="12" height="15" rx="1" fill="#2EBD85"/>
+        <line x1="500" y1="210" x2="500" y2="220" stroke="#F6465D"/>
+        <rect x="494" y="214.5" width="12" height="7.5" rx="1" fill="#F6465D"/>
+        <line x1="521" y1="239" x2="521" y2="253" stroke="#2EBD85"/>
+        <rect x="515" y="246" width="12" height="31.5" rx="1" fill="#2EBD85"/>
+        <line x1="542" y1="262" x2="542" y2="275" stroke="#2EBD85"/>
+        <rect x="536" y="267" width="12" height="21" rx="1" fill="#2EBD85"/>
+        <line x1="563" y1="249" x2="563" y2="270.5" stroke="#F6465D"/>
+        <rect x="557" y="255" width="12" height="12" rx="1" fill="#F6465D"/>
+        <line x1="584" y1="243" x2="584" y2="252" stroke="#F6465D"/>
+        <rect x="578" y="247.5" width="12" height="7.5" rx="1" fill="#F6465D"/>
+        <line x1="605" y1="247" x2="605" y2="257" stroke="#2EBD85"/>
+        <rect x="599" y="252" width="12" height="4.5" rx="1" fill="#2EBD85"/>
+        <line x1="626" y1="240" x2="626" y2="250" stroke="#F6465D"/>
+        <rect x="620" y="244.5" width="12" height="7.5" rx="1" fill="#F6465D"/>
+        <line x1="647" y1="234.5" x2="647" y2="242" stroke="#F6465D"/>
+        <rect x="641" y="238.5" width="12" height="6" rx="1" fill="#F6465D"/>
+        <line x1="668" y1="238" x2="668" y2="248" stroke="#2EBD85"/>
+        <rect x="662" y="243" width="12" height="4.5" rx="1" fill="#2EBD85"/>
+        <line x1="689" y1="232" x2="689" y2="241" stroke="#F6465D"/>
+        <rect x="683" y="237" width="12" height="6" rx="1" fill="#F6465D"/>
+        <line x1="710" y1="236" x2="710" y2="246.5" stroke="#2EBD85"/>
+        <rect x="704" y="241.5" width="12" height="4.5" rx="1" fill="#2EBD85"/>
+        <line x1="731" y1="230.5" x2="731" y2="240" stroke="#F6465D"/>
+        <rect x="725" y="235.5" width="12" height="6" rx="1" fill="#F6465D"/>
+        <line x1="752" y1="243" x2="752" y2="258" stroke="#2EBD85"/>
+        <rect x="746" y="249" width="12" height="13.5" rx="1" fill="#2EBD85"/>
+        <line x1="773" y1="252" x2="773" y2="266" stroke="#2EBD85"/>
+        <rect x="767" y="258" width="12" height="9" rx="1" fill="#2EBD85"/>
+        <line x1="794" y1="263" x2="794" y2="278.5" stroke="#2EBD85"/>
+        <rect x="788" y="270" width="12" height="12" rx="1" fill="#2EBD85"/>
+        <line x1="815" y1="279.5" x2="815" y2="291" stroke="#2EBD85"/>
+        <rect x="809" y="283.5" width="12" height="13.5" rx="1" fill="#2EBD85"/>
+      </svg>
+    </div>
+
+    <aside class="side-panel">
+      <div class="panel-title">关键数据</div>
+      <div class="panel-divider"></div>
+      <div class="stat-row"><span class="stat-label">发行价（960）</span><span class="stat-value">100.00</span></div>
+      <div class="stat-row"><span class="stat-label">历史最高（1021）</span><span class="stat-value up">318.42</span></div>
+      <div class="stat-row"><span class="stat-label">存续时间</span><span class="stat-value">319 年</span></div>
+      <div class="stat-row"><span class="stat-label">终值（1279）</span><span class="stat-value down">55.00</span></div>
+      <div class="stat-row"><span class="stat-label">最大回撤</span><span class="stat-value down">-82.72%</span></div>
+      <div class="stat-row"><span class="stat-label">累计收益</span><span class="stat-value down">-45.00%</span></div>
+      <div class="panel-divider"></div>
+      <div class="panel-title">大事记</div>
+      <div class="event-row">
+        <span class="event-year">960</span>
+        <span class="event-name">陈桥兵变 · IPO上市</span>
+        <span class="event-impact up">+15.00%</span>
+      </div>
+      <div class="event-row">
+        <span class="event-year">1004</span>
+        <span class="event-name">澶渊之盟 · 市场企稳涨停</span>
+        <span class="event-impact up">+10.53%</span>
+      </div>
+      <div class="event-row">
+        <span class="event-year">1127</span>
+        <span class="event-name">靖康之难 · 北宋崩盘</span>
+        <span class="event-impact down">-36.84%</span>
+      </div>
+      <div class="event-row">
+        <span class="event-year">1279</span>
+        <span class="event-name">崖山海战 · 清盘退市</span>
+        <span class="event-impact down">-80.95%</span>
+      </div>
+    </aside>
+  </section>
+
+  <!-- ==================== 王朝列表区 ==================== -->
+  <section class="list-section">
+    <div class="section-head">
+      <span class="section-title">全部王朝</span>
+      <span class="section-sub">按上市时间排序 · 发行价统一为 100</span>
+    </div>
+    <div class="card-grid">
+
+      <!-- 大秦 -->
+      <div class="dynasty-card">
+        <div class="card-head">
+          <div class="card-name-group">
+            <span class="card-name">大秦王朝</span>
+            <span class="card-meta">QIN.221 · 前221—前207 · 存续15年</span>
+          </div>
+          <span class="status-tag">闪电退市</span>
+        </div>
+        <div class="card-price">
+          <span class="card-price-label">终值</span>
+          <span class="card-price-num down">40.00</span>
+          <span class="card-price-chg down">-96.00%</span>
+        </div>
+        <svg class="kline" width="408" height="110" viewBox="0 0 408 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="55" y1="85" x2="55" y2="100" stroke="#F6465D"/><rect x="48" y="89.2" width="14" height="7.8" rx="1" fill="#F6465D"/>
+          <line x1="82" y1="74" x2="82" y2="83" stroke="#F6465D"/><rect x="75" y="78.8" width="14" height="10.4" rx="1" fill="#F6465D"/>
+          <line x1="109" y1="58" x2="109" y2="69" stroke="#F6465D"/><rect x="102" y="63.2" width="14" height="15.6" rx="1" fill="#F6465D"/>
+          <line x1="136" y1="37" x2="136" y2="66" stroke="#F6465D"/><rect x="129" y="42.4" width="14" height="20.8" rx="1" fill="#F6465D"/>
+          <line x1="163" y1="21" x2="163" y2="45" stroke="#F6465D"/><rect x="156" y="26.8" width="14" height="15.6" rx="1" fill="#F6465D"/>
+          <line x1="190" y1="23" x2="190" y2="38" stroke="#2EBD85"/><rect x="183" y="26.8" width="14" height="7.8" rx="1" fill="#2EBD85"/>
+          <line x1="217" y1="20" x2="217" y2="38" stroke="#F6465D"/><rect x="210" y="24.2" width="14" height="10.4" rx="1" fill="#F6465D"/>
+          <line x1="244" y1="21" x2="244" y2="51" stroke="#2EBD85"/><rect x="237" y="24.2" width="14" height="20.8" rx="1" fill="#2EBD85"/>
+          <line x1="271" y1="39" x2="271" y2="63" stroke="#2EBD85"/><rect x="264" y="42.4" width="14" height="15.6" rx="1" fill="#2EBD85"/>
+          <line x1="298" y1="56" x2="298" y2="85" stroke="#2EBD85"/><rect x="291" y="60.6" width="14" height="18.2" rx="1" fill="#2EBD85"/>
+          <line x1="325" y1="73" x2="325" y2="100" stroke="#2EBD85"/><rect x="318" y="78.8" width="14" height="15.6" rx="1" fill="#2EBD85"/>
+          <line x1="352" y1="90" x2="352" y2="108" stroke="#2EBD85"/><rect x="345" y="94.4" width="14" height="10.4" rx="1" fill="#2EBD85"/>
+        </svg>
+      </div>
+
+      <!-- 大汉 -->
+      <div class="dynasty-card">
+        <div class="card-head">
+          <div class="card-name-group">
+            <span class="card-name">大汉王朝</span>
+            <span class="card-meta">HAN.202 · 前202—220 · 存续422年</span>
+          </div>
+          <span class="status-tag">已退市</span>
+        </div>
+        <div class="card-price">
+          <span class="card-price-label">终值</span>
+          <span class="card-price-num up">180.00</span>
+          <span class="card-price-chg up">+80.00%</span>
+        </div>
+        <svg class="kline" width="408" height="110" viewBox="0 0 408 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="28" y1="75" x2="28" y2="92" stroke="#F6465D"/><rect x="21" y="78.8" width="14" height="7.2" rx="1" fill="#F6465D"/>
+          <line x1="55" y1="74" x2="55" y2="86" stroke="#2EBD85"/><rect x="48" y="78.8" width="14" height="3" rx="1" fill="#2EBD85"/>
+          <line x1="82" y1="65" x2="82" y2="87" stroke="#F6465D"/><rect x="75" y="69.2" width="14" height="12" rx="1" fill="#F6465D"/>
+          <line x1="109" y1="55" x2="109" y2="75" stroke="#F6465D"/><rect x="102" y="59.6" width="14" height="9.6" rx="1" fill="#F6465D"/>
+          <line x1="136" y1="54" x2="136" y2="68" stroke="#2EBD85"/><rect x="129" y="59.6" width="14" height="3" rx="1" fill="#2EBD85"/>
+          <line x1="163" y1="43" x2="163" y2="68" stroke="#F6465D"/><rect x="156" y="47.6" width="14" height="14.4" rx="1" fill="#F6465D"/>
+          <line x1="190" y1="34" x2="190" y2="54" stroke="#F6465D"/><rect x="183" y="38" width="14" height="9.6" rx="1" fill="#F6465D"/>
+          <line x1="217" y1="32" x2="217" y2="52" stroke="#2EBD85"/><rect x="210" y="38" width="14" height="7.2" rx="1" fill="#2EBD85"/>
+          <line x1="244" y1="29" x2="244" y2="52" stroke="#F6465D"/><rect x="237" y="33.2" width="14" height="12" rx="1" fill="#F6465D"/>
+          <line x1="271" y1="28" x2="271" y2="44" stroke="#2EBD85"/><rect x="264" y="33.2" width="14" height="4.8" rx="1" fill="#2EBD85"/>
+          <line x1="298" y1="23" x2="298" y2="44" stroke="#F6465D"/><rect x="291" y="28.4" width="14" height="9.6" rx="1" fill="#F6465D"/>
+          <line x1="325" y1="23" x2="325" y2="42" stroke="#2EBD85"/><rect x="318" y="28.4" width="14" height="7.2" rx="1" fill="#2EBD85"/>
+          <line x1="352" y1="30" x2="352" y2="49" stroke="#2EBD85"/><rect x="345" y="35.6" width="14" height="7.2" rx="1" fill="#2EBD85"/>
+          <line x1="379" y1="38" x2="379" y2="73" stroke="#2EBD85"/><rect x="372" y="42.8" width="14" height="24" rx="1" fill="#2EBD85"/>
+        </svg>
+      </div>
+
+      <!-- 大唐 -->
+      <div class="dynasty-card">
+        <div class="card-head">
+          <div class="card-name-group">
+            <span class="card-name">大唐王朝</span>
+            <span class="card-meta">TANG.618 · 618—907 · 存续290年</span>
+          </div>
+          <span class="status-tag">已退市</span>
+        </div>
+        <div class="card-price">
+          <span class="card-price-label">终值</span>
+          <span class="card-price-num down">60.00</span>
+          <span class="card-price-chg down">-40.00%</span>
+        </div>
+        <svg class="kline" width="408" height="110" viewBox="0 0 408 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="42" y1="69" x2="42" y2="90" stroke="#F6465D"/><rect x="35" y="73.6" width="14" height="10.4" rx="1" fill="#F6465D"/>
+          <line x1="69" y1="56" x2="69" y2="80" stroke="#F6465D"/><rect x="62" y="60.6" width="14" height="13" rx="1" fill="#F6465D"/>
+          <line x1="96" y1="56" x2="96" y2="71" stroke="#2EBD85"/><rect x="89" y="60.6" width="14" height="4" rx="1" fill="#2EBD85"/>
+          <line x1="123" y1="46" x2="123" y2="71" stroke="#F6465D"/><rect x="116" y="50.2" width="14" height="14.3" rx="1" fill="#F6465D"/>
+          <line x1="150" y1="33" x2="150" y2="56" stroke="#F6465D"/><rect x="143" y="37.2" width="14" height="13" rx="1" fill="#F6465D"/>
+          <line x1="177" y1="20" x2="177" y2="44" stroke="#F6465D"/><rect x="170" y="24.2" width="14" height="13" rx="1" fill="#F6465D"/>
+          <line x1="204" y1="20" x2="204" y2="36" stroke="#2EBD85"/><rect x="197" y="24.2" width="14" height="4.8" rx="1" fill="#2EBD85"/>
+          <line x1="231" y1="24" x2="231" y2="77" stroke="#2EBD85"/><rect x="224" y="29.4" width="14" height="41.6" rx="1" fill="#2EBD85"/>
+          <line x1="258" y1="55" x2="258" y2="77" stroke="#F6465D"/><rect x="251" y="60.6" width="14" height="10.4" rx="1" fill="#F6465D"/>
+          <line x1="285" y1="55" x2="285" y2="72" stroke="#2EBD85"/><rect x="278" y="60.6" width="14" height="5.2" rx="1" fill="#2EBD85"/>
+          <line x1="312" y1="52" x2="312" y2="72" stroke="#F6465D"/><rect x="305" y="58" width="14" height="7.8" rx="1" fill="#F6465D"/>
+          <line x1="339" y1="53" x2="339" y2="85" stroke="#2EBD85"/><rect x="332" y="58" width="14" height="20.8" rx="1" fill="#2EBD85"/>
+          <line x1="366" y1="73" x2="366" y2="101" stroke="#2EBD85"/><rect x="359" y="78.8" width="14" height="15.6" rx="1" fill="#2EBD85"/>
+        </svg>
+      </div>
+
+      <!-- 大元 -->
+      <div class="dynasty-card">
+        <div class="card-head">
+          <div class="card-name-group">
+            <span class="card-name">大元王朝</span>
+            <span class="card-meta">YUAN.1271 · 1271—1368 · 存续98年</span>
+          </div>
+          <span class="status-tag">已退市</span>
+        </div>
+        <div class="card-price">
+          <span class="card-price-label">终值</span>
+          <span class="card-price-num down">55.00</span>
+          <span class="card-price-chg down">-45.00%</span>
+        </div>
+        <svg class="kline" width="408" height="110" viewBox="0 0 408 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="82" y1="40" x2="82" y2="81" stroke="#F6465D"/><rect x="75" y="47" width="14" height="28" rx="1" fill="#F6465D"/>
+          <line x1="109" y1="41" x2="109" y2="63" stroke="#2EBD85"/><rect x="102" y="47" width="14" height="10.5" rx="1" fill="#2EBD85"/>
+          <line x1="136" y1="30" x2="136" y2="63" stroke="#F6465D"/><rect x="129" y="36.5" width="14" height="21" rx="1" fill="#F6465D"/>
+          <line x1="163" y1="31" x2="163" y2="49" stroke="#2EBD85"/><rect x="156" y="36.5" width="14" height="7" rx="1" fill="#2EBD85"/>
+          <line x1="190" y1="20" x2="190" y2="49" stroke="#F6465D"/><rect x="183" y="26" width="14" height="17.5" rx="1" fill="#F6465D"/>
+          <line x1="217" y1="20" x2="217" y2="43" stroke="#2EBD85"/><rect x="210" y="26" width="14" height="10.5" rx="1" fill="#2EBD85"/>
+          <line x1="244" y1="31" x2="244" y2="57" stroke="#2EBD85"/><rect x="237" y="36.5" width="14" height="14" rx="1" fill="#2EBD85"/>
+          <line x1="271" y1="45" x2="271" y2="68" stroke="#2EBD85"/><rect x="264" y="50.5" width="14" height="10.5" rx="1" fill="#2EBD85"/>
+          <line x1="298" y1="55" x2="298" y2="82" stroke="#2EBD85"/><rect x="291" y="61" width="14" height="14" rx="1" fill="#2EBD85"/>
+          <line x1="325" y1="69" x2="325" y2="101" stroke="#2EBD85"/><rect x="318" y="75" width="14" height="19" rx="1" fill="#2EBD85"/>
+        </svg>
+      </div>
+
+      <!-- 大明 -->
+      <div class="dynasty-card">
+        <div class="card-head">
+          <div class="card-name-group">
+            <span class="card-name">大明王朝</span>
+            <span class="card-meta">MING.1368 · 1368—1644 · 存续277年</span>
+          </div>
+          <span class="status-tag">已退市</span>
+        </div>
+        <div class="card-price">
+          <span class="card-price-label">终值</span>
+          <span class="card-price-num down">70.00</span>
+          <span class="card-price-chg down">-30.00%</span>
+        </div>
+        <svg class="kline" width="408" height="110" viewBox="0 0 408 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="42" y1="56" x2="42" y2="85" stroke="#F6465D"/><rect x="35" y="62" width="14" height="16" rx="1" fill="#F6465D"/>
+          <line x1="69" y1="40" x2="69" y2="69" stroke="#F6465D"/><rect x="62" y="46" width="14" height="16" rx="1" fill="#F6465D"/>
+          <line x1="96" y1="40" x2="96" y2="59" stroke="#2EBD85"/><rect x="89" y="46" width="14" height="6.4" rx="1" fill="#2EBD85"/>
+          <line x1="123" y1="30" x2="123" y2="59" stroke="#F6465D"/><rect x="116" y="36.4" width="14" height="16" rx="1" fill="#F6465D"/>
+          <line x1="150" y1="30" x2="150" y2="49" stroke="#2EBD85"/><rect x="143" y="36.4" width="14" height="6.4" rx="1" fill="#2EBD85"/>
+          <line x1="177" y1="24" x2="177" y2="49" stroke="#F6465D"/><rect x="170" y="30" width="14" height="12.8" rx="1" fill="#F6465D"/>
+          <line x1="204" y1="24" x2="204" y2="43" stroke="#2EBD85"/><rect x="197" y="30" width="14" height="6.4" rx="1" fill="#2EBD85"/>
+          <line x1="231" y1="21" x2="231" y2="43" stroke="#F6465D"/><rect x="224" y="26.8" width="14" height="9.6" rx="1" fill="#F6465D"/>
+          <line x1="258" y1="21" x2="258" y2="41" stroke="#2EBD85"/><rect x="251" y="26.8" width="14" height="8" rx="1" fill="#2EBD85"/>
+          <line x1="285" y1="23" x2="285" y2="41" stroke="#F6465D"/><rect x="278" y="28.4" width="14" height="6.4" rx="1" fill="#F6465D"/>
+          <line x1="312" y1="23" x2="312" y2="53" stroke="#2EBD85"/><rect x="305" y="28.4" width="14" height="17.6" rx="1" fill="#2EBD85"/>
+          <line x1="339" y1="40" x2="339" y2="75" stroke="#2EBD85"/><rect x="332" y="46" width="14" height="22.4" rx="1" fill="#2EBD85"/>
+          <line x1="366" y1="62" x2="366" y2="94" stroke="#2EBD85"/><rect x="359" y="68.4" width="14" height="19.2" rx="1" fill="#2EBD85"/>
+        </svg>
+      </div>
+
+      <!-- 大清 -->
+      <div class="dynasty-card">
+        <div class="card-head">
+          <div class="card-name-group">
+            <span class="card-name">大清王朝</span>
+            <span class="card-meta">QING.1644 · 1644—1912 · 存续268年</span>
+          </div>
+          <span class="status-tag">已退市</span>
+        </div>
+        <div class="card-price">
+          <span class="card-price-label">终值</span>
+          <span class="card-price-num down">35.00</span>
+          <span class="card-price-chg down">-65.00%</span>
+        </div>
+        <svg class="kline" width="408" height="110" viewBox="0 0 408 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="15" y1="68" x2="15" y2="88" stroke="#F6465D"/><rect x="8" y="73.6" width="14" height="8.4" rx="1" fill="#F6465D"/>
+          <line x1="42" y1="57" x2="42" y2="80" stroke="#F6465D"/><rect x="35" y="62.4" width="14" height="11.2" rx="1" fill="#F6465D"/>
+          <line x1="69" y1="57" x2="69" y2="73" stroke="#2EBD85"/><rect x="62" y="62.4" width="14" height="4.2" rx="1" fill="#2EBD85"/>
+          <line x1="96" y1="42" x2="96" y2="73" stroke="#F6465D"/><rect x="89" y="48.4" width="14" height="18.2" rx="1" fill="#F6465D"/>
+          <line x1="123" y1="26" x2="123" y2="55" stroke="#F6465D"/><rect x="116" y="31.6" width="14" height="16.8" rx="1" fill="#F6465D"/>
+          <line x1="150" y1="15" x2="150" y2="38" stroke="#F6465D"/><rect x="143" y="20.4" width="14" height="11.2" rx="1" fill="#F6465D"/>
+          <line x1="177" y1="15" x2="177" y2="34" stroke="#2EBD85"/><rect x="170" y="20.4" width="14" height="7" rx="1" fill="#2EBD85"/>
+          <line x1="204" y1="22" x2="204" y2="49" stroke="#2EBD85"/><rect x="197" y="27.4" width="14" height="15.4" rx="1" fill="#2EBD85"/>
+          <line x1="231" y1="37" x2="231" y2="58" stroke="#2EBD85"/><rect x="224" y="42.8" width="14" height="8.4" rx="1" fill="#2EBD85"/>
+          <line x1="258" y1="46" x2="258" y2="63" stroke="#2EBD85"/><rect x="251" y="51.2" width="14" height="5.6" rx="1" fill="#2EBD85"/>
+          <line x1="285" y1="51" x2="285" y2="69" stroke="#2EBD85"/><rect x="278" y="56.8" width="14" height="5.6" rx="1" fill="#2EBD85"/>
+          <line x1="312" y1="53" x2="312" y2="69" stroke="#F6465D"/><rect x="305" y="58.2" width="14" height="4.2" rx="1" fill="#F6465D"/>
+          <line x1="339" y1="53" x2="339" y2="77" stroke="#2EBD85"/><rect x="332" y="58.2" width="14" height="12.6" rx="1" fill="#2EBD85"/>
+          <line x1="366" y1="65" x2="366" y2="91" stroke="#2EBD85"/><rect x="359" y="70.8" width="14" height="14" rx="1" fill="#2EBD85"/>
+          <line x1="393" y1="79" x2="393" y2="106" stroke="#2EBD85"/><rect x="386" y="84.8" width="14" height="15.4" rx="1" fill="#2EBD85"/>
+        </svg>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ==================== 人物板块预告 ==================== -->
+  <section class="teaser-wrap">
+    <div class="teaser">
+      <div class="teaser-text">
+        <div class="teaser-title-row">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="3" y="7" width="10" height="7" rx="1.5" stroke="#D9A441" stroke-width="1.5"/>
+            <path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" stroke="#D9A441" stroke-width="1.5"/>
+          </svg>
+          <span class="teaser-title">人物板块 · 筹备中</span>
+        </div>
+        <p class="teaser-desc">帝王将相、文人武将将以个股形式挂牌，以功业与人气定价，K 线即人生。</p>
+      </div>
+      <div class="teaser-btn">敬请期待</div>
+    </div>
+  </section>
+
+  <!-- ==================== 页脚 ==================== -->
+  <footer class="footer">
+    <p>本页数据为历史艺术创作，不构成任何投资建议 · 王朝交易所 DYNASTY EXCHANGE</p>
+  </footer>
+
+</div>
+</div>
+
+<script>
+  // 等比缩放：保持 1440 设计画布，按窗口宽度整体缩放
+  (function () {
+    var DESIGN_W = 1440;
+    var page = document.getElementById('page');
+    var viewport = document.getElementById('viewport');
+    function rescale() {
+      var s = document.documentElement.clientWidth / DESIGN_W;
+      page.style.transform = 'scale(' + s + ')';
+      viewport.style.height = page.offsetHeight * s + 'px';
+    }
+    window.addEventListener('resize', rescale);
+    rescale();
+  })();
+
+  // 二级导航芯片：点击切换选中态（视觉演示）
+  (function () {
+    var chips = document.querySelectorAll('.subnav .chip');
+    chips.forEach(function (chip) {
+      chip.addEventListener('click', function () {
+        chips.forEach(function (c) { c.classList.remove('active'); });
+        chip.classList.add('active');
+      });
+    });
+  })();
+</script>
+</body>
+</html>
