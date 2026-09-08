@@ -27,6 +27,7 @@
   .tl-wrap{border-top:1px solid var(--line);background:#0f141b;padding:12px 16px}
   .tl-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:12px}
   .tl-title{color:var(--mut);font-size:12px;letter-spacing:1px}
+  .tl-title i{font-style:normal;color:var(--amber);opacity:.8;margin-left:8px}
   .seg{display:flex;border:1px solid var(--line);border-radius:7px;overflow:hidden;flex:0 0 auto}
   .seg button{background:var(--panel);border:none;color:var(--mut);font-size:12px;padding:5px 14px;cursor:pointer;font-family:inherit;transition:background .15s,color .15s}
   .seg button.on{background:var(--amber);color:#0d1117;font-weight:600}
@@ -61,18 +62,6 @@
   .cprice label{color:var(--mut);font-size:10px;letter-spacing:.5px}
   .cprice b{font-size:15px;font-weight:600}
   .cprice.hide{display:none}
-  .rd{border:1px solid var(--line);border-radius:10px;background:#121821;margin-bottom:10px;overflow:hidden}
-  .rd-h{display:flex;align-items:center;justify-content:space-between;padding:7px 12px;cursor:pointer;user-select:none}
-  .rd-h .rd-t{font-size:12px;color:var(--txt);letter-spacing:1px}
-  .rd-btn{font-size:11px;color:var(--mut);font-family:var(--mono)}
-  .rd-h:hover .rd-btn{color:var(--amber)}
-  .rd-b{display:flex;gap:18px;align-items:center;padding:0 12px 10px;flex-wrap:wrap}
-  .rd.collapsed .rd-b{display:none}
-  .rd-ul{list-style:none;flex:1 1 300px;font-size:12px;line-height:1.95;color:#c6cde0}
-  .rd-ul li{display:flex;align-items:baseline;gap:8px}
-  .rd-ul i{width:8px;height:8px;border-radius:2px;flex:0 0 auto}
-  .rd-ul b{color:var(--txt);min-width:58px;font-weight:600;flex:0 0 auto}
-  .rd-note{flex:0 0 100%;font-size:11px;color:var(--mut);font-family:var(--mono);border-top:1px dashed var(--line);padding-top:7px;line-height:1.7}
   #card p{font-size:13px;line-height:1.75;color:#c6cde0;white-space:pre-line}
   footer{padding:12px 22px;border-top:1px solid var(--line);color:var(--mut);font-size:11px;background:#0f141b}
   .tip{font-family:var(--mono);font-size:12px}
@@ -99,38 +88,13 @@
 
   <div class="tl-wrap" data-page-node-id="Py0FBefK55ztdKbI92BfWg">
     <div class="tl-head" data-page-node-id="qr33q9c5kvqOcYPNTdrWaI">
-      <div class="tl-title" data-page-node-id="icRY9qFzrvKCEpDSNBbn4j">重大事件 · 盘面标注</div>
+      <div class="tl-title" data-page-node-id="icRY9qFzrvKCEpDSNBbn4j">重大事件 · 盘面标注<i id="lbHint"></i></div>
       <div class="seg" data-page-node-id="PYEfznuyWkA32TC4aIFytE">
         <button class="on" data-mode="year" data-page-node-id="tuY02wwyLC033Kx1W6RYnf">年 K</button>
         <button data-mode="emperor" data-page-node-id="xlnjjHvTmJo9Hqmcqqg5oe">皇帝 K</button>
       </div>
     </div>
     <div id="timeline" data-page-node-id="NH8TUubQUqmc0THbDn7XzI"></div>
-
-    <div class="rd" id="rd">
-      <div class="rd-h" id="rdHead">
-        <span class="rd-t">K 线读法 · 一根 K 线在说什么</span>
-        <span class="rd-btn" id="rdToggle">收起 ▲</span>
-      </div>
-      <div class="rd-b">
-        <svg viewBox="0 0 140 96" width="112" height="77" aria-label="K线结构示意">
-          <line x1="34" y1="8"  x2="34" y2="88" stroke="#f23645" stroke-width="2"/>
-          <rect x="20" y="30" width="28" height="38" fill="#f23645"/>
-          <line x1="34" y1="18" x2="66" y2="18" stroke="#3a4763" stroke-width="1" stroke-dasharray="3 3"/>
-          <line x1="34" y1="49" x2="66" y2="49" stroke="#3a4763" stroke-width="1" stroke-dasharray="3 3"/>
-          <line x1="34" y1="80" x2="66" y2="80" stroke="#3a4763" stroke-width="1" stroke-dasharray="3 3"/>
-          <text x="70" y="21" fill="#f0b90b" font-size="11" font-family="Consolas,monospace">上影线</text>
-          <text x="70" y="52" fill="#e6e9ef" font-size="11" font-family="Consolas,monospace">实体</text>
-          <text x="70" y="83" fill="#089981" font-size="11" font-family="Consolas,monospace">下影线</text>
-        </svg>
-        <ul class="rd-ul">
-          <li><i style="background:#f0b90b"></i><b>上影线</b>年内最高价 → 冲高却没守住，高光没能兑现</li>
-          <li><i style="background:#f23645"></i><b>实体</b>年初开盘 → 年末收盘的净位移，年内真实涨跌（红涨 / 绿跌）</li>
-          <li><i style="background:#089981"></i><b>下影线</b>年内最低价 → 探底后被拉回，危机化解</li>
-        </ul>
-        <div class="rd-note">皇帝 K：实体 = 即位价 → 退位价，上下影 = 在位期间的极值；红涨绿跌按即位价与退位价比较判定</div>
-      </div>
-    </div>
   </div>
 
   <div id="card" class="hidden" data-page-node-id="TXoXnGJEO1SjrryFEj2LdV">
@@ -208,11 +172,6 @@
       [1140,118],[1142,96],[1165,150],[1187,165],[1207,128],[1234,112],[1259,120],[1272,100],
       [1273,58],[1276,26],[1279,2]
     ];
-    // ---- 波动率区间（变法/战乱/灭亡期放大影线）----
-    const VOL = [
-      [960,1.0],[1000,0.9],[1043,1.0],[1069,2.0],[1085,1.7],[1100,1.0],[1124,2.2],[1130,1.8],
-      [1142,1.4],[1165,0.8],[1187,0.7],[1207,1.3],[1234,1.2],[1259,0.9],[1272,1.7],[1279,3.0]
-    ];
 
     function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
     const rand = mulberry32(9601279);
@@ -227,33 +186,20 @@
     }
 
     // ---- 生成年 K 线 [open, close, low, high] ----
-    const START=960, END=1279;
+    // 纯实体 K 线：不画上下影线，high/low 收敛到实体两端
+    const START=960, END=1279, PEAK=1082;   // PEAK = 见顶年（永乐城之败）
     const years=[], candles=[];
     let prevClose = ANCHORS[0][1];
     for(let y=START;y<=END;y++){
       years.push(String(y));
       const target = interpOn(ANCHORS,y);
       const open  = y===START ? ANCHORS[0][1] : prevClose;
-      const close = target*(1+(rand()-0.5)*0.03);
-      // 更真实的影线：长度随涨跌幅缩放 + 上下影线独立随机 + 战乱期波动放大
-      const vm   = interpOn(VOL,y);
-      const move = Math.abs(close-open)/Math.max(open,0.01);
-      const vbase= (0.006 + move*0.85 + rand()*0.018) * vm;
-      const upF  = Math.min(vbase*(0.25+rand()*1.5), 0.30);
-      const dnF  = Math.min(vbase*(0.25+rand()*1.5), 0.30);
-      const high = Math.max(open,close)*(1+upF);
-      const low  = Math.min(open,close)*(1-dnF);
+      const close = target*(1+(rand()-0.5)*0.03) * (y===PEAK ? 1.07 : 1);  // 见顶年冲高
+      const high  = Math.max(open,close);
+      const low   = Math.min(open,close);
       candles.push([round1(open),round1(close),round1(low),round1(high)]);
       prevClose = close;
     }
-
-    // ---- 钉顶：1082「永乐城之败」强制长上影，确保历史最高 pin 落在事件年 ----
-    const PEAK = 1082;
-    (function pinPeak(){
-      const k = candles[PEAK-START];
-      let mx = 0; candles.forEach(c=>{ if(c[3]>mx) mx=c[3]; });
-      k[3] = round1(Math.max(mx + 1.5, Math.max(k[0],k[1])*1.06));
-    })();
 
     const yearIndex = {}; years.forEach((y,i)=>yearIndex[y]=i);
     const byYear = {}; EVENTS.forEach(e=>{(byYear[e.year]=byYear[e.year]||[]).push(e)});
@@ -281,14 +227,18 @@
       return {cats, data, ma:ma(data,3), maName:'MA3'};
     }
 
-    // 标注点：两行 —— 第一行历史事件名，第二行「—— 金融术语」（按多空着色）
+    // 标注点：缩放跨度 <=120 年时展开「事件名 —— 金融术语」（两行），全览时只显示术语
+    let labelFull = false;
     function mkPoint(x,y,e,i){
       const bear = e.dir==='bear', c = dirColor(e.dir);
+      const fmt = labelFull
+        ? '{t|'+e.title+'}\n{m|—— '+e.term+'}'
+        : '{m|'+e.term+'}';
       return {coord:[x,round1(y)], value:e.title+' —— '+e.term, eventIndex:i,
         symbol:'circle', symbolSize:9, z:12,
         itemStyle:{color:c,borderColor:'#0d1117',borderWidth:1.5},
         label:{show:true,position:bear?'bottom':'top',distance:8,align:'center',
-          formatter:'{t|'+e.title+'}\n{m|—— '+e.term+'}',
+          formatter:fmt,
           rich:{
             t:{color:'#e6e9ef',fontSize:10,lineHeight:13,fontFamily:mono},
             m:{color:c,fontSize:10,fontWeight:'bold',lineHeight:13,fontFamily:mono}
@@ -345,7 +295,8 @@
         const col  = c>=prev ? '#f23645' : '#089981';
         head = cur.cats[idx]+' 年';
         evs  = byYear[Number(cur.cats[idx])]||[];
-        body = tipRow('开',o) + tipRow('收',c,col) + tipRow('高',h) + tipRow('低',l) + tipRow('涨跌幅', pctStr(pct,col));
+        // 纯实体 K 线：最高/最低即开收两端，不再单列
+        body = tipRow('开',o) + tipRow('收',c,col) + tipRow('涨跌幅', pctStr(pct,col));
       }else{
         const em  = EMPERORS[idx];
         const yrs = em.e-em.s+1;                            // 在位年数（首尾年计入）
@@ -367,6 +318,7 @@
 
     function render(){
       cur = buildSeries();
+      labelFull = (mode==='emperor');      // 皇帝 K 只有 18 根，恒展开
       const marks = buildMarks(cur.cats, cur.data);
       chart.setOption({
         backgroundColor:'transparent',
@@ -391,7 +343,7 @@
           backgroundColor:'rgba(20,26,36,.95)',borderColor:'#2a3342',
           textStyle:{color:'#e6e9ef',fontSize:12},formatter:tipFormatter},
         series:[
-          {name:'国运指数',type:'candlestick',data:cur.data,
+          {id:'k', name:'国运指数',type:'candlestick',data:cur.data,
             itemStyle:{color:'#f23645',color0:'#089981',borderColor:'#f23645',borderColor0:'#089981'},
             markPoint:{data:marks},
             markLine:{symbol:'none',lineStyle:{color:'#f0b90b',type:'dashed',width:1},
@@ -401,11 +353,32 @@
             lineStyle:{color:'#f0b90b',width:1.3,opacity:.9},z:3}
         ]
       }, {replaceMerge:['series']});
+      updateHint();
     }
 
     chart = echarts.init(document.getElementById('chart'));
     render();
     window.addEventListener('resize', ()=>chart.resize());
+
+    // ---- 标注详略自适应：缩放跨度 <=120 年展开完整标注，全览只显示术语 ----
+    const SPAN_FULL = 120;
+    function updateHint(){
+      document.getElementById('lbHint').textContent =
+        labelFull ? '完整标注' : '滚轮放大至 120 年内展开完整标注';
+    }
+    function applyMarks(){
+      chart.setOption({series:[{id:'k', markPoint:{data: buildMarks(cur.cats, cur.data)}}]});
+      updateHint();
+    }
+    function syncLabelMode(){
+      if(mode==='emperor'){ labelFull=true; return; }
+      const dz=(chart.getOption().dataZoom||[])[0];
+      if(!dz) return;
+      const span=(dz.end-dz.start)/100*cur.cats.length;   // 可见年数
+      const full = span <= SPAN_FULL;
+      if(full!==labelFull){ labelFull=full; applyMarks(); }
+    }
+    chart.on('dataZoom', syncLabelMode);
 
     // ---- 头部统计 ----
     const last = candles[candles.length-1][1];
@@ -478,14 +451,6 @@
       card.classList.remove('hidden');
       Array.prototype.forEach.call(tl.children,el=>el.classList.remove('active'));
     }
-
-    // ---- K 线读法折叠 ----
-    const rd=document.getElementById('rd'), rdBtn=document.getElementById('rdToggle');
-    document.getElementById('rdHead').addEventListener('click',()=>{
-      const c=rd.classList.toggle('collapsed');
-      rdBtn.textContent = c ? '展开 ▼' : '收起 ▲';
-      chart.resize();
-    });
 
     document.getElementById('cardClose').addEventListener('click',()=>card.classList.add('hidden'));
 
