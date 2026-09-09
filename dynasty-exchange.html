@@ -134,6 +134,7 @@
   .chip[data-filter="fav"] { color: #B7791F; }
   .chip[data-filter="up"].active, .chip[data-filter="down"].active { color: #FFFFFF; }
   .card-grid { display: flex; flex-wrap: wrap; gap: 20px; }
+  .grid-empty { width: 100%; padding: 56px 0; text-align: center; font-size: 14px; color: #86868B; }
   .dynasty-card {
     width: 434px; display: flex; flex-direction: column; gap: 14px;
     background: #FFFFFF; border: 1px solid var(--line); border-radius: 18px; padding: 24px;
@@ -214,6 +215,7 @@
     </div>
     <nav class="nav-links">
       <a class="nav-link active">王朝</a>
+      <a class="nav-link" id="navFav" title="查看已加入自选的王朝标的">⭐ 自选</a>
       <a class="nav-link">人物</a>
       <a class="nav-link">数据</a>
       <a class="nav-link">关于</a>
@@ -414,6 +416,7 @@
       </div>
 
     </div>
+    <div class="grid-empty" id="gridEmpty" style="display:none"></div>
   </section>
 
   <!-- ==================== 人物板块预告 ==================== -->
@@ -699,6 +702,7 @@
     })();
     function applyFilter(){
       var q=(searchInput.value||'').trim().toLowerCase();
+      var visible=0;
       Array.prototype.forEach.call(document.querySelectorAll('#cardGrid .dynasty-card'), function(c){
         var ok=true, t=c.getAttribute('data-trend'), g=c.getAttribute('data-group');
         if(curFilter==='up') ok=(t==='up');
@@ -708,8 +712,27 @@
         else if(curFilter==='fav') ok=favCodes.has(c.getAttribute('data-code'));
         if(ok && q) ok=(c.getAttribute('data-code')+' '+c.textContent).toLowerCase().indexOf(q)>=0;
         c.style.display=ok?'':'none';
+        if(ok) visible++;
       });
+      var empty=document.getElementById('gridEmpty');
+      if(empty){
+        empty.style.display=visible?'none':'';
+        empty.textContent = curFilter==='fav'
+          ? '暂无自选标的 —— 打开任意王朝详情页，点右上角「加入自选」即可收藏'
+          : '没有匹配的标的，换个筛选或关键词试试';
+      }
     }
+    // 顶层导航「⭐ 自选」：激活自选筛选并滚到行情列表（详情页经 #fav 深链直达）
+    function activateFavFilter(){
+      curFilter='fav';
+      Array.prototype.forEach.call(document.querySelectorAll('#chips .chip'), function(x){
+        x.classList.toggle('active', x.getAttribute('data-filter')==='fav');
+      });
+      applyFilter();
+      var sec=document.getElementById('listSection');
+      if(sec) sec.scrollIntoView({behavior:'smooth',block:'start'});
+    }
+    document.getElementById('navFav').addEventListener('click', activateFavFilter);
     Array.prototype.forEach.call(document.querySelectorAll('#chips .chip'), function(chip){
       chip.addEventListener('click', function(){
         Array.prototype.forEach.call(document.querySelectorAll('#chips .chip'), function(x){ x.classList.remove('active'); });
@@ -799,6 +822,8 @@
         if(c) gotoChart(c.getAttribute('data-code'));
       });
       applyFilter();
+      // 详情页顶层导航「⭐ 自选」经 #fav 深链直达自选列表
+      if(location.hash==='#fav') activateFavFilter();
 
       // 焦点行情区：每次进入程序随机挑一支（有数据王朝优先入池），不再固定标的
       var withData=list.filter(function(d){ return hasData(full[d.code]); });

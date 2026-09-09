@@ -156,6 +156,29 @@ def test_watchlist_persisted_and_keyboard_nav():
     assert 'id="kbdHint"' in chart and "kbdHint').style.display=''" in chart
 
 
+def test_nav_watchlist_side_arrows_and_follow_card():
+    """顶层导航「⭐ 自选」+ 盘面页两侧箭头（与键盘同功能）+ 详情浮卡跟随鼠标。"""
+    with open(app.resource_path("index.html"), encoding="utf-8") as f:
+        chart = f.read()
+    with open(app.resource_path("dynasty-exchange.html"), encoding="utf-8") as f:
+        home = f.read()
+    # 两页顶层导航均有自选入口；详情页经 #fav 深链回首页并激活自选筛选
+    assert 'id="navFav"' in chart and 'id="navFav"' in home
+    assert 'href="dynasty-exchange.html#fav"' in chart
+    assert "location.hash==='#fav'" in home and "function activateFavFilter" in home
+    assert 'id="gridEmpty"' in home                      # 自选为空/搜索无结果时的空态提示
+    # 两侧箭头与键盘共用 stepTo，下拉/键盘/箭头统一走 switchTo
+    assert 'id="navPrev"' in chart and 'id="navNext"' in chart
+    assert "function stepTo" in chart and "function switchTo" in chart
+    assert "np.addEventListener('click',()=>stepTo(-1))" in chart
+    assert "nn.addEventListener('click',()=>stepTo(1))" in chart
+    # 浮卡随鼠标：显示时定位到光标处，光标悬入卡面即停止跟随
+    assert "function moveCard" in chart and "function showCardAtCursor" in chart
+    assert "cardFollow=false" in chart and "closest('#card')" in chart
+    # 事件与皇帝两条展示路径都要唤起跟随
+    assert chart.count("showCardAtCursor();") == 2
+
+
 def test_chart_page_peak_trough_event_marks():
     """峰谷锚点：局部极值绑定邻近最大冲击事件，放大锚点标识、不写文字标注。"""
     with open(app.resource_path("index.html"), encoding="utf-8") as f:

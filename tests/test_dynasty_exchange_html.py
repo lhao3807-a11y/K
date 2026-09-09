@@ -139,8 +139,8 @@ def run_tests():
         failures.append(f"SVG 数量不符：期望 {svg_expected}，实际 {checker.counts['svg']}")
     if checker.counts["dynasty-card"] != 6:
         failures.append(f"王朝卡片数量不符：期望 6，实际 {checker.counts['dynasty-card']}")
-    if checker.counts["nav-link"] != 4:
-        failures.append(f"导航链接数量不符：期望 4，实际 {checker.counts['nav-link']}")
+    if checker.counts["nav-link"] != 5:
+        failures.append(f"导航链接数量不符：期望 5，实际 {checker.counts['nav-link']}")
     if checker.counts["chip"] != 6:
         failures.append(f"筛选 chips 数量不符：期望 6，实际 {checker.counts['chip']}")
     chip_active = html.count('class="chip active"')
