@@ -187,7 +187,7 @@ def main() -> int:
         js_api=Api(),
         width=DEFAULT_SIZE[0], height=DEFAULT_SIZE[1],
         min_size=MIN_SIZE,
-        background_color="#0d1117",
+        background_color="#FFFFFF",
     )
 
     # 冒烟模式：窗口真实创建并渲染 5 秒后自动关闭（供测试验证）

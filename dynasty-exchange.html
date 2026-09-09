@@ -1,723 +1,442 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-page-node-id="5cZ5YzSsvLvbAZBXFynCJY">
-<head data-page-node-id="DnjwxME8dqWqspDmrcqrNw">
-<meta charset="UTF-8" data-page-node-id="4EU56qs7NtRN3FHUjr7uV0">
-<meta name="viewport" content="width=device-width, initial-scale=1.0" data-page-node-id="hI3HBWddhp9WaiZWB8jYn5">
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>王朝交易所 · 首页 | DYNASTY EXCHANGE</title>
 <style>
   :root {
-    --bg: #0B0E11;
-    --bg-header: #0E1218;
-    --bg-subnav: #0D1117;
-    --card: #10151C;
-    --card-alt: #0E1319;
-    --fill-dark: #131920;
-    --fill-badge: #161C24;
-    --fill-chip-active: #1C2430;
-    --line: #1E242C;
-    --line-strong: #232A33;
-    --line-teaser: #2A323D;
-    --grid: #1B212B;
-    --text-hi: #EAECEF;
-    --text-mid: #C7CDD6;
-    --text-sub: #848E9C;
-    --text-dim: #5A6472;
-    --text-faint: #3E4754;
-    --gold: #D9A441;
+    --bg: #FFFFFF;
+    --bg-alt: #F5F5F7;
+    --band: #272729;
+    --text: #1D1D1F;
+    --text-2: #6E6E73;
+    --text-3: #86868B;
+    --axis: #C7CDD6;
+    --blue: #0066CC;
+    --blue-hover: #0077ED;
+    --blue-soft: #2997FF;
     --up: #F6465D;      /* 涨 · 红 */
     --down: #2EBD85;    /* 跌 · 绿 */
-    --ma: #9AA4B2;
-    --event-blue: #7C8DB5;
+    --line: #E0E0E0;
+    --grid: #F0F0F0;
     --font-cn: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", "微软雅黑", sans-serif;
-    --font-num: "Geist Mono", "JetBrains Mono", "Cascadia Mono", Consolas, monospace;
+    --font-num: "Cascadia Mono", "JetBrains Mono", Consolas, "Courier New", monospace;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { background: var(--bg); }
-  body { font-family: var(--font-cn); color: var(--text-hi); -webkit-font-smoothing: antialiased; }
+  body { font-family: var(--font-cn); color: var(--text); -webkit-font-smoothing: antialiased; }
   #viewport { overflow: hidden; }
   #page { width: 1440px; transform-origin: top left; background: var(--bg); }
-
-  /* ============ 顶部导航（第一层：王朝 / 人物） ============ */
-  .header {
-    display: flex; align-items: center; justify-content: space-between;
-    height: 64px; padding: 0 32px; gap: 24px;
-    background: var(--bg-header);
-    border-bottom: 1px solid var(--line);
-  }
-  .logo-group { display: flex; align-items: center; gap: 10px; }
-  .logo-mark { display: flex; }
-  .logo-text { display: flex; flex-direction: column; gap: 2px; }
-  .logo-cn { font-size: 16px; font-weight: 700; color: var(--text-hi); line-height: 1.2; }
-  .logo-en { font-family: var(--font-num); font-size: 9px; color: var(--text-dim); letter-spacing: 2px; }
-  .main-nav { display: flex; align-items: center; gap: 4px; height: 100%; }
-  .tab {
-    display: flex; align-items: center; gap: 8px;
-    height: 100%; padding: 0 16px; cursor: pointer; user-select: none;
-  }
-  .tab-label { font-size: 14px; color: var(--text-dim); }
-  .tab.active { flex-direction: column; justify-content: center; gap: 0; }
-  .tab.active .tab-label { color: var(--text-hi); font-weight: 500; }
-  .tab-indicator { width: 100%; height: 3px; border-radius: 2px 2px 0 0; background: var(--gold); margin-top: auto; }
-  .tab-badge {
-    background: var(--fill-badge); border-radius: 4px; padding: 2px 6px;
-    font-size: 10px; color: var(--text-dim);
-  }
-  .header-right { display: flex; align-items: center; gap: 16px; }
-  .search {
-    display: flex; align-items: center; gap: 8px;
-    width: 220px; height: 36px; padding: 0 12px;
-    background: var(--fill-dark); border: 1px solid var(--line-strong); border-radius: 6px;
-  }
-  .search svg { flex: none; }
-  .search span { font-size: 13px; color: var(--text-dim); }
-  .market-status { display: flex; align-items: center; gap: 8px; }
-  .status-dot { width: 8px; height: 8px; border-radius: 99px; background: var(--down); }
-  .status-text { font-size: 13px; font-weight: 500; color: var(--down); }
-
-  /* ============ 二级导航（第二层：王朝标的） ============ */
-  .subnav {
-    display: flex; align-items: center; gap: 10px;
-    height: 56px; padding: 0 32px;
-    background: var(--bg-subnav);
-    border-bottom: 1px solid var(--line);
-    flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden;
-    scrollbar-width: thin; scrollbar-color: #2A3441 transparent;
-  }
-  .subnav::-webkit-scrollbar { height: 5px; }
-  .subnav::-webkit-scrollbar-thumb { background: #2A3441; border-radius: 3px; }
-  .subnav::-webkit-scrollbar-track { background: transparent; }
-  .subnav > * { flex-shrink: 0; }
-  .subnav-prefix { display: flex; align-items: center; gap: 8px; padding-right: 6px; }
-  .subnav-prefix span { font-size: 12px; color: var(--text-dim); }
-  .chip {
-    display: flex; align-items: center; gap: 8px;
-    padding: 7px 14px; border-radius: 6px;
-    background: var(--fill-dark); cursor: pointer; user-select: none;
-    transition: background .15s ease;
-  }
-  .chip:hover { background: #1A212B; }
-  .chip-name { font-size: 13px; font-weight: 500; color: var(--text-mid); }
-  .chip-code { font-family: var(--font-num); font-size: 11px; color: var(--text-dim); }
-  .chip.active { background: var(--fill-chip-active); border: 1px solid var(--gold); padding: 6px 13px; }
-  .chip.active .chip-name { font-weight: 700; color: var(--text-hi); }
-  .chip.active .chip-code { font-weight: 500; color: var(--gold); }
-  .chip-more { font-size: 12px; color: var(--text-faint); margin-left: 2px; }
-
-  /* ============ 市场概览条 ============ */
-  .summary { display: flex; align-items: center; height: 84px; padding: 0 32px; background: var(--bg); }
-  .metric { display: flex; flex-direction: column; gap: 6px; }
-  .metric.pad-l { padding-left: 36px; }
-  .metric.pad-r { padding-right: 36px; }
-  .metric-pad { padding-left: 36px; padding-right: 36px; }
-  .metric-label { font-size: 12px; color: var(--text-sub); }
-  .metric-value { display: flex; align-items: baseline; gap: 10px; }
-  .metric-num { font-family: var(--font-num); font-size: 20px; font-weight: 700; color: var(--text-hi); }
-  .metric-sub { font-size: 12px; color: var(--text-sub); }
-  .metric-sub-mono { font-family: var(--font-num); font-size: 13px; font-weight: 500; }
-  .summary-divider { width: 1px; height: 40px; background: var(--line); flex: none; }
   .up { color: var(--up); }
   .down { color: var(--down); }
 
+  /* ============ 全局导航（黑色细条） ============ */
+  .nav {
+    display: flex; align-items: center; justify-content: space-between;
+    height: 44px; padding: 0 32px; background: #000000;
+  }
+  .logo-group { display: flex; align-items: center; gap: 10px; }
+  .logo-text { display: flex; flex-direction: column; gap: 2px; }
+  .logo-cn { font-size: 14px; font-weight: 600; color: #FFFFFF; line-height: 1.2; }
+  .logo-en { font-family: var(--font-num); font-size: 8px; color: #7A7A7A; letter-spacing: 2px; }
+  .nav-links { display: flex; align-items: center; gap: 28px; }
+  .nav-link { font-size: 12px; color: #999999; cursor: pointer; user-select: none; text-decoration: none; }
+  .nav-link:hover { color: #FFFFFF; }
+  .nav-link.active { color: #FFFFFF; font-weight: 500; }
+  .nav-right { display: flex; align-items: center; gap: 16px; }
+  .search {
+    display: flex; align-items: center; gap: 8px;
+    width: 200px; height: 32px; padding: 0 14px;
+    background: #272729; border-radius: 9999px;
+  }
+  .search input {
+    flex: 1; min-width: 0; background: none; border: none; outline: none;
+    font-family: var(--font-cn); font-size: 12px; color: #FFFFFF;
+  }
+  .search input::placeholder { color: #7A7A7A; }
+  .market-status { display: flex; align-items: center; gap: 6px; }
+  .status-dot { width: 8px; height: 8px; border-radius: 99px; background: var(--down); }
+  .status-text { font-size: 12px; font-weight: 500; color: var(--down); }
+
+  /* ============ Hero ============ */
+  .hero {
+    display: flex; flex-direction: column; align-items: center; gap: 20px;
+    padding: 96px 48px 80px; text-align: center;
+  }
+  .hero-eyebrow { font-family: var(--font-num); font-size: 13px; font-weight: 500; color: var(--blue); letter-spacing: 3px; }
+  .hero-title { font-size: 56px; font-weight: 600; letter-spacing: -1px; line-height: 62px; }
+  .hero-lead { font-size: 20px; color: var(--text-2); }
+  .cta-row { display: flex; gap: 16px; padding-top: 12px; }
+  .btn {
+    border-radius: 9999px; padding: 12px 28px; font-size: 15px; cursor: pointer;
+    border: none; font-family: var(--font-cn); transition: background .15s ease, transform .1s ease;
+  }
+  .btn:active { transform: scale(.97); }
+  .btn-primary { background: var(--blue); color: #FFFFFF; font-weight: 500; }
+  .btn-primary:hover { background: var(--blue-hover); }
+  .btn-ghost { background: #FFFFFF; color: var(--blue); border: 1px solid var(--blue); }
+  .btn-ghost:hover { background: rgba(0,102,204,.06); }
+
+  /* ============ 市场概览条 ============ */
+  .summary {
+    display: flex; align-items: center; justify-content: space-between;
+    height: 96px; padding: 0 48px; background: var(--bg-alt);
+  }
+  .metric { display: flex; flex-direction: column; gap: 6px; }
+  .metric-label { font-size: 12px; color: var(--text-3); }
+  .metric-value { display: flex; align-items: baseline; gap: 10px; }
+  .metric-num { font-family: var(--font-num); font-size: 22px; font-weight: 600; color: var(--text); }
+  .metric-sub { font-size: 12px; color: var(--text-3); }
+  .metric-sub-mono { font-family: var(--font-num); font-size: 13px; font-weight: 500; }
+  .summary-divider { width: 1px; height: 40px; background: var(--line); flex: none; }
+
   /* ============ 焦点行情区 ============ */
-  .featured { display: flex; gap: 20px; padding: 24px 32px 0; }
-  .featured-card {
-    width: 900px; flex: none;
-    display: flex; flex-direction: column; gap: 12px;
-    background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 20px;
+  .featured {
+    display: flex; align-items: center; gap: 64px;
+    padding: 80px 48px; background: var(--bg);
   }
-  .breadcrumb { display: flex; align-items: center; gap: 8px; }
-  .breadcrumb .crumb { font-size: 12px; color: var(--text-dim); cursor: pointer; }
-  .breadcrumb .crumb:hover { color: var(--text-mid); }
-  .breadcrumb .sep { font-family: var(--font-num); font-size: 13px; color: var(--text-faint); }
-  .breadcrumb .current { font-size: 12px; font-weight: 500; color: var(--gold); cursor: default; }
-  .featured-head { display: flex; align-items: center; justify-content: space-between; }
-  .name-group { display: flex; align-items: center; gap: 10px; }
-  .dynasty-name { font-size: 20px; font-weight: 700; }
+  .featured-info { width: 480px; flex: none; display: flex; flex-direction: column; gap: 18px; }
+  .featured-label { font-family: var(--font-num); font-size: 13px; font-weight: 500; color: var(--blue); letter-spacing: 2px; }
+  .name-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .dynasty-name { font-size: 40px; font-weight: 600; letter-spacing: -0.5px; }
   .code-badge {
-    background: var(--fill-badge); border-radius: 4px; padding: 3px 8px;
-    font-family: var(--font-num); font-size: 12px; color: var(--text-sub);
+    background: var(--bg-alt); border-radius: 6px; padding: 4px 8px;
+    font-family: var(--font-num); font-size: 12px; color: var(--text-2);
   }
-  .status-tag {
-    border-radius: 4px; padding: 3px 8px;
-    background: rgba(246, 70, 93, 0.14);
-    font-size: 11px; font-weight: 500; color: var(--up);
-  }
-  .status-tag.pending {
-    background: rgba(217, 164, 65, 0.14); color: var(--gold, #D9A441);
-  }
-  .price-group { display: flex; align-items: baseline; gap: 10px; }
-  .price-now { font-family: var(--font-num); font-size: 24px; font-weight: 700; }
-  .price-chg { font-family: var(--font-num); font-size: 13px; font-weight: 500; }
-  .kline { display: block; }
+  .status-tag { border-radius: 6px; padding: 4px 8px; font-size: 11px; font-weight: 500; }
+  .status-tag.up { background: rgba(246,70,93,.1); color: var(--up); }
+  .status-tag.down { background: rgba(46,189,133,.1); color: var(--down); }
+  .status-tag.pending { background: var(--bg-alt); color: var(--text-3); }
+  .price-row { display: flex; align-items: baseline; gap: 14px; }
+  .price-now { font-family: var(--font-num); font-size: 48px; font-weight: 600; }
+  .price-chg { font-family: var(--font-num); font-size: 16px; font-weight: 500; }
+  .featured-desc { font-size: 15px; color: var(--text-2); line-height: 24px; }
+  .featured-chart { flex: 1; min-width: 0; }
+  .featured-chart svg { display: block; width: 100%; height: auto; }
 
-  /* ============ 右侧数据面板 ============ */
-  .side-panel {
-    flex: 1; display: flex; flex-direction: column; gap: 14px;
-    background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 20px;
-  }
-  .panel-title { font-size: 14px; font-weight: 700; }
-  .panel-divider { width: 100%; height: 1px; background: var(--line); }
-  .stat-row { display: flex; align-items: center; justify-content: space-between; }
-  .stat-label { font-size: 13px; color: var(--text-sub); }
-  .stat-value { font-family: var(--font-num); font-size: 14px; font-weight: 500; color: var(--text-mid); }
-  .event-row { display: flex; align-items: center; gap: 10px; }
-  .event-year { font-family: var(--font-num); font-size: 12px; color: var(--text-dim); flex: none; }
-  .event-name { font-size: 13px; color: var(--text-mid); flex: 1; }
-  .event-impact { font-family: var(--font-num); font-size: 12px; font-weight: 500; flex: none; }
-
-  /* ============ 王朝列表区 ============ */
-  .list-section { display: flex; flex-direction: column; gap: 14px; padding: 24px 32px 0; }
+  /* ============ 王朝行情列表 ============ */
+  .list-section { display: flex; flex-direction: column; gap: 28px; padding: 64px 48px 72px; background: var(--bg-alt); }
   .section-head { display: flex; align-items: center; justify-content: space-between; }
-  .section-title { font-size: 16px; font-weight: 700; }
-  .section-sub { font-size: 12px; color: var(--text-dim); }
-  .card-grid { display: flex; flex-wrap: wrap; gap: 16px; }
-  .dynasty-card {
-    width: 448px;
-    display: flex; flex-direction: column; gap: 12px;
-    background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 20px;
-    transition: border-color .15s ease, transform .15s ease;
-    cursor: pointer;
+  .section-title-wrap { display: flex; flex-direction: column; gap: 6px; }
+  .section-title { font-size: 28px; font-weight: 600; letter-spacing: -0.5px; }
+  .section-sub { font-size: 14px; color: var(--text-3); }
+  .chips { display: flex; align-items: center; gap: 10px; }
+  .chip {
+    border-radius: 9999px; padding: 8px 16px; font-size: 13px; cursor: pointer; user-select: none;
+    background: #FFFFFF; border: 1px solid var(--line); color: var(--text-2);
+    transition: transform .12s ease, background .15s ease, color .15s ease;
   }
-  .dynasty-card:hover { border-color: #334052; transform: translateY(-3px); box-shadow: 0 12px 28px rgba(0,0,0,.45); }
+  .chip:hover { transform: translateY(-1px); }
+  .chip.active { background: var(--text); border-color: var(--text); color: #FFFFFF; font-weight: 500; }
+  .chip[data-filter="up"] { color: var(--up); }
+  .chip[data-filter="down"] { color: var(--down); }
+  .chip[data-filter="up"].active, .chip[data-filter="down"].active { color: #FFFFFF; }
+  .card-grid { display: flex; flex-wrap: wrap; gap: 20px; }
+  .dynasty-card {
+    width: 434px; display: flex; flex-direction: column; gap: 14px;
+    background: #FFFFFF; border: 1px solid var(--line); border-radius: 18px; padding: 24px;
+    cursor: pointer; transition: transform .15s ease, border-color .15s ease;
+  }
+  .dynasty-card:hover { transform: translateY(-2px); border-color: var(--blue); }
   .card-head { display: flex; align-items: flex-start; justify-content: space-between; }
   .card-name-group { display: flex; flex-direction: column; gap: 4px; }
-  .card-name { font-size: 16px; font-weight: 700; }
-  .card-meta { font-family: var(--font-num); font-size: 12px; color: var(--text-dim); }
+  .card-name { font-size: 18px; font-weight: 600; }
+  .card-meta { font-family: var(--font-num); font-size: 12px; color: var(--text-3); }
   .card-price { display: flex; align-items: baseline; gap: 10px; }
-  .card-price-label { font-size: 12px; color: var(--text-dim); }
-  .card-price-num { font-family: var(--font-num); font-size: 20px; font-weight: 700; }
+  .card-price-num { font-family: var(--font-num); font-size: 24px; font-weight: 600; }
   .card-price-chg { font-family: var(--font-num); font-size: 13px; font-weight: 500; }
+  .card-spark svg { display: block; }
 
-  /* ============ 人物板块预告 + 页脚 ============ */
-  .teaser-wrap { padding: 24px 32px 0; }
+  /* ============ 人物板块预告（深色带） ============ */
   .teaser {
     display: flex; align-items: center; justify-content: space-between;
-    background: var(--card-alt); border: 1px solid var(--line-teaser); border-radius: 12px; padding: 24px;
+    padding: 72px 48px; background: var(--band);
   }
-  .teaser-text { display: flex; flex-direction: column; gap: 6px; }
-  .teaser-title-row { display: flex; align-items: center; gap: 8px; }
-  .teaser-title { font-size: 16px; font-weight: 700; color: var(--text-mid); }
-  .teaser-desc { font-size: 13px; color: var(--text-dim); }
-  .teaser-btn {
-    background: var(--fill-badge); border: 1px solid var(--line-strong); border-radius: 6px;
-    padding: 10px 20px; font-size: 13px; color: var(--text-dim);
-    cursor: default; user-select: none;
-  }
-  .footer { display: flex; justify-content: center; padding: 28px 32px; }
-  .footer p { font-size: 12px; color: var(--text-faint); }
+  .teaser-text { display: flex; flex-direction: column; gap: 12px; max-width: 720px; }
+  .teaser-label { font-family: var(--font-num); font-size: 13px; font-weight: 500; color: var(--blue-soft); letter-spacing: 2px; }
+  .teaser-title { font-size: 28px; font-weight: 600; color: #FFFFFF; letter-spacing: -0.5px; }
+  .teaser-desc { font-size: 15px; color: #CCCCCC; line-height: 24px; }
+  .teaser-btn { flex: none; }
 
-  /* ============ 动效与交互 ============ */
+  /* ============ 页脚 ============ */
+  .footer {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 32px 48px; background: var(--bg);
+  }
+  .footer p { font-size: 12px; color: var(--text-3); }
+  .footer-links { display: flex; gap: 24px; }
+  .footer-links span { font-size: 12px; color: var(--text-2); cursor: pointer; }
+  .footer-links span:hover { color: var(--blue); }
+
+  /* ============ 动效 ============ */
   @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
   @keyframes pulse {
     0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(46,189,133,.45); }
     50% { opacity: .55; box-shadow: 0 0 0 5px rgba(46,189,133,0); }
   }
-  .featured-card { animation: rise .55s cubic-bezier(.22,.61,.36,1) both; }
-  .side-panel   { animation: rise .55s .08s cubic-bezier(.22,.61,.36,1) both; }
-  .list-section { animation: rise .60s .14s cubic-bezier(.22,.61,.36,1) both; }
-  .teaser       { animation: rise .60s .20s cubic-bezier(.22,.61,.36,1) both; }
-  #fKline       { animation: fadeIn .7s ease both; }
-  .status-dot   { animation: pulse 2.6s ease-in-out infinite; }
+  .hero > * { animation: rise .55s cubic-bezier(.22,.61,.36,1) both; }
+  .hero > *:nth-child(2) { animation-delay: .06s; }
+  .hero > *:nth-child(3) { animation-delay: .12s; }
+  .hero > *:nth-child(4) { animation-delay: .18s; }
+  .summary { animation: fadeIn .6s .1s ease both; }
+  .featured { animation: rise .6s .14s cubic-bezier(.22,.61,.36,1) both; }
+  .list-section { animation: rise .6s .2s cubic-bezier(.22,.61,.36,1) both; }
+  .teaser { animation: rise .6s .26s cubic-bezier(.22,.61,.36,1) both; }
+  .status-dot { animation: pulse 2.6s ease-in-out infinite; }
   .dynasty-card { animation: rise .5s cubic-bezier(.22,.61,.36,1) both; }
-  .chip { transition: background .15s ease, transform .15s ease, border-color .15s ease; }
-  .chip:hover { transform: translateY(-1px); }
-  .chip:active { transform: translateY(0) scale(.97); }
-  .summary .metric { transition: transform .15s ease; }
-  .summary .metric:hover { transform: translateY(-1px); }
-  .summary .metric:hover .metric-label { color: var(--text-mid); }
   .pt-mark { animation: fadeIn .8s .35s ease both; }
   @media (prefers-reduced-motion: reduce) {
     * { animation: none !important; transition: none !important; }
   }
 </style>
 </head>
-<body data-page-node-id="GQPrCGIzw2hTcBMGzRWmU2">
-<div id="viewport" data-page-node-id="UKdeWow3i4c6tuOEiy4nfk">
-<div id="page" data-page-node-id="RZS9YzzbvqSVMSxyVNPBAY">
+<body>
+<div id="viewport">
+<div id="page">
 
-  <!-- ==================== 第一层导航：顶部栏 ==================== -->
-  <header class="header" data-page-node-id="Dah2G1nzVV3WELdwmjOQwg">
-    <div class="logo-group" data-page-node-id="FxwzWFMGQ5BsnESxgGZToP">
-      <div class="logo-mark" data-page-node-id="tVLIU0cN796hLYPkaogDbT">
-        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" data-page-node-id="z2tUraoEFj6DDraQphP6Xb">
-          <rect width="28" height="28" rx="6" fill="#D9A441" data-page-node-id="BJdT5ZsHGEBMzsZDViZF3M"/>
-          <line x1="9" y1="6" x2="9" y2="22" stroke="#0B0E11" stroke-width="1.5" data-page-node-id="7d26oieEks5hhM25uWkvK6"/>
-          <rect x="6.5" y="10" width="5" height="8" rx="1" fill="#0B0E11" data-page-node-id="otETEqzsxS4y4P8phHh5CU"/>
-          <line x1="19" y1="8" x2="19" y2="24" stroke="#0B0E11" stroke-width="1.5" data-page-node-id="aJDexjuzHDDYWN7unSQkPD"/>
-          <rect x="16.5" y="12" width="5" height="7" rx="1" fill="#0B0E11" data-page-node-id="OJ67ZlBLJH9Jr3rYWumVlR"/>
-        </svg>
-      </div>
-      <div class="logo-text" data-page-node-id="6mOb9GmLHUaGmQ8aZZHNT0">
-        <div class="logo-cn" data-page-node-id="VXwrotrxPBEAXKFKHy8h8r">王朝交易所</div>
-        <div class="logo-en" data-page-node-id="rCeZM4hkKhcPRoDWRa3sn5">DYNASTY EXCHANGE</div>
+  <!-- ==================== 全局导航 ==================== -->
+  <header class="nav">
+    <div class="logo-group">
+      <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="26" height="26" rx="7" fill="#0066CC"/>
+        <line x1="9" y1="5" x2="9" y2="21" stroke="#FFFFFF" stroke-width="1.5"/>
+        <rect x="7" y="9" width="4" height="8" rx="1" fill="#FFFFFF"/>
+        <line x1="17" y1="7" x2="17" y2="23" stroke="#FFFFFF" stroke-width="1.5"/>
+        <rect x="15" y="12" width="4" height="7" rx="1" fill="#FFFFFF"/>
+      </svg>
+      <div class="logo-text">
+        <div class="logo-cn">王朝交易所</div>
+        <div class="logo-en">DYNASTY EXCHANGE</div>
       </div>
     </div>
-    <nav class="main-nav" data-page-node-id="y23K1yE01hc9VvN6OkTyF1">
-      <div class="tab active" data-page-node-id="rIPWuSyEGn9KrycAW2bOw5">
-        <span class="tab-label" data-page-node-id="TbYsMDLpfXm3Wh4Ohc4oAq">王朝行情</span>
-        <div class="tab-indicator" data-page-node-id="dfiPl2UP8ETZm1AtEwgfwc"></div>
-      </div>
-      <div class="tab" data-page-node-id="5ha6AuYJkl9ovOYVIBhg8L">
-        <span class="tab-label" data-page-node-id="H1K9DQQ6DK5kTpX9uf1b6h">人物</span>
-        <span class="tab-badge" data-page-node-id="k2dFLht5ZzftjJfFLp868O">即将上线</span>
-      </div>
+    <nav class="nav-links">
+      <a class="nav-link active">王朝</a>
+      <a class="nav-link">人物</a>
+      <a class="nav-link">数据</a>
+      <a class="nav-link">关于</a>
     </nav>
-    <div class="header-right" data-page-node-id="tGHyXcOILMmnMvDjUbNokL">
-      <div class="search" data-page-node-id="YytJHE0JXN1fyqixkSMKhq">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" data-page-node-id="VA1nqRQ6o29S2nC7EKjE8V">
-          <circle cx="7" cy="7" r="5" stroke="#5A6472" stroke-width="1.5" data-page-node-id="ECUfHMJCx3ADk1KJF0DW5Y"/>
-          <path d="M11 11L14.5 14.5" stroke="#5A6472" stroke-width="1.5" stroke-linecap="round" data-page-node-id="E1B5E7tc1dXEXeyWQukxXc"/>
+    <div class="nav-right">
+      <div class="search">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="5.5" cy="5.5" r="4.5" stroke="#7A7A7A" stroke-width="1.5"/>
+          <path d="M9 9L12 12" stroke="#7A7A7A" stroke-width="1.5" stroke-linecap="round"/>
         </svg>
-        <span data-page-node-id="4cHAOi3INqzTtKYP45K4d2">搜索王朝 / 人物</span>
+        <input id="searchInput" type="text" placeholder="搜索王朝 / 代码">
       </div>
-      <div class="market-status" data-page-node-id="MBEiB60v56RZ39GvmxBaBs">
-        <div class="status-dot" data-page-node-id="dBH9HEBn6vtJAVb14aB1Oi"></div>
-        <span class="status-text" data-page-node-id="VYGQErlvUfChV0UzrKGUFm">开市中</span>
+      <div class="market-status">
+        <div class="status-dot"></div>
+        <span class="status-text">交易中</span>
       </div>
     </div>
   </header>
 
-  <!-- ==================== 第二层导航：王朝标的 ==================== -->
-  <nav class="subnav" data-page-node-id="ouxMKMVD7rh5cjSG0nMBgU">
-    <div class="subnav-prefix" data-page-node-id="yguh55gQ5QVt9Yljd00l7L">
-      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" data-page-node-id="98LNC8hKkBN526hoMfDotn">
-        <rect x="1" y="1.5" width="12" height="4" rx="1" stroke="#D9A441" stroke-width="1.2" data-page-node-id="VqxRwYEgzuFvGA1plAKfwu"/>
-        <rect x="3.5" y="8.5" width="7" height="4" rx="1" stroke="#D9A441" stroke-width="1.2" opacity="0.5" data-page-node-id="UqwznFd5MomhKJSWMI7kzn"/>
-        <line x1="7" y1="5.5" x2="7" y2="8.5" stroke="#D9A441" stroke-width="1.2" opacity="0.5" data-page-node-id="5WOXrY5GabhNBVWk3tDcP4"/>
-      </svg>
-      <span data-page-node-id="tt5pKdeveL2xnJsSPmAH4e">王朝标的</span>
+  <!-- ==================== Hero ==================== -->
+  <section class="hero">
+    <div class="hero-eyebrow">DYNASTY EXCHANGE · 国运行情终端</div>
+    <h1 class="hero-title">把五千年，看成一条 K 线。</h1>
+    <p class="hero-lead">以王朝为标的，以国运为行情。每一次治乱兴衰，都有价可查。</p>
+    <div class="cta-row">
+      <button class="btn btn-primary" id="ctaEnter">进入行情</button>
+      <button class="btn btn-ghost" id="ctaAbout">了解玩法</button>
     </div>
-    <div class="chip" data-page-node-id="iOVHs0Tv7jFNqnXFBLzgyk"><span class="chip-name" data-page-node-id="7zfeCj5CuDD91IwvYrGQup">全部行情</span></div>
-    <div class="chip" data-page-node-id="qJsFL95nYiet67MECWB785"><span class="chip-name" data-page-node-id="qBjYc0nqE1wUOmu7MIqJ7l">秦</span><span class="chip-code" data-page-node-id="GWIN32r0kyYDZLzM8VBfgc">QIN.221</span></div>
-    <div class="chip" data-page-node-id="fkKZW67IsScRtKvuoeoZ1H"><span class="chip-name" data-page-node-id="BXdBV7DnHQQT7ZhVxoOa1H">汉</span><span class="chip-code" data-page-node-id="7njmTi4tFgKkbGbHxBg0li">HAN.202</span></div>
-    <div class="chip" data-page-node-id="rg1OBIEqWpdx2q67k34grL"><span class="chip-name" data-page-node-id="ge0qlGbXQRSE2Aw8CIXX6Y">唐</span><span class="chip-code" data-page-node-id="z3dN1gSiGUXEJ6HDVGV1h8">TANG.618</span></div>
-    <div class="chip active" data-page-node-id="hngq4DN4Cc2LvPSH36G81j"><span class="chip-name" data-page-node-id="gttdLPWY8T04hTIPCpodLC">宋</span><span class="chip-code" data-page-node-id="KYfW8ZSdGvav1sDDKI3RW9">SONG.960</span></div>
-    <div class="chip" data-page-node-id="pEVbZvtwKrIZxoQuZzWFVc"><span class="chip-name" data-page-node-id="pasJMr08J261aDTRhunfHz">元</span><span class="chip-code" data-page-node-id="Q4nZdgG1bZCbuwUQBfO6Zn">YUAN.1271</span></div>
-    <div class="chip" data-page-node-id="CjnKKoIsySZaajNdVw5ttN"><span class="chip-name" data-page-node-id="HXsZP2GXF9p0yDyLtquWXH">明</span><span class="chip-code" data-page-node-id="XuoIYHIw95FH0zWoWFEMVz">MING.1368</span></div>
-    <div class="chip" data-page-node-id="QdD8wB36uooqOcU5FJy4qi"><span class="chip-name" data-page-node-id="TV6WsJuVocvFGuWHcBS105">清</span><span class="chip-code" data-page-node-id="cMGwEco3tALWI6AnOVIv5y">QING.1644</span></div>
-    <span class="chip-more" data-page-node-id="gz9RBHvCkbEychD3oDlxse">+ 隋 · 晋 · 三国 等 5 支</span>
-  </nav>
+  </section>
 
   <!-- ==================== 市场概览条 ==================== -->
-  <section class="summary" data-page-node-id="ZalDQvdazX8wyUgbbhnkHJ">
-    <div class="metric pad-r" data-page-node-id="mjyK9BpCJ1WwESQGzuSlbk">
-      <div class="metric-label" data-page-node-id="ZJl2tXmZGJZ6C3hmLLGeym">国运综合指数 CNHX</div>
-      <div class="metric-value" data-page-node-id="aMXKUAr4aTNfenYmxqT1jY">
-        <span class="metric-num" data-page-node-id="BhwcSyFWOjWt8KrQdkH99s">1,842.65</span>
-        <span class="metric-sub-mono up" data-page-node-id="uDGLacO2TmQWnArGhoiT9q">+23.16&nbsp;&nbsp;+1.28%</span>
+  <section class="summary">
+    <div class="metric">
+      <div class="metric-label">挂牌王朝</div>
+      <div class="metric-value">
+        <span class="metric-num" id="mListed">8 支</span>
+        <span class="metric-sub" id="mListedSub">在市 1 · 退市 7</span>
       </div>
     </div>
-    <div class="summary-divider" data-page-node-id="A6h0FN08kOOUdf7qqL0bNC"></div>
-    <div class="metric metric-pad" data-page-node-id="mNYu4SaqycleZesejx3nRB">
-      <div class="metric-label" data-page-node-id="B3uY0Yjm4fJujgIWUuThDu">挂牌王朝</div>
-      <div class="metric-value" data-page-node-id="hCZnXDVRYkqTNCXZGVwaR2">
-        <span class="metric-num" id="mListed" data-page-node-id="zaMe6d7HARRtLDoTkLOaI3">13 支</span>
-        <span class="metric-sub" id="mListedSub" data-page-node-id="i0OkDSy0241X69T7iPRl47">在市 0 · 退市 13</span>
+    <div class="summary-divider"></div>
+    <div class="metric">
+      <div class="metric-label">国运综合指数</div>
+      <div class="metric-value">
+        <span class="metric-num" id="mIndex">--</span>
+        <span class="metric-sub-mono" id="mIndexChg">--</span>
       </div>
     </div>
-    <div class="summary-divider" data-page-node-id="aDMRUwAW3hEcUvHECavKsG"></div>
-    <div class="metric metric-pad" data-page-node-id="2jrFgp9m8TgnfnH6Pd00Th">
-      <div class="metric-label" data-page-node-id="g3oQXymaRUchC3jLes703l">国祚总值</div>
-      <div class="metric-value" data-page-node-id="VoiqVScbYZhtmf9HXeotfX">
-        <span class="metric-num" data-page-node-id="iUaMyJkihoeSIamqZXfqVf">¥4.83 万亿</span>
-        <span class="metric-sub-mono up" data-page-node-id="1OihoATbttjTob5d1ftFuR">+1.90%</span>
-      </div>
+    <div class="summary-divider"></div>
+    <div class="metric">
+      <div class="metric-label">上涨家数</div>
+      <div class="metric-value"><span class="metric-num up" id="mUp">--</span></div>
     </div>
-    <div class="summary-divider" data-page-node-id="hBinDxBtT52xNO59BGZfDB"></div>
-    <div class="metric metric-pad" data-page-node-id="300LHB1VUxNFC9E0fkJSbK">
-      <div class="metric-label" data-page-node-id="qzmddImQyXMC8izWWlfL6t">今日成交额</div>
-      <div class="metric-value" data-page-node-id="zdKREzaKJSaDwCDPeQzPWI">
-        <span class="metric-num" data-page-node-id="wZHaobCKDlQvnv0IJsKu5a">¥382.6 亿</span>
-        <span class="metric-sub" data-page-node-id="vHBx3MNGjY6DN2t5JA3XDb">量比 1.24</span>
-      </div>
+    <div class="summary-divider"></div>
+    <div class="metric">
+      <div class="metric-label">下跌家数</div>
+      <div class="metric-value"><span class="metric-num down" id="mDown">--</span></div>
     </div>
-    <div class="summary-divider" data-page-node-id="ncim8T31IJBGURMrF4iMVb"></div>
-    <div class="metric" data-page-node-id="qsKKiMwopQdvnoAnPela1m">
-      <div class="metric-label" data-page-node-id="oY60W97OQPiuaNz6nn5CFm">市况（史册口径）</div>
-      <div class="metric-value" data-page-node-id="QtXEQKXASoAEWAO71i1vUP">
-        <span class="metric-sub-mono up" id="mUp" data-page-node-id="SivdVHVHF0B5BDfCGqhXTa">涨 3</span>
-        <span class="metric-sub-mono down" id="mDown" data-page-node-id="cbMhtgYSZRPE6dVQ4S6lSN">跌 10</span>
-        <span class="metric-sub-mono" id="mFlat" style="color:#5A6472;" data-page-node-id="O0xtkZ60ZEw6n5IiHETfHV">平 0</span>
-      </div>
+    <div class="summary-divider"></div>
+    <div class="metric">
+      <div class="metric-label">大事记收录</div>
+      <div class="metric-value"><span class="metric-num" id="mEvents">--</span></div>
     </div>
   </section>
 
-  <!-- ==================== 焦点行情区：大宋王朝 SONG.960 ==================== -->
-  <section class="featured" data-page-node-id="xMkiDHElC2jI7zPWxeyFlt">
-    <div class="featured-card" data-page-node-id="EHZku7K1SzGLU6bYsWyDSr">
-      <div class="breadcrumb" data-page-node-id="zUAhCUnoAR0mULsGGixSoc">
-        <span class="crumb" data-page-node-id="KMhvQDF7MMV1HKiEZKkJfG">王朝行情</span><span class="sep" data-page-node-id="ZJvrOQ4MXgugdhExqBDPYb">›</span>
-        <span class="crumb" data-page-node-id="LNzCBGMMrAmjLXMCTaMay0">全部王朝</span><span class="sep" data-page-node-id="vUsDhNJNr00RZ6RoTMj687">›</span>
-        <span class="current" id="fBread" data-page-node-id="uXIUFQkmnthnO8fCl2oGSL">大宋王朝 SONG.960</span>
+  <!-- ==================== 焦点行情区 ==================== -->
+  <section class="featured" id="featured">
+    <div class="featured-info">
+      <div class="featured-label">焦点行情 · FEATURED</div>
+      <div class="name-row">
+        <span class="dynasty-name" id="fName">大宋王朝</span>
+        <span class="code-badge" id="fCode">DASONG.960</span>
+        <span class="status-tag up" id="fStatus">上涨</span>
       </div>
-      <div class="featured-head" data-page-node-id="cGFzbVgZHFpI3cVtDYMi4K" id="featuredHead">
-        <div class="name-group" data-page-node-id="PZk8PeyYYMNesmuIPqzUwo">
-          <span class="dynasty-name" id="fName" data-page-node-id="wojQAS0SIOrUqJ6b1O6RV5">大宋王朝</span>
-          <span class="code-badge" id="fCode" data-page-node-id="M8DlJWbeddyuhXAiNQQTWg">SONG.960</span>
-          <span class="status-tag" id="fStatus" data-page-node-id="K0MNvyeBRqqlxTAP2EDZ2z">已退市</span>
-        </div>
-        <div class="price-group" data-page-node-id="9qEHHB1QliHKHkh5bWgTCC">
-          <span class="price-now down" id="fPrice" data-page-node-id="rjoeop4T2Mc6TgjDBepy0m">55.00</span>
-          <span class="price-chg down" id="fChg" data-page-node-id="rHG3ntRam3OMspk1dlD9nz">终值 -45.00%</span>
-        </div>
+      <div class="price-row">
+        <span class="price-now up" id="fPrice">286.45</span>
+        <span class="price-chg up" id="fChg">+4.62%</span>
       </div>
-      <svg class="kline" id="fKline" width="860" height="340" viewBox="0 0 860 340" fill="none" xmlns="http://www.w3.org/2000/svg" data-page-node-id="z1Lw1EzyNU9s698kCuy5nH">
-        <line x1="38" y1="90" x2="815" y2="90" stroke="#1B212B" stroke-width="1" data-page-node-id="Cdf1RVZ1pAPREZDQavvGkE"/>
-        <line x1="38" y1="150" x2="815" y2="150" stroke="#1B212B" stroke-width="1" data-page-node-id="h3deDupomHstnbmUVC1qEv"/>
-        <line x1="38" y1="210" x2="815" y2="210" stroke="#1B212B" stroke-width="1" data-page-node-id="qrNk57phVWJe7iHrZ5z83s"/>
-        <line x1="38" y1="270" x2="815" y2="270" stroke="#D9A441" stroke-width="1" stroke-dasharray="4 4" opacity="0.45" data-page-node-id="J0yCcaxLaxRNj0GE5DPuFF"/>
-        <text x="6" y="94" font-size="11" fill="#5A6472" data-page-node-id="BNSPCqfsasPHaND94Jtw0Q">700</text>
-        <text x="6" y="154" font-size="11" fill="#5A6472" data-page-node-id="r44a4mPLfDEYliLVt5gSoj">500</text>
-        <text x="6" y="214" font-size="11" fill="#5A6472" data-page-node-id="kaRCzVIr9HGJiFAPCaJ523">300</text>
-        <text x="38" y="324" font-size="11" fill="#5A6472" data-page-node-id="YgyaDgAbIjk9SeURZzAFvj">960 · 建隆</text>
-        <text x="269" y="324" font-size="11" fill="#5A6472" text-anchor="middle" data-page-node-id="Jbpo7GNddEmGoayVWP4QMW">1060</text>
-        <text x="521" y="324" font-size="11" fill="#5A6472" text-anchor="middle" data-page-node-id="kk1OrJPFV1bxhtRdRJUtcA">1127 · 靖康</text>
-        <text x="766" y="324" font-size="11" fill="#5A6472" data-page-node-id="Cxi42XHPLk3MW9ZC68bToo">1279 · 祥兴</text>
-        <path d="M38 271 C 130 250 230 232 330 222 S 420 214 460 228 S 510 262 550 252 S 630 244 690 246 S 790 260 815 286" stroke="#9AA4B2" stroke-width="2" opacity="0.4" fill="none" data-page-node-id="7d1wzaNzZoTMPKivBkd3D3"/>
-        <line x1="38" y1="204" x2="38" y2="260" stroke="#D9A441" stroke-width="1" opacity="0.7" data-page-node-id="0BWri8hzCtAWjoC3ynxgGg"/>
-        <text x="20" y="196" font-size="12" fill="#D9A441" data-page-node-id="UoCvtL33isgucVFKCIeY7E">陈桥兵变 · IPO上市</text>
-        <line x1="521" y1="138" x2="521" y2="235" stroke="#7C8DB5" stroke-width="1" opacity="0.7" data-page-node-id="YNKBJnivK5SXikh0vOppDG"/>
-        <text x="430" y="130" font-size="12" fill="#7C8DB5" data-page-node-id="J6pJG52fNRWOQhB2cj8V6q">靖康之难 · 一字跌停</text>
-        <line x1="815" y1="64" x2="815" y2="276" stroke="#F6465D" stroke-width="1" opacity="0.7" data-page-node-id="FLR7atFjZf7QbzFJ2o4jCD"/>
-        <text x="648" y="56" font-size="12" fill="#F6465D" data-page-node-id="02wWyIpN8KWLWQkX3c9SWO">崖山海战 · 清盘退市</text>
-        <text x="716" y="229" font-size="11" fill="#D9A441" opacity="0.9" data-page-node-id="EK5VlHgB0n88UzV2wb7UKk">发行价 100</text>
-        <line x1="38" y1="264" x2="38" y2="272" stroke="#F6465D" data-page-node-id="xAqO1DUBdr3CErqVzWvzMa"/>
-        <rect x="32" y="265.5" width="12" height="4.5" rx="1" fill="#F6465D" data-page-node-id="a3XaMwQyxvgvGviL66L8bE"/>
-        <line x1="59" y1="257.5" x2="59" y2="263" stroke="#F6465D" data-page-node-id="L8A8xR0MrC8EgA8IOTAaBK"/>
-        <rect x="53" y="259.5" width="12" height="6" rx="1" fill="#F6465D" data-page-node-id="W7oMovBfNljSrwO3wm9IxV"/>
-        <line x1="80" y1="256" x2="80" y2="263" stroke="#2EBD85" data-page-node-id="TAo4elTvQZZ6TxDyWwCoer"/>
-        <rect x="74" y="259.5" width="12" height="3" rx="1" fill="#2EBD85" data-page-node-id="HEcGnFBnW0i5QrKBYyBbPu"/>
-        <line x1="101" y1="252" x2="101" y2="258.5" stroke="#F6465D" data-page-node-id="959ffToE6RhTBCy6tnlycb"/>
-        <rect x="95" y="255" width="12" height="6.6" rx="1" fill="#F6465D" data-page-node-id="nvKR3EMiTkAhhWeEqzfmvF"/>
-        <line x1="122" y1="245" x2="122" y2="251.5" stroke="#F6465D" data-page-node-id="cN7iOBoWH13sAHraNG5gU0"/>
-        <rect x="116" y="248.4" width="12" height="6.6" rx="1" fill="#F6465D" data-page-node-id="ABWHvje6h4kU04rp8VQA4w"/>
-        <line x1="143" y1="244" x2="143" y2="252" stroke="#2EBD85" data-page-node-id="7W0pYUMPhPgCiU2YorSK0q"/>
-        <rect x="137" y="248.4" width="12" height="3" rx="1" fill="#2EBD85" data-page-node-id="dvux47wTpr9DyE60xIrzH5"/>
-        <line x1="164" y1="239.5" x2="164" y2="246.5" stroke="#F6465D" data-page-node-id="2Ub3N6XlgYY8wPMz9qtypD"/>
-        <rect x="158" y="243" width="12" height="7.5" rx="1" fill="#F6465D" data-page-node-id="tueVS6mokntfnFyvKvCsvv"/>
-        <line x1="185" y1="233.5" x2="185" y2="240.5" stroke="#F6465D" data-page-node-id="5FHLHO4pGpYgeoURiCY30E"/>
-        <rect x="179" y="237" width="12" height="6" rx="1" fill="#F6465D" data-page-node-id="ls5N1ivenMw32S9IKGypof"/>
-        <line x1="206" y1="233" x2="206" y2="240" stroke="#2EBD85" data-page-node-id="12GHcW5MXeTEhB7xTOsGBR"/>
-        <rect x="200" y="237" width="12" height="3.6" rx="1" fill="#2EBD85" data-page-node-id="SaZLAV08tH7TORuj510sEq"/>
-        <line x1="227" y1="229" x2="227" y2="236" stroke="#F6465D" data-page-node-id="136iYHcRxu7X6HSQQnDDhA"/>
-        <rect x="221" y="232.5" width="12" height="8.1" rx="1" fill="#F6465D" data-page-node-id="NXGCobG681fYX5Y4R8NPZM"/>
-        <line x1="248" y1="223" x2="248" y2="230" stroke="#F6465D" data-page-node-id="rIcYPCIEetSD1GgA036xFE"/>
-        <rect x="242" y="226.5" width="12" height="6" rx="1" fill="#F6465D" data-page-node-id="WxSMJj6KDfCYgIO9LWvd7C"/>
-        <line x1="269" y1="222" x2="269" y2="230.5" stroke="#2EBD85" data-page-node-id="OSoVBG7myvzqQTPi9YzPNd"/>
-        <rect x="263" y="226.5" width="12" height="4.5" rx="1" fill="#2EBD85" data-page-node-id="CloCduXHm1qCfRSPDmeZzV"/>
-        <line x1="290" y1="220" x2="290" y2="227.5" stroke="#F6465D" data-page-node-id="g5rBVvN4mNOwJaCA4en6Cz"/>
-        <rect x="284" y="223.5" width="12" height="7.5" rx="1" fill="#F6465D" data-page-node-id="mBL7VTDSKJKPhwF4PPC3wo"/>
-        <line x1="311" y1="224" x2="311" y2="231.5" stroke="#2EBD85" data-page-node-id="AV8ygJW3NGJPxjlAOwtrD2"/>
-        <rect x="305" y="228" width="12" height="4.5" rx="1" fill="#2EBD85" data-page-node-id="kvv9qlhxHEIXtdypKJk8gq"/>
-        <line x1="332" y1="217" x2="332" y2="224.5" stroke="#F6465D" data-page-node-id="1NzRZmtzI25BBdKtVL8bPs"/>
-        <rect x="326" y="220.5" width="12" height="7.5" rx="1" fill="#F6465D" data-page-node-id="NijHjXHHJ4BwzHNBQn3wrN"/>
-        <line x1="353" y1="221" x2="353" y2="229" stroke="#2EBD85" data-page-node-id="gCNlfKNS2FadJt97agTcTt"/>
-        <rect x="347" y="225" width="12" height="4.5" rx="1" fill="#2EBD85" data-page-node-id="AIJhlF1oANJYJaHH8I4oRV"/>
-        <line x1="374" y1="212" x2="374" y2="219.5" stroke="#F6465D" data-page-node-id="0uThQqlEIBgKjse9yB2LHR"/>
-        <rect x="368" y="216" width="12" height="9" rx="1" fill="#F6465D" data-page-node-id="lkbTJuADAz7Y3HbpcT3Dcm"/>
-        <line x1="395" y1="206.5" x2="395" y2="214" stroke="#F6465D" data-page-node-id="eIYvy08lFxn6aaiFpfI1EI"/>
-        <rect x="389" y="210" width="12" height="6" rx="1" fill="#F6465D" data-page-node-id="zoXNEghttB9agseSUBBnV3"/>
-        <line x1="416" y1="213" x2="416" y2="221.5" stroke="#2EBD85" data-page-node-id="86Jo5sq6sIQ0c2vC3LBvBW"/>
-        <rect x="410" y="217.5" width="12" height="7.5" rx="1" fill="#2EBD85" data-page-node-id="dAISHv2UXiCvN1x6KWxYJ0"/>
-        <line x1="437" y1="208" x2="437" y2="215.5" stroke="#F6465D" data-page-node-id="jrgLfNqguGoBhFxVXv6OE8"/>
-        <rect x="431" y="211.5" width="12" height="6" rx="1" fill="#F6465D" data-page-node-id="unsmcDvQEb9LlpwHC6iQOT"/>
-        <line x1="458" y1="203" x2="458" y2="211" stroke="#F6465D" data-page-node-id="KB2wmFQLijfltenaqxjiVk"/>
-        <rect x="452" y="207" width="12" height="4.5" rx="1" fill="#F6465D" data-page-node-id="GAVKGzErMeZl23nQmMNFuB"/>
-        <line x1="479" y1="218" x2="479" y2="236" stroke="#2EBD85" data-page-node-id="7FpuBtOewoltCjZIsuR62R"/>
-        <rect x="473" y="222" width="12" height="15" rx="1" fill="#2EBD85" data-page-node-id="L5QjW5gEVnv44kHbBUXecr"/>
-        <line x1="500" y1="210" x2="500" y2="220" stroke="#F6465D" data-page-node-id="xyZs7cV0tSUKGd4c3SRb2o"/>
-        <rect x="494" y="214.5" width="12" height="7.5" rx="1" fill="#F6465D" data-page-node-id="1jM9BdK8oJu37yQE7ie4oL"/>
-        <line x1="521" y1="239" x2="521" y2="253" stroke="#2EBD85" data-page-node-id="Wef1W1AZCNUgKCDQNV3wU8"/>
-        <rect x="515" y="246" width="12" height="31.5" rx="1" fill="#2EBD85" data-page-node-id="rMQxB7p4DmnF9DidFneJ2I"/>
-        <line x1="542" y1="262" x2="542" y2="275" stroke="#2EBD85" data-page-node-id="XkI7IgcDZstFQqrZULnNEB"/>
-        <rect x="536" y="267" width="12" height="21" rx="1" fill="#2EBD85" data-page-node-id="cFV9I33OrvhK1zJlOQ7OKu"/>
-        <line x1="563" y1="249" x2="563" y2="270.5" stroke="#F6465D" data-page-node-id="LewWcChjomo1ZEga6F658B"/>
-        <rect x="557" y="255" width="12" height="12" rx="1" fill="#F6465D" data-page-node-id="xxGQU3a5Mc6BBpEIGwgBcT"/>
-        <line x1="584" y1="243" x2="584" y2="252" stroke="#F6465D" data-page-node-id="mvxoqqIojMrP5zJTTRBV0c"/>
-        <rect x="578" y="247.5" width="12" height="7.5" rx="1" fill="#F6465D" data-page-node-id="K5q5Op4UJ55TlW5XkWDRqi"/>
-        <line x1="605" y1="247" x2="605" y2="257" stroke="#2EBD85" data-page-node-id="5sNVtOB3nnD2FOxGD4v3eD"/>
-        <rect x="599" y="252" width="12" height="4.5" rx="1" fill="#2EBD85" data-page-node-id="e7IgquVxdafuHHgJYmDgw7"/>
-        <line x1="626" y1="240" x2="626" y2="250" stroke="#F6465D" data-page-node-id="yh74svKSFupKAlhbbXqi8W"/>
-        <rect x="620" y="244.5" width="12" height="7.5" rx="1" fill="#F6465D" data-page-node-id="wrWjMvc1dpXMuUEl0b9jrO"/>
-        <line x1="647" y1="234.5" x2="647" y2="242" stroke="#F6465D" data-page-node-id="1hECh9pBw2fJj2Sd1zpWrk"/>
-        <rect x="641" y="238.5" width="12" height="6" rx="1" fill="#F6465D" data-page-node-id="D995ZXmUKQWz73KQl64LFR"/>
-        <line x1="668" y1="238" x2="668" y2="248" stroke="#2EBD85" data-page-node-id="OYYtVMpbNggVXxX491Vl3c"/>
-        <rect x="662" y="243" width="12" height="4.5" rx="1" fill="#2EBD85" data-page-node-id="tjKNCtTJHFgd67vrXKWYKV"/>
-        <line x1="689" y1="232" x2="689" y2="241" stroke="#F6465D" data-page-node-id="VtyyrCcTcQFWoMkevXb2Gu"/>
-        <rect x="683" y="237" width="12" height="6" rx="1" fill="#F6465D" data-page-node-id="Fjn4wM7tPaTUhxTjErLPy1"/>
-        <line x1="710" y1="236" x2="710" y2="246.5" stroke="#2EBD85" data-page-node-id="p3UCbbVIAVBE9sbLLBqyfi"/>
-        <rect x="704" y="241.5" width="12" height="4.5" rx="1" fill="#2EBD85" data-page-node-id="Eu3EenfOVIr42IbD0HpxdA"/>
-        <line x1="731" y1="230.5" x2="731" y2="240" stroke="#F6465D" data-page-node-id="iCoI309fKQyBP2GDQmgzeH"/>
-        <rect x="725" y="235.5" width="12" height="6" rx="1" fill="#F6465D" data-page-node-id="Bw0qsDNc7Be2TcFFWsqDuG"/>
-        <line x1="752" y1="243" x2="752" y2="258" stroke="#2EBD85" data-page-node-id="w8sfn8DJwLltBCr3PleDKq"/>
-        <rect x="746" y="249" width="12" height="13.5" rx="1" fill="#2EBD85" data-page-node-id="DqYqbCOoxTIcBdNHiRRMp8"/>
-        <line x1="773" y1="252" x2="773" y2="266" stroke="#2EBD85" data-page-node-id="i6Z7DsWCyDXpWmVmr2kPSV"/>
-        <rect x="767" y="258" width="12" height="9" rx="1" fill="#2EBD85" data-page-node-id="pubN1Knqe921PZtDLLfkTq"/>
-        <line x1="794" y1="263" x2="794" y2="278.5" stroke="#2EBD85" data-page-node-id="XwXR3huceuJQbrnuwWP9nd"/>
-        <rect x="788" y="270" width="12" height="12" rx="1" fill="#2EBD85" data-page-node-id="VyeQUHw0eoErYQTsn7KbOo"/>
-        <line x1="815" y1="279.5" x2="815" y2="291" stroke="#2EBD85" data-page-node-id="T2uTuuLHonUDsWnmw6NtrJ"/>
-        <rect x="809" y="283.5" width="12" height="13.5" rx="1" fill="#2EBD85" data-page-node-id="akY2MKAZbbEldGJKsi5m6x"/>
-      </svg>
+      <p class="featured-desc" id="fDesc">两宋三百二十年：经济、科技与市井文化的历史级主升浪。靖康之变造成最深回撤，此后进入南宋震荡市。</p>
+      <div><button class="btn btn-primary" id="fCta">查看详情</button></div>
     </div>
-
-    <aside class="side-panel" data-page-node-id="eQaTmjFk2gimiMvYmBfk6H">
-      <div class="panel-title" data-page-node-id="ceybLSWTDNAdGAr4ZtEo9l">关键数据</div>
-      <div class="panel-divider" data-page-node-id="7ofUwVY8tHgTEz9cUA3tps"></div>
-      <div class="stat-row" data-page-node-id="ERakTuroUuvAwh8QyGv9h2"><span class="stat-label" id="sIssueLabel" data-page-node-id="jlBMw4TH8wG9uCAl6tchJL">发行价（960）</span><span class="stat-value" id="sIssue" data-page-node-id="GpAF65a0OPplOGOtomCBFa">100.00</span></div>
-      <div class="stat-row" data-page-node-id="Ay1Iriqc9lPAPdvtW7AIvc"><span class="stat-label" id="sHighLabel" data-page-node-id="COLuexYAFZHGdkk5R14gMk">历史最高（1021）</span><span class="stat-value up" id="sHigh" data-page-node-id="Q3SVCDxfoZDqJwaMOgjsDO">318.42</span></div>
-      <div class="stat-row" data-page-node-id="U3FtcGTS5Wax01ZlygdsCE"><span class="stat-label" id="sDurLabel" data-page-node-id="yjFe88MVClj6dtI18w6ni5">存续时间</span><span class="stat-value" id="sDur" data-page-node-id="nd7WRFasP496BMsyOMfEro">319 年</span></div>
-      <div class="stat-row" data-page-node-id="TBxjzGqeHSZmjerzS4DLvX"><span class="stat-label" id="sLastLabel" data-page-node-id="5ER3ZYoc0OB5QNztOP0ggY">终值（1279）</span><span class="stat-value down" id="sLast" data-page-node-id="JSvr4OpTzg15pVe1hvgfDR">55.00</span></div>
-      <div class="stat-row" data-page-node-id="FB6TufbcjQ82XJS7NSvHCh"><span class="stat-label" data-page-node-id="CQgKSxaBUtlRNbmPAjj5Kw">最大回撤</span><span class="stat-value down" id="sDraw" data-page-node-id="1Ky917XMd96oxm8ancNXHz">-82.72%</span></div>
-      <div class="stat-row" data-page-node-id="97ZeMDiCP4KfLg559dMfu3"><span class="stat-label" data-page-node-id="JERECNYvIM38Q5KhmCN11A">累计收益</span><span class="stat-value down" id="sRet" data-page-node-id="J9ZUug66LWiu0oYhw2JVbN">-45.00%</span></div>
-      <div class="panel-divider" data-page-node-id="Mo4bGt3mGCrZiiEzD5FGoo"></div>
-      <div class="panel-title" data-page-node-id="oxKz0nqvUZ3B0PvIBqq9NK">大事记</div>
-      <div id="fEventRows">
-      <div class="event-row" data-page-node-id="8CUfq2B5t8CExBMASn3DmP">
-        <span class="event-year" data-page-node-id="XYacp6dOB46wXWsSFR8E9z">960</span>
-        <span class="event-name" data-page-node-id="YHdrSxfggCnsTZle1xYJah">陈桥兵变 · IPO上市</span>
-        <span class="event-impact up" data-page-node-id="K1JVWZ5Fp5o3xW0b8obbDv">+15.00%</span>
-      </div>
-      <div class="event-row" data-page-node-id="rgF1B57d66Fu3YrABM5TFc">
-        <span class="event-year" data-page-node-id="LrKeoNACO0paQQt4CCc3m7">1004</span>
-        <span class="event-name" data-page-node-id="aPPxgaRrgBUdVCbHtHd1mB">澶渊之盟 · 市场企稳涨停</span>
-        <span class="event-impact up" data-page-node-id="gCvmmIDxUW1ndbYiaxm7RH">+10.53%</span>
-      </div>
-      <div class="event-row" data-page-node-id="bFXnTtnvmwwsFqyAEZ0R5h">
-        <span class="event-year" data-page-node-id="d7aW1BYyZYZ4EBaGqE70jJ">1127</span>
-        <span class="event-name" data-page-node-id="QZiOsuHlrAG9nxG3zO3xMO">靖康之难 · 北宋崩盘</span>
-        <span class="event-impact down" data-page-node-id="6sGJxp4kMEcOHdfVXopwOS">-36.84%</span>
-      </div>
-      <div class="event-row" data-page-node-id="4tYyGbkGadHHKwB2sqXO2T">
-        <span class="event-year" data-page-node-id="yp8iguTUZyTHVrPW3X7PNY">1279</span>
-        <span class="event-name" data-page-node-id="z2pFAq7YmuBxpaCXm6VRXN">崖山海战 · 清盘退市</span>
-        <span class="event-impact down" data-page-node-id="zijlPHEIYxzMZeqRxx7FHR">-80.95%</span>
-      </div>
-      </div>
-    </aside>
+    <div class="featured-chart">
+      <svg id="fKline" width="800" height="360" viewBox="0 0 800 360" fill="none" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
   </section>
 
-  <!-- ==================== 王朝列表区 ==================== -->
-  <section class="list-section" data-page-node-id="91XUgynCcYXoF904mSKL0K">
-    <div class="section-head" data-page-node-id="esYF9s9jNUFXaeZ5WtpEwF">
-      <span class="section-title" data-page-node-id="t5zgKyVM9VFjNcrGsSVItJ">全部王朝</span>
-      <span class="section-sub" id="subCount" data-page-node-id="EGRWn6pG7mpu4eLNo1jNqU">按上市时间排序 · 发行价统一为 100</span>
+  <!-- ==================== 王朝行情列表 ==================== -->
+  <section class="list-section" id="listSection">
+    <div class="section-head">
+      <div class="section-title-wrap">
+        <span class="section-title">王朝行情</span>
+        <span class="section-sub" id="subCount">覆盖秦至清统一王朝标的，按国运综合指数定价</span>
+      </div>
+      <div class="chips" id="chips">
+        <span class="chip active" data-filter="all">全部</span>
+        <span class="chip" data-filter="up">上涨</span>
+        <span class="chip" data-filter="down">下跌</span>
+        <span class="chip" data-filter="unified">大一统</span>
+        <span class="chip" data-filter="split">分裂期</span>
+      </div>
     </div>
-    <div class="card-grid" id="cardGrid" data-page-node-id="8YBgDQLl8j3y5UkGfd2uNm">
+    <div class="card-grid" id="cardGrid">
 
       <!-- 大秦 -->
-      <div class="dynasty-card" data-page-node-id="EJR2Ph6yB0krEVLdNFvxwt">
-        <div class="card-head" data-page-node-id="moCDfmBY3jQXtIXz69eWG8">
-          <div class="card-name-group" data-page-node-id="wmXIpMBrUZAwImu83KvH8X">
-            <span class="card-name" data-page-node-id="2UFSBjJXYOfJAgCehTJPgv">大秦王朝</span>
-            <span class="card-meta" data-page-node-id="cFwwDIUi6yVpghtd20ya8k">QIN.221 · 前221—前207 · 存续15年</span>
+      <div class="dynasty-card" data-code="DAQIN.221" data-trend="down" data-group="unified" style="animation-delay:0ms">
+        <div class="card-head">
+          <div class="card-name-group">
+            <span class="card-name">大秦王朝</span>
+            <span class="card-meta">DAQIN.221 · 前221—前207 · 存续15年</span>
           </div>
-          <span class="status-tag" data-page-node-id="0V6nICtxHvnMX3VfwpVBRj">闪电退市</span>
+          <span class="status-tag down">下跌</span>
         </div>
-        <div class="card-price" data-page-node-id="rWAYtFyDDJAD1HzGSwlros">
-          <span class="card-price-label" data-page-node-id="q7xqLnR6pfnICQErNSmQFd">终值</span>
-          <span class="card-price-num down" data-page-node-id="TZpfLFuYFyzgEkeC7Fg0Hi">40.00</span>
-          <span class="card-price-chg down" data-page-node-id="oqdG1ABCdu7N63vGHfc9yH">-96.00%</span>
+        <div class="card-price">
+          <span class="card-price-num down">40.00</span>
+          <span class="card-price-chg down">-60.00%</span>
         </div>
-        <svg class="kline" width="408" height="110" viewBox="0 0 408 110" fill="none" xmlns="http://www.w3.org/2000/svg" data-page-node-id="kdPTK4PI90x4WizGRKIVxJ">
-          <line x1="55" y1="85" x2="55" y2="100" stroke="#F6465D" data-page-node-id="xG16utAdtyVXu07px6ryDT"/><rect x="48" y="89.2" width="14" height="7.8" rx="1" fill="#F6465D" data-page-node-id="bNXnGEBJ7B3THP6i8tJp9b"/>
-          <line x1="82" y1="74" x2="82" y2="83" stroke="#F6465D" data-page-node-id="cqmIzWD7yQTtL4bKtVyP0L"/><rect x="75" y="78.8" width="14" height="10.4" rx="1" fill="#F6465D" data-page-node-id="g4fVSQ3Uv7B1xH8mdD0Cct"/>
-          <line x1="109" y1="58" x2="109" y2="69" stroke="#F6465D" data-page-node-id="BLlrUfCb5ECabPAZVurHtD"/><rect x="102" y="63.2" width="14" height="15.6" rx="1" fill="#F6465D" data-page-node-id="P8oR0eXJpAtWgN1bPPeyPu"/>
-          <line x1="136" y1="37" x2="136" y2="66" stroke="#F6465D" data-page-node-id="akSlLJUKikKHHAfDYO9bEA"/><rect x="129" y="42.4" width="14" height="20.8" rx="1" fill="#F6465D" data-page-node-id="1bjuLus0Iy28kCR6KvDEld"/>
-          <line x1="163" y1="21" x2="163" y2="45" stroke="#F6465D" data-page-node-id="CJ8ZzRIib8sDchfXewZZ65"/><rect x="156" y="26.8" width="14" height="15.6" rx="1" fill="#F6465D" data-page-node-id="BBoummjQsq6vrGCWlEw1tG"/>
-          <line x1="190" y1="23" x2="190" y2="38" stroke="#2EBD85" data-page-node-id="RRUgIRC51sMXr05O4ztunI"/><rect x="183" y="26.8" width="14" height="7.8" rx="1" fill="#2EBD85" data-page-node-id="n373I6FVuP9JbCUTfOY33X"/>
-          <line x1="217" y1="20" x2="217" y2="38" stroke="#F6465D" data-page-node-id="OYVeSbycOPHQ3dihpjgeA4"/><rect x="210" y="24.2" width="14" height="10.4" rx="1" fill="#F6465D" data-page-node-id="rtSJuYPLtv5FI0aGhiAnvL"/>
-          <line x1="244" y1="21" x2="244" y2="51" stroke="#2EBD85" data-page-node-id="pS6gbDBHOC9R7a3bYNMUuz"/><rect x="237" y="24.2" width="14" height="20.8" rx="1" fill="#2EBD85" data-page-node-id="xUsmKBBiaUZFG7u3Ub2kXi"/>
-          <line x1="271" y1="39" x2="271" y2="63" stroke="#2EBD85" data-page-node-id="bXgAaOCZauiO2LyRY7jARL"/><rect x="264" y="42.4" width="14" height="15.6" rx="1" fill="#2EBD85" data-page-node-id="Z9L30eu7RvQApn7qF3noU3"/>
-          <line x1="298" y1="56" x2="298" y2="85" stroke="#2EBD85" data-page-node-id="0QpOa9aGLoP8Q5QT0GkG4z"/><rect x="291" y="60.6" width="14" height="18.2" rx="1" fill="#2EBD85" data-page-node-id="H200ZwKFPUlMO9UXqKnKic"/>
-          <line x1="325" y1="73" x2="325" y2="100" stroke="#2EBD85" data-page-node-id="OnZKGpmVhGDWyvqTbhAfg7"/><rect x="318" y="78.8" width="14" height="15.6" rx="1" fill="#2EBD85" data-page-node-id="vvbmjBSgc2sCNUucrI0BJO"/>
-          <line x1="352" y1="90" x2="352" y2="108" stroke="#2EBD85" data-page-node-id="n8NfsBM5L0ECPFFAA2Jjb4"/><rect x="345" y="94.4" width="14" height="10.4" rx="1" fill="#2EBD85" data-page-node-id="WFNF0mo5aAm2VDwmCzCtRg"/>
-        </svg>
+        <div class="card-spark"><svg width="386" height="52" viewBox="0 0 386 52" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.0 28.6 L49.5 20.9 L97.0 12.5 L144.5 6.0 L192.0 10.5 L239.5 22.2 L287.0 35.1 L334.5 42.8 L382.0 48.0 L382.0 52 L2.0 52 Z" fill="#2EBD85" fill-opacity="0.08"/><polyline points="2.0,28.6 49.5,20.9 97.0,12.5 144.5,6.0 192.0,10.5 239.5,22.2 287.0,35.1 334.5,42.8 382.0,48.0" stroke="#2EBD85" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg></div>
       </div>
 
       <!-- 大汉 -->
-      <div class="dynasty-card" data-page-node-id="kSnjazGqFktz4FVBWCilm7">
-        <div class="card-head" data-page-node-id="lM2HOOGJQFa0zTtdfB6Zu0">
-          <div class="card-name-group" data-page-node-id="dfLncCRH08FLm2Gab7iv3J">
-            <span class="card-name" data-page-node-id="jz2cFqe2esFYEzpy3DnrYd">大汉王朝</span>
-            <span class="card-meta" data-page-node-id="cFhxZp2AvLYjPJcMZ4nYCN">HAN.202 · 前202—220 · 存续422年</span>
+      <div class="dynasty-card" data-code="DAHAN.202" data-trend="up" data-group="unified" style="animation-delay:70ms">
+        <div class="card-head">
+          <div class="card-name-group">
+            <span class="card-name">大汉王朝</span>
+            <span class="card-meta">DAHAN.202 · 前202—220 · 存续422年</span>
           </div>
-          <span class="status-tag" data-page-node-id="Hxy6EAgwmy6NLdt9lhulED">已退市</span>
+          <span class="status-tag up">上涨</span>
         </div>
-        <div class="card-price" data-page-node-id="W5ED83uocJYdcKcs5HHhvy">
-          <span class="card-price-label" data-page-node-id="0EnQYdD4mzW2bwKuCiKB4T">终值</span>
-          <span class="card-price-num up" data-page-node-id="QxATyoo2DJVyzMXrTOJolM">180.00</span>
-          <span class="card-price-chg up" data-page-node-id="AqpmpvmOY1GADEF0Rdf5BY">+80.00%</span>
+        <div class="card-price">
+          <span class="card-price-num up">180.00</span>
+          <span class="card-price-chg up">+80.00%</span>
         </div>
-        <svg class="kline" width="408" height="110" viewBox="0 0 408 110" fill="none" xmlns="http://www.w3.org/2000/svg" data-page-node-id="551eBmhUund16EvHccfM8k">
-          <line x1="28" y1="75" x2="28" y2="92" stroke="#F6465D" data-page-node-id="Sv3jfAuqpIHRuSyuOMhCnA"/><rect x="21" y="78.8" width="14" height="7.2" rx="1" fill="#F6465D" data-page-node-id="V3HUNvhphoAHnCwvsA4V1N"/>
-          <line x1="55" y1="74" x2="55" y2="86" stroke="#2EBD85" data-page-node-id="omTiBTyBHkgcDS0shqUnW4"/><rect x="48" y="78.8" width="14" height="3" rx="1" fill="#2EBD85" data-page-node-id="Cy66oaq0pDaWR92EKoI9x1"/>
-          <line x1="82" y1="65" x2="82" y2="87" stroke="#F6465D" data-page-node-id="sffUEY3C6vQg3B73Z1b7pd"/><rect x="75" y="69.2" width="14" height="12" rx="1" fill="#F6465D" data-page-node-id="KVTd4lnP91jrmEVrAyHk7C"/>
-          <line x1="109" y1="55" x2="109" y2="75" stroke="#F6465D" data-page-node-id="2nAq7tEeGb8QKdeHYVWNbd"/><rect x="102" y="59.6" width="14" height="9.6" rx="1" fill="#F6465D" data-page-node-id="1ybyhMA7N5CB9YiTml2UUV"/>
-          <line x1="136" y1="54" x2="136" y2="68" stroke="#2EBD85" data-page-node-id="sHi50XieHbeNTDqCbWc4JQ"/><rect x="129" y="59.6" width="14" height="3" rx="1" fill="#2EBD85" data-page-node-id="JtGaoyfnGuIFE1ut3JefJI"/>
-          <line x1="163" y1="43" x2="163" y2="68" stroke="#F6465D" data-page-node-id="SIVdQKLn3xaxfcCSaKMCJZ"/><rect x="156" y="47.6" width="14" height="14.4" rx="1" fill="#F6465D" data-page-node-id="M3Eb0Ro8Zdl3ag2fQvuqZt"/>
-          <line x1="190" y1="34" x2="190" y2="54" stroke="#F6465D" data-page-node-id="bAhPd5osX1tYmwBAqf4w93"/><rect x="183" y="38" width="14" height="9.6" rx="1" fill="#F6465D" data-page-node-id="F6wypAMiX8uCttwNdwyCZr"/>
-          <line x1="217" y1="32" x2="217" y2="52" stroke="#2EBD85" data-page-node-id="kitCEv8jPGFC9yBR5zMGQK"/><rect x="210" y="38" width="14" height="7.2" rx="1" fill="#2EBD85" data-page-node-id="AsaaUjA8HdHEvtltJfpW1Q"/>
-          <line x1="244" y1="29" x2="244" y2="52" stroke="#F6465D" data-page-node-id="Cg7edXAdFk2wg7AlxW2Uur"/><rect x="237" y="33.2" width="14" height="12" rx="1" fill="#F6465D" data-page-node-id="lW1287Ir3DdQg0cMVTB8zp"/>
-          <line x1="271" y1="28" x2="271" y2="44" stroke="#2EBD85" data-page-node-id="xLGMQh48ZpTZkFivVy9Gi6"/><rect x="264" y="33.2" width="14" height="4.8" rx="1" fill="#2EBD85" data-page-node-id="BkuKSg7NEtR3vWMcAa1Gxu"/>
-          <line x1="298" y1="23" x2="298" y2="44" stroke="#F6465D" data-page-node-id="f3WvpH6gIlmlw98hFUp9Vu"/><rect x="291" y="28.4" width="14" height="9.6" rx="1" fill="#F6465D" data-page-node-id="Je17tOzLUvwP9qi0E9hFoG"/>
-          <line x1="325" y1="23" x2="325" y2="42" stroke="#2EBD85" data-page-node-id="VjzomrpxmKezMi4QwAgOca"/><rect x="318" y="28.4" width="14" height="7.2" rx="1" fill="#2EBD85" data-page-node-id="XaQ4SomTFLxfs3kssSLBCg"/>
-          <line x1="352" y1="30" x2="352" y2="49" stroke="#2EBD85" data-page-node-id="NUT26pDB48y19nhBpKbGNo"/><rect x="345" y="35.6" width="14" height="7.2" rx="1" fill="#2EBD85" data-page-node-id="YNlP4Eap9gvtFyJWF0ytBD"/>
-          <line x1="379" y1="38" x2="379" y2="73" stroke="#2EBD85" data-page-node-id="YFA0ljMedAz0E6oZzIcFxj"/><rect x="372" y="42.8" width="14" height="24" rx="1" fill="#2EBD85" data-page-node-id="jw2cB1LouGOkVgBwxBRX7v"/>
-        </svg>
+        <div class="card-spark"><svg width="386" height="52" viewBox="0 0 386 52" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.0 45.8 L33.7 36.9 L65.3 28.1 L97.0 19.3 L128.7 23.7 L160.3 43.6 L192.0 48.0 L223.7 34.7 L255.3 21.5 L287.0 12.6 L318.7 6.0 L350.3 14.8 L382.0 8.2 L382.0 52 L2.0 52 Z" fill="#F6465D" fill-opacity="0.08"/><polyline points="2.0,45.8 33.7,36.9 65.3,28.1 97.0,19.3 128.7,23.7 160.3,43.6 192.0,48.0 223.7,34.7 255.3,21.5 287.0,12.6 318.7,6.0 350.3,14.8 382.0,8.2" stroke="#F6465D" marker-end="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg></div>
       </div>
 
       <!-- 大唐 -->
-      <div class="dynasty-card" data-page-node-id="bO4Bo3ooFMqntzYtNgEZxS">
-        <div class="card-head" data-page-node-id="N8Z5G0OrkaQGgvqnI50eCJ">
-          <div class="card-name-group" data-page-node-id="wimZ9RBSTr1nIJEOd5WHu3">
-            <span class="card-name" data-page-node-id="RaQhoroQdBrZ37sX1p65ew">大唐王朝</span>
-            <span class="card-meta" data-page-node-id="pliy4dsGHP6EwRrHSK1vx1">TANG.618 · 618—907 · 存续290年</span>
+      <div class="dynasty-card" data-code="TANG.618" data-trend="up" data-group="unified" style="animation-delay:140ms">
+        <div class="card-head">
+          <div class="card-name-group">
+            <span class="card-name">大唐王朝</span>
+            <span class="card-meta">TANG.618 · 618—907 · 存续290年</span>
           </div>
-          <span class="status-tag" data-page-node-id="YkzIPHi8sTHqUjXn98dCzT">已退市</span>
+          <span class="status-tag up">上涨</span>
         </div>
-        <div class="card-price" data-page-node-id="pteA9DgWxhAUGE03zs1A7Y">
-          <span class="card-price-label" data-page-node-id="PzVjUi2CFcu44inL9DstzK">终值</span>
-          <span class="card-price-num down" data-page-node-id="xGfHCgi6Qk4L5dqqRpxuE5">60.00</span>
-          <span class="card-price-chg down" data-page-node-id="BnRCLYuPPTYi40En8vT2AS">-40.00%</span>
+        <div class="card-price">
+          <span class="card-price-num up">160.00</span>
+          <span class="card-price-chg up">+60.00%</span>
         </div>
-        <svg class="kline" width="408" height="110" viewBox="0 0 408 110" fill="none" xmlns="http://www.w3.org/2000/svg" data-page-node-id="2Qij1TQ6NKBzcUeCSSeAnl">
-          <line x1="42" y1="69" x2="42" y2="90" stroke="#F6465D" data-page-node-id="O8JXHfzi3GO6GEb9WXLD3P"/><rect x="35" y="73.6" width="14" height="10.4" rx="1" fill="#F6465D" data-page-node-id="xCLVe2rlwEBgpl2nzbwwsQ"/>
-          <line x1="69" y1="56" x2="69" y2="80" stroke="#F6465D" data-page-node-id="ZfiEy0Rso8tJ79KjamXIkb"/><rect x="62" y="60.6" width="14" height="13" rx="1" fill="#F6465D" data-page-node-id="R7LLScd8MGGBAGaf1h7fqZ"/>
-          <line x1="96" y1="56" x2="96" y2="71" stroke="#2EBD85" data-page-node-id="CGw0nkruzdnisnDdrnWB0g"/><rect x="89" y="60.6" width="14" height="4" rx="1" fill="#2EBD85" data-page-node-id="FeMBLeAfOq1agwcFwcwHcD"/>
-          <line x1="123" y1="46" x2="123" y2="71" stroke="#F6465D" data-page-node-id="hqJGtCbYDWCLFqlCwREZU5"/><rect x="116" y="50.2" width="14" height="14.3" rx="1" fill="#F6465D" data-page-node-id="lue6R7Q0WoqFeFkZ1zHOrd"/>
-          <line x1="150" y1="33" x2="150" y2="56" stroke="#F6465D" data-page-node-id="UKm2rwpSx5JgwI0uuRtWEl"/><rect x="143" y="37.2" width="14" height="13" rx="1" fill="#F6465D" data-page-node-id="D4nDkfPJN7BhXb07ji7aWb"/>
-          <line x1="177" y1="20" x2="177" y2="44" stroke="#F6465D" data-page-node-id="Ce4vPe5PfygVKLJaL6tn1G"/><rect x="170" y="24.2" width="14" height="13" rx="1" fill="#F6465D" data-page-node-id="wlWXeGMpUKgyFq1qM2ikHp"/>
-          <line x1="204" y1="20" x2="204" y2="36" stroke="#2EBD85" data-page-node-id="2r2Zlf63gt7D9xbg4B2GlT"/><rect x="197" y="24.2" width="14" height="4.8" rx="1" fill="#2EBD85" data-page-node-id="orHgF5pL9P2H5KuiNYiTbP"/>
-          <line x1="231" y1="24" x2="231" y2="77" stroke="#2EBD85" data-page-node-id="XOLe4LVBwyIn5LhHpUu5ti"/><rect x="224" y="29.4" width="14" height="41.6" rx="1" fill="#2EBD85" data-page-node-id="XLyuan1UtCUEeuwbLJzceB"/>
-          <line x1="258" y1="55" x2="258" y2="77" stroke="#F6465D" data-page-node-id="4Myk1xGNEH7wXxNXC5Scr0"/><rect x="251" y="60.6" width="14" height="10.4" rx="1" fill="#F6465D" data-page-node-id="pMZ0vDrFk2UDHBAJMvB9Yc"/>
-          <line x1="285" y1="55" x2="285" y2="72" stroke="#2EBD85" data-page-node-id="Mnm9MpKdKqWckiVFuOsl3g"/><rect x="278" y="60.6" width="14" height="5.2" rx="1" fill="#2EBD85" data-page-node-id="tjyUpBHT8pXZdlktzSxAEs"/>
-          <line x1="312" y1="52" x2="312" y2="72" stroke="#F6465D" data-page-node-id="ZATv7kmz2k3CIvN5OMFf4T"/><rect x="305" y="58" width="14" height="7.8" rx="1" fill="#F6465D" data-page-node-id="rfEWUEG4LoHyfTlNAnS199"/>
-          <line x1="339" y1="53" x2="339" y2="85" stroke="#2EBD85" data-page-node-id="AhawUSKrOJ2JXlvf00ocrn"/><rect x="332" y="58" width="14" height="20.8" rx="1" fill="#2EBD85" data-page-node-id="ZoeYStHfzCwkANupAp0BmH"/>
-          <line x1="366" y1="73" x2="366" y2="101" stroke="#2EBD85" data-page-node-id="o4ginRcGEHnqb4Gh6467s7"/><rect x="359" y="78.8" width="14" height="15.6" rx="1" fill="#2EBD85" data-page-node-id="mVVzG8jz7GaNcCjGoWPvkx"/>
-        </svg>
+        <div class="card-spark"><svg width="386" height="52" viewBox="0 0 386 52" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.0 45.1 L36.5 34.6 L71.1 23.2 L105.6 11.7 L140.2 6.0 L174.7 13.6 L209.3 40.4 L243.8 48.0 L278.4 38.5 L312.9 42.3 L347.5 34.6 L382.0 30.8 L382.0 52 L2.0 52 Z" fill="#F6465D" fill-opacity="0.08"/><polyline points="2.0,45.1 36.5,34.6 71.1,23.2 105.6,11.7 140.2,6.0 174.7,13.6 209.3,40.4 243.8,48.0 278.4,38.5 312.9,42.3 347.5,34.6 382.0,30.8" stroke="#F6465D" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg></div>
       </div>
 
-      <!-- 大元 -->
-      <div class="dynasty-card" data-page-node-id="fFRKFRhLtC7T2qPuu0ZHvN">
-        <div class="card-head" data-page-node-id="KCsymqhdB4w3nlq8b9jeVA">
-          <div class="card-name-group" data-page-node-id="1WaHTvCVa7IPJsHmcouMoH">
-            <span class="card-name" data-page-node-id="5qd2F44hoUbbKzpLWbFGE6">大元王朝</span>
-            <span class="card-meta" data-page-node-id="k3M75G6cTVeIRNdzaEzeAj">YUAN.1271 · 1271—1368 · 存续98年</span>
+      <!-- 大宋 -->
+      <div class="dynasty-card" data-code="DASONG.960" data-trend="up" data-group="unified" style="animation-delay:210ms">
+        <div class="card-head">
+          <div class="card-name-group">
+            <span class="card-name">大宋王朝</span>
+            <span class="card-meta">DASONG.960 · 960—1279 · 存续320年</span>
           </div>
-          <span class="status-tag" data-page-node-id="3mxEzj5Iz5xD8ZV1RzEYiH">已退市</span>
+          <span class="status-tag up">上涨</span>
         </div>
-        <div class="card-price" data-page-node-id="l7Uj8qFbZ46vEON6S6FLBT">
-          <span class="card-price-label" data-page-node-id="fGEo6IAOkYVVAJFkDANOxJ">终值</span>
-          <span class="card-price-num down" data-page-node-id="LJLXk8IWzodJDOP8jpNAgN">55.00</span>
-          <span class="card-price-chg down" data-page-node-id="Bcq0d5wiaMrujOqdMC9n3Q">-45.00%</span>
+        <div class="card-price">
+          <span class="card-price-num up">286.45</span>
+          <span class="card-price-chg up">+4.62%</span>
         </div>
-        <svg class="kline" width="408" height="110" viewBox="0 0 408 110" fill="none" xmlns="http://www.w3.org/2000/svg" data-page-node-id="xxuuZCAmqmhJmGPATwZAD5">
-          <line x1="82" y1="40" x2="82" y2="81" stroke="#F6465D" data-page-node-id="H0Mk2a6JbeQfppgIhm7wx7"/><rect x="75" y="47" width="14" height="28" rx="1" fill="#F6465D" data-page-node-id="khPXgT0FBnUD2P8al3ChGy"/>
-          <line x1="109" y1="41" x2="109" y2="63" stroke="#2EBD85" data-page-node-id="nlQDr9Am5oVNI1sshwuhc5"/><rect x="102" y="47" width="14" height="10.5" rx="1" fill="#2EBD85" data-page-node-id="sRQeA6jJ1q7sYBbQWFvQFb"/>
-          <line x1="136" y1="30" x2="136" y2="63" stroke="#F6465D" data-page-node-id="EeWGsjnu6uqdvmeZE9psMv"/><rect x="129" y="36.5" width="14" height="21" rx="1" fill="#F6465D" data-page-node-id="gtx1dCLZHLNEaI98UI7vax"/>
-          <line x1="163" y1="31" x2="163" y2="49" stroke="#2EBD85" data-page-node-id="uhSpFgWrC3BCOxoxzAbxR9"/><rect x="156" y="36.5" width="14" height="7" rx="1" fill="#2EBD85" data-page-node-id="mesIyZQMrJyZGCMRESmgLU"/>
-          <line x1="190" y1="20" x2="190" y2="49" stroke="#F6465D" data-page-node-id="7pc6iWAaGr2hnVc6kBs0H7"/><rect x="183" y="26" width="14" height="17.5" rx="1" fill="#F6465D" data-page-node-id="H3ZeSRYjllXVuGBpPYR9nP"/>
-          <line x1="217" y1="20" x2="217" y2="43" stroke="#2EBD85" data-page-node-id="5RsZo050NwvDXqEawIANcW"/><rect x="210" y="26" width="14" height="10.5" rx="1" fill="#2EBD85" data-page-node-id="GWRXrm21KDHXkQBeg0jr9r"/>
-          <line x1="244" y1="31" x2="244" y2="57" stroke="#2EBD85" data-page-node-id="S64HAKrGd2p6mGFnL1Cjp4"/><rect x="237" y="36.5" width="14" height="14" rx="1" fill="#2EBD85" data-page-node-id="laL0eBkOIT1xITYoHrsFrl"/>
-          <line x1="271" y1="45" x2="271" y2="68" stroke="#2EBD85" data-page-node-id="FOpli3mg0xHxo54JuQHuMN"/><rect x="264" y="50.5" width="14" height="10.5" rx="1" fill="#2EBD85" data-page-node-id="XbCcjCEXYc7fFA3dyg9vfE"/>
-          <line x1="298" y1="55" x2="298" y2="82" stroke="#2EBD85" data-page-node-id="prsgy6GSZuaVRXZQMAEFcy"/><rect x="291" y="61" width="14" height="14" rx="1" fill="#2EBD85" data-page-node-id="YKCf5XQEy0lmYQYYArUyjF"/>
-          <line x1="325" y1="69" x2="325" y2="101" stroke="#2EBD85" data-page-node-id="lGLVmDRvc0qChM3aOldzYp"/><rect x="318" y="75" width="14" height="19" rx="1" fill="#2EBD85" data-page-node-id="4lvIUSSSfU7bygVTRekaKh"/>
-        </svg>
+        <div class="card-spark"><svg width="386" height="52" viewBox="0 0 386 52" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.0 44.3 L36.5 35.2 L71.1 24.3 L105.6 13.3 L140.2 6.0 L174.7 11.5 L209.3 42.5 L243.8 48.0 L278.4 35.2 L312.9 27.9 L347.5 33.4 L382.0 26.1 L382.0 52 L2.0 52 Z" fill="#F6465D" fill-opacity="0.08"/><polyline points="2.0,44.3 36.5,35.2 71.1,24.3 105.6,13.3 140.2,6.0 174.7,11.5 209.3,42.5 243.8,48.0 278.4,35.2 312.9,27.9 347.5,33.4 382.0,26.1" stroke="#F6465D" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg></div>
       </div>
 
       <!-- 大明 -->
-      <div class="dynasty-card" data-page-node-id="2LHnmDH0HymfA3KEhTCmtG">
-        <div class="card-head" data-page-node-id="TjBb3kaB5aZtedmRm7YYIs">
-          <div class="card-name-group" data-page-node-id="4B0vYNYVAEfMiDQfoUtuqg">
-            <span class="card-name" data-page-node-id="o8QyZanI8llafIarFcUVfs">大明王朝</span>
-            <span class="card-meta" data-page-node-id="Ja6kwqAHm2jJDE5brs0BZu">MING.1368 · 1368—1644 · 存续277年</span>
+      <div class="dynasty-card" data-code="MING.1368" data-trend="up" data-group="unified" style="animation-delay:280ms">
+        <div class="card-head">
+          <div class="card-name-group">
+            <span class="card-name">大明王朝</span>
+            <span class="card-meta">MING.1368 · 1368—1644 · 存续277年</span>
           </div>
-          <span class="status-tag" data-page-node-id="8GiCfVCGu8J3WEYthaCFEi">已退市</span>
+          <span class="status-tag up">上涨</span>
         </div>
-        <div class="card-price" data-page-node-id="V8dnbfr5MzqHCm6qG2Hp9W">
-          <span class="card-price-label" data-page-node-id="7Ksr2GL579NtcsObR32Rwb">终值</span>
-          <span class="card-price-num down" data-page-node-id="HKiqs5XM91Rg7ihXE5mjlL">70.00</span>
-          <span class="card-price-chg down" data-page-node-id="R6jtf9XDsD0b1vwDBxvgjg">-30.00%</span>
+        <div class="card-price">
+          <span class="card-price-num up">70.00</span>
+          <span class="card-price-chg up">-30.00%</span>
         </div>
-        <svg class="kline" width="408" height="110" viewBox="0 0 408 110" fill="none" xmlns="http://www.w3.org/2000/svg" data-page-node-id="LEBXPFebzix4YJZ8x9tsyD">
-          <line x1="42" y1="56" x2="42" y2="85" stroke="#F6465D" data-page-node-id="BSQSZjtgC8SHJCFxnSOcoB"/><rect x="35" y="62" width="14" height="16" rx="1" fill="#F6465D" data-page-node-id="IoVQLPXZ0BfRAgXRWS8VRV"/>
-          <line x1="69" y1="40" x2="69" y2="69" stroke="#F6465D" data-page-node-id="5lIzt0RAAZLCA2557jVucI"/><rect x="62" y="46" width="14" height="16" rx="1" fill="#F6465D" data-page-node-id="Y4cTlORbTFTH01nVcjq9ml"/>
-          <line x1="96" y1="40" x2="96" y2="59" stroke="#2EBD85" data-page-node-id="ymXkyE1ejrhu64ErYM2QEQ"/><rect x="89" y="46" width="14" height="6.4" rx="1" fill="#2EBD85" data-page-node-id="AmxDf2opaZR63YDjGrg9Ve"/>
-          <line x1="123" y1="30" x2="123" y2="59" stroke="#F6465D" data-page-node-id="i7IVBSxcRymWm0TJQcFkrR"/><rect x="116" y="36.4" width="14" height="16" rx="1" fill="#F6465D" data-page-node-id="Wx4r67dFsAwLFLbJeyHfc7"/>
-          <line x1="150" y1="30" x2="150" y2="49" stroke="#2EBD85" data-page-node-id="Vyf4QrcVTgECChlm5QC5iu"/><rect x="143" y="36.4" width="14" height="6.4" rx="1" fill="#2EBD85" data-page-node-id="SHXAedzAhpIXAJWEmFITuT"/>
-          <line x1="177" y1="24" x2="177" y2="49" stroke="#F6465D" data-page-node-id="Tj8UZf0eE5dSww2TvGOi0Q"/><rect x="170" y="30" width="14" height="12.8" rx="1" fill="#F6465D" data-page-node-id="y9gVMCTUfLWx8hZD3fEzBB"/>
-          <line x1="204" y1="24" x2="204" y2="43" stroke="#2EBD85" data-page-node-id="GPRBUlxBlHtDDbv8GJ9zbf"/><rect x="197" y="30" width="14" height="6.4" rx="1" fill="#2EBD85" data-page-node-id="kqJokkgrCDPnbxK4wBCQPH"/>
-          <line x1="231" y1="21" x2="231" y2="43" stroke="#F6465D" data-page-node-id="J5S0CgxbR8sLcDXXCChmFd"/><rect x="224" y="26.8" width="14" height="9.6" rx="1" fill="#F6465D" data-page-node-id="4WCHRJnIwweOmOY0O9zRax"/>
-          <line x1="258" y1="21" x2="258" y2="41" stroke="#2EBD85" data-page-node-id="sFJkC9910YN6PvhVd6XCPS"/><rect x="251" y="26.8" width="14" height="8" rx="1" fill="#2EBD85" data-page-node-id="Kxb2D2TBDdm01m4FrNUO9Z"/>
-          <line x1="285" y1="23" x2="285" y2="41" stroke="#F6465D" data-page-node-id="Zbv5ksdgqXxRQ7NrBozjRX"/><rect x="278" y="28.4" width="14" height="6.4" rx="1" fill="#F6465D" data-page-node-id="5ETjSQrxpg8GLQbeCNWQiE"/>
-          <line x1="312" y1="23" x2="312" y2="53" stroke="#2EBD85" data-page-node-id="zMrNlNsnHUbnOm81uCpfcV"/><rect x="305" y="28.4" width="14" height="17.6" rx="1" fill="#2EBD85" data-page-node-id="lExP5FDbIq7qsRxYUeUgF0"/>
-          <line x1="339" y1="40" x2="339" y2="75" stroke="#2EBD85" data-page-node-id="4K3f4NzRRoo0vMbIeA7Nda"/><rect x="332" y="46" width="14" height="22.4" rx="1" fill="#2EBD85" data-page-node-id="hYEb0pkfKL5fQtrSi8M5rR"/>
-          <line x1="366" y1="62" x2="366" y2="94" stroke="#2EBD85" data-page-node-id="6q0bjYN2Ivjj9is5oY0v7p"/><rect x="359" y="68.4" width="14" height="19.2" rx="1" fill="#2EBD85" data-page-node-id="2Rr2ZdRubhjHFTWD4TdSae"/>
-        </svg>
+        <div class="card-spark"><svg width="386" height="52" viewBox="0 0 386 52" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.0 48.0 L36.5 34.9 L71.1 19.1 L105.6 11.2 L140.2 13.9 L174.7 6.0 L209.3 11.2 L243.8 21.8 L278.4 29.6 L312.9 37.5 L347.5 34.9 L382.0 40.1 L382.0 52 L2.0 52 Z" fill="#F6465D" fill-opacity="0.08"/><polyline points="2.0,48.0 36.5,34.9 71.1,19.1 105.6,11.2 140.2,13.9 174.7,6.0 209.3,11.2 243.8,21.8 278.4,29.6 312.9,37.5 347.5,34.9 382.0,40.1" stroke="#F6465D" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg></div>
       </div>
 
       <!-- 大清 -->
-      <div class="dynasty-card" data-page-node-id="24jPOCNHYUI5TGdVNJwEmm">
-        <div class="card-head" data-page-node-id="8UhtO8ykDdJ9oiy1BaWQW1">
-          <div class="card-name-group" data-page-node-id="7MHz6krMBUGgY27lpF6a8N">
-            <span class="card-name" data-page-node-id="Qu9yrGQ4ikK9OwVjzSRfaL">大清王朝</span>
-            <span class="card-meta" data-page-node-id="ehSjUEcfVS4pTvvSL8JIQA">QING.1644 · 1644—1912 · 存续268年</span>
+      <div class="dynasty-card" data-code="QING.1644" data-trend="down" data-group="unified" style="animation-delay:350ms">
+        <div class="card-head">
+          <div class="card-name-group">
+            <span class="card-name">大清王朝</span>
+            <span class="card-meta">QING.1644 · 1644—1912 · 存续269年</span>
           </div>
-          <span class="status-tag" data-page-node-id="WP9xMNhkq3G1k3l1pgDj3Y">已退市</span>
+          <span class="status-tag down">下跌</span>
         </div>
-        <div class="card-price" data-page-node-id="SDElZGzwTeY6LJ1z76XDsc">
-          <span class="card-price-label" data-page-node-id="SDchaDEJr195L8yOGajfCT">终值</span>
-          <span class="card-price-num down" data-page-node-id="Ku2HRv9ZIHL0tPc7nH5yRz">35.00</span>
-          <span class="card-price-chg down" data-page-node-id="jruA7BoQ8WN8H8zgqz5SFF">-65.00%</span>
+        <div class="card-price">
+          <span class="card-price-num down">35.00</span>
+          <span class="card-price-chg down">-65.00%</span>
         </div>
-        <svg class="kline" width="408" height="110" viewBox="0 0 408 110" fill="none" xmlns="http://www.w3.org/2000/svg" data-page-node-id="3wLmhoZKWAa8yACCR2G3Hu">
-          <line x1="15" y1="68" x2="15" y2="88" stroke="#F6465D" data-page-node-id="PkzBewDGBrfjO5ogVlYIwU"/><rect x="8" y="73.6" width="14" height="8.4" rx="1" fill="#F6465D" data-page-node-id="jyBQwSGJQ0CS3KcskMezKR"/>
-          <line x1="42" y1="57" x2="42" y2="80" stroke="#F6465D" data-page-node-id="V579ktMyA2Ki4VyenSkRst"/><rect x="35" y="62.4" width="14" height="11.2" rx="1" fill="#F6465D" data-page-node-id="4bnBqzOnVMZnCsFwawZlNE"/>
-          <line x1="69" y1="57" x2="69" y2="73" stroke="#2EBD85" data-page-node-id="GWihIGReaTrr7gG1Ue6lEV"/><rect x="62" y="62.4" width="14" height="4.2" rx="1" fill="#2EBD85" data-page-node-id="NbjgQekAgdaS3d0tjozmXf"/>
-          <line x1="96" y1="42" x2="96" y2="73" stroke="#F6465D" data-page-node-id="7Vf99zh5iZIHvt4vrFYanZ"/><rect x="89" y="48.4" width="14" height="18.2" rx="1" fill="#F6465D" data-page-node-id="fleGqz0tBhd3OJC0pxL2Xl"/>
-          <line x1="123" y1="26" x2="123" y2="55" stroke="#F6465D" data-page-node-id="fDOCVq5bhDEi9vW3DJ2juk"/><rect x="116" y="31.6" width="14" height="16.8" rx="1" fill="#F6465D" data-page-node-id="umCq5aLM2JIqmjXBmCA9Br"/>
-          <line x1="150" y1="15" x2="150" y2="38" stroke="#F6465D" data-page-node-id="5Ah8hhpSP3HCSFNCdCmebe"/><rect x="143" y="20.4" width="14" height="11.2" rx="1" fill="#F6465D" data-page-node-id="QEI7VIdo9hU8jOZIawxsGV"/>
-          <line x1="177" y1="15" x2="177" y2="34" stroke="#2EBD85" data-page-node-id="vysu42pa49ApkGfTqMECbA"/><rect x="170" y="20.4" width="14" height="7" rx="1" fill="#2EBD85" data-page-node-id="JwTIUGe5091yjj2GzY8RwA"/>
-          <line x1="204" y1="22" x2="204" y2="49" stroke="#2EBD85" data-page-node-id="r5cLVsT6vlAcddrM4gK6sX"/><rect x="197" y="27.4" width="14" height="15.4" rx="1" fill="#2EBD85" data-page-node-id="GpIxhaGayvEYgUuopcGgGK"/>
-          <line x1="231" y1="37" x2="231" y2="58" stroke="#2EBD85" data-page-node-id="PUwPhZMrT33QkD2h4Djj2k"/><rect x="224" y="42.8" width="14" height="8.4" rx="1" fill="#2EBD85" data-page-node-id="GGDch6t3D5jqAaeIk2nWmf"/>
-          <line x1="258" y1="46" x2="258" y2="63" stroke="#2EBD85" data-page-node-id="kfqJp7LxBANqH4DH2QqrAd"/><rect x="251" y="51.2" width="14" height="5.6" rx="1" fill="#2EBD85" data-page-node-id="SV8Hom15HPCwRIGUGtDkuz"/>
-          <line x1="285" y1="51" x2="285" y2="69" stroke="#2EBD85" data-page-node-id="G3g7YvebQZY63LiaXAmrf2"/><rect x="278" y="56.8" width="14" height="5.6" rx="1" fill="#2EBD85" data-page-node-id="FqWFDG2ZfufStpwB2biVIC"/>
-          <line x1="312" y1="53" x2="312" y2="69" stroke="#F6465D" data-page-node-id="KIDYSfhhU7FYisXWmUlM4E"/><rect x="305" y="58.2" width="14" height="4.2" rx="1" fill="#F6465D" data-page-node-id="mVDSxKNRt6hSuo3P4wJGsp"/>
-          <line x1="339" y1="53" x2="339" y2="77" stroke="#2EBD85" data-page-node-id="qMENhF3MS0HF3svOlFMSu0"/><rect x="332" y="58.2" width="14" height="12.6" rx="1" fill="#2EBD85" data-page-node-id="g3JuLn2dGiaxGWCx1u56Kj"/>
-          <line x1="366" y1="65" x2="366" y2="91" stroke="#2EBD85" data-page-node-id="EirWikeBCda8UwvA6UOm2v"/><rect x="359" y="70.8" width="14" height="14" rx="1" fill="#2EBD85" data-page-node-id="LIjBhIGqk2gFYHHSB5BHBi"/>
-          <line x1="393" y1="79" x2="393" y2="106" stroke="#2EBD85" data-page-node-id="EGBMCnBhefNzdErkksoW8x"/><rect x="386" y="84.8" width="14" height="15.4" rx="1" fill="#2EBD85" data-page-node-id="AkPDuyRzc4yKjTf25NHt3Z"/>
-        </svg>
+        <div class="card-spark"><svg width="386" height="52" viewBox="0 0 386 52" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.0 33.8 L36.5 26.3 L71.1 16.8 L105.6 8.7 L140.2 6.0 L174.7 10.1 L209.3 15.5 L243.8 23.6 L278.4 31.7 L312.9 38.5 L347.5 43.9 L382.0 48.0 L382.0 52 L2.0 52 Z" fill="#2EBD85" fill-opacity="0.08"/><polyline points="2.0,33.8 36.5,26.3 71.1,16.8 105.6,8.7 140.2,6.0 174.7,10.1 209.3,15.5 243.8,23.6 278.4,31.7 312.9,38.5 347.5,43.9 382.0,48.0" stroke="#2EBD85" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg></div>
       </div>
 
     </div>
   </section>
 
   <!-- ==================== 人物板块预告 ==================== -->
-  <section class="teaser-wrap" data-page-node-id="JdPATCt0waIeEz0GFM9QWV">
-    <div class="teaser" data-page-node-id="EFhj6IuxCH54EUk5uUvWt0">
-      <div class="teaser-text" data-page-node-id="Z8hx8ZqaFzhHm5JqUMv4aP">
-        <div class="teaser-title-row" data-page-node-id="By0S9n1QUMEeQ5qW8FoebD">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" data-page-node-id="pjsjGLF9Hh3kg52GbHOMDv">
-            <rect x="3" y="7" width="10" height="7" rx="1.5" stroke="#D9A441" stroke-width="1.5" data-page-node-id="DrzujcOZ848gRuMf7cFsEI"/>
-            <path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" stroke="#D9A441" stroke-width="1.5" data-page-node-id="oPA9jIbdxqH0XjOdozV2Pq"/>
-          </svg>
-          <span class="teaser-title" data-page-node-id="HoJbpaDBKnGEtIuBCpy7U8">人物板块 · 筹备中</span>
-        </div>
-        <p class="teaser-desc" data-page-node-id="IQDyPs3MbNznnaoDCpQDZ2">帝王将相、文人武将将以个股形式挂牌，以功业与人气定价，K 线即人生。</p>
-      </div>
-      <div class="teaser-btn" data-page-node-id="KHpHBTMuu9iWd8IpHHNqdC">敬请期待</div>
+  <section class="teaser" id="teaser">
+    <div class="teaser-text">
+      <span class="teaser-label">即将上线 · COMING SOON</span>
+      <span class="teaser-title">人物板块：把帝王将相也挂上盘口</span>
+      <p class="teaser-desc">以人物为标的：政绩定价、声望行情、历史地位指数。从赵匡胤到王安石，逐一上市。</p>
     </div>
+    <button class="btn btn-primary teaser-btn" id="teaserBtn">预约上线提醒</button>
   </section>
 
   <!-- ==================== 页脚 ==================== -->
-  <footer class="footer" data-page-node-id="nVMpTV1bpovP2gAgrHJDZi">
-    <p data-page-node-id="rtDeV2yW0IJabhplXUBAlm">本页数据为历史艺术创作，不构成任何投资建议 · 王朝交易所 DYNASTY EXCHANGE</p>
+  <footer class="footer">
+    <p>王朝交易所 DYNASTY EXCHANGE · 行情为历史演绎，不构成投资建议</p>
+    <div class="footer-links">
+      <span>数据来源</span><span>玩法说明</span><span>更新日志</span>
+    </div>
   </footer>
 
 </div>
 </div>
 
+<!-- 演示模式回退数据：桌面端运行时优先走 pywebview js_api 直读 SQLite -->
+<script src="./data.js"></script>
 <script>
   // 等比缩放：保持 1440 设计画布，按窗口宽度整体缩放
   (function () {
@@ -733,41 +452,45 @@
     rescale();
   })();
 
-  // 二级导航芯片：点击切换选中态（视觉演示）
+  // CTA 锚点 + 人物预告预约
   (function () {
-    var chips = document.querySelectorAll('.subnav .chip');
-    chips.forEach(function (chip) {
-      chip.addEventListener('click', function () {
-        chips.forEach(function (c) { c.classList.remove('active'); });
-        chip.classList.add('active');
-      });
+    document.getElementById('ctaEnter').addEventListener('click', function () {
+      document.getElementById('featured').scrollIntoView({ behavior: 'smooth' });
+    });
+    document.getElementById('ctaAbout').addEventListener('click', function () {
+      document.getElementById('teaser').scrollIntoView({ behavior: 'smooth' });
+    });
+    var tb = document.getElementById('teaserBtn');
+    tb.addEventListener('click', function () {
+      tb.textContent = '已预约，上线后通知你';
+      tb.disabled = true;
     });
   })();
 
   // ================= 动态数据接入 =================
-  // 桌面端：js_api 直读 SQLite，焦点区/卡片/芯片/概览全部按真实数据重绘。
-  // 浏览器直接打开（无 js_api）：保留设计稿静态内容作为演示。
+  // 桌面端：js_api 直读 SQLite，焦点区/卡片/概览全部按真实数据重绘。
+  // 浏览器直接打开（无 js_api）：data.js 演示焦点区，卡片保留静态演示。
   // K 线算法与 index.html 完全一致，保证两页数字一致。
   (function () {
-    var UP = '#F6465D', DOWN = '#2EBD85', GOLD = '#D9A441', EVBLUE = '#7C8DB5';
-    function dirColor(d){ return d==='bull' ? UP : d==='bear' ? DOWN : d==='vol' ? GOLD : EVBLUE; }
+    var UP = '#F6465D', DOWN = '#2EBD85', BLUE = '#0066CC', AXIS = '#C7CDD6', GRID = '#F0F0F0';
+    var UNIFIED = { 'DAQIN.221':1, 'DAHAN.202':1, 'SUI.581':1, 'TANG.618':1,
+                    'DASONG.960':1, 'YUAN.1271':1, 'MING.1368':1, 'QING.1644':1 };
     function r1(x){ return Math.round(x*10)/10; }
     function fmtPct(x){ return (x>=0?'+':'') + x.toFixed(2) + '%'; }
     function cls(x){ return x>=0 ? 'up' : 'down'; }
-    function shortName(n){ return n.replace(/^大/, '').replace(/王朝$/, ''); }
     function gotoChart(code){ window.location.href = 'index.html#' + encodeURIComponent(code); }
     function fmtYear(y){ return y<0 ? '前'+(-y) : String(y); }   // 公元前年份（DB 负数存储）
     // 锚点 >=2 个才能生成 K 线；否则按"筹备中"占位渲染
     function hasData(D){ return !!(D && D.anchors && D.anchors.length>=2); }
     function pendingKlineSVG(big){
-      // 筹备中占位图：金色虚线基准 + 提示文案（big=焦点区尺寸 / 卡片尺寸）
+      // 筹备中占位图：灰色虚线基准 + 提示文案（big=焦点区尺寸 / 卡片尺寸）
       return big
-        ? '<line x1="38" y1="170" x2="815" y2="170" stroke="#2A323E" stroke-width="1" stroke-dasharray="5 5"/>'
-          +'<text x="426" y="164" font-size="13" fill="#5A6472" text-anchor="middle">锚点数据入库后自动生成 K 线</text>'
-          +'<text x="38" y="324" font-size="11" fill="#5A6472">—</text>'
-          +'<text x="815" y="324" font-size="11" fill="#5A6472" text-anchor="end">—</text>'
-        : '<line x1="14" y1="55" x2="394" y2="55" stroke="#2A323E" stroke-width="1" stroke-dasharray="5 5"/>'
-          +'<text x="204" y="59" font-size="12" fill="#5A6472" text-anchor="middle">数据筹备中</text>';
+        ? '<line x1="16" y1="180" x2="754" y2="180" stroke="#E0E0E0" stroke-width="1" stroke-dasharray="5 5"/>'
+          +'<text x="385" y="172" font-size="13" fill="#86868B" text-anchor="middle">锚点数据入库后自动生成 K 线</text>'
+          +'<text x="16" y="346" font-size="10" fill="#C7CDD6">—</text>'
+          +'<text x="754" y="346" font-size="10" fill="#C7CDD6" text-anchor="end">—</text>'
+        : '<line x1="2" y1="26" x2="382" y2="26" stroke="#E0E0E0" stroke-width="1" stroke-dasharray="5 5"/>'
+          +'<text x="192" y="30" font-size="12" fill="#86868B" text-anchor="middle">数据筹备中</text>';
     }
 
     function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
@@ -798,12 +521,6 @@
       while(y<=D.dynasty.endYear){ ys.push(y); y=(y===-1?1:y+1); }
       return ys;
     }
-    // 事件年单年冲击：事件年收盘 vs 前一交易日收盘（与盘面页口径一致）
-    function impactPct(D, cs, year){
-      var ys=yearsOf(D), i=ys.indexOf(year);
-      if(i<1) return null;
-      return (cs[i][1]-cs[i-1][1])/cs[i-1][1]*100;
-    }
     function statsOf(D){
       var cs=buildCandles(D), issue=D.dynasty.issuePrice, ys=yearsOf(D);
       var last=cs[cs.length-1][1], hi=-Infinity, hiY=ys[0];
@@ -831,50 +548,51 @@
       }
       return out;
     }
-    function miniKlineSVG(cs){
-      var W=408, H=110, P=14, T=10;
-      var lo=Infinity, hi=-Infinity;
-      cs.forEach(function(k){ lo=Math.min(lo,k[2]); hi=Math.max(hi,k[3]); });
+    // 卡片迷你走势：收盘价折线 + 渐变面积（红涨绿跌）
+    function miniKlineSVG(cs, up){
+      var W=386, H=52;
+      var pts=cs.map(function(k){ return k[1]; });
+      var lo=Math.min.apply(null,pts), hi=Math.max.apply(null,pts);
       if(hi===lo) hi=lo+1;
-      var step=(W-2*P)/cs.length, bw=Math.min(14, step*0.55);
-      function Y(v){ return T + (H-2*T) * (1-(v-lo)/(hi-lo)); }
-      var s='';
-      cs.forEach(function(k,i){
-        var cx=(P+step*(i+0.5)).toFixed(1);
-        var col=k[1]>=k[0]?UP:DOWN;
-        var bt=Math.min(Y(k[0]),Y(k[1])), bh=Math.max(1, Math.abs(Y(k[0])-Y(k[1])));
-        s+='<line x1="'+cx+'" y1="'+Y(k[3]).toFixed(1)+'" x2="'+cx+'" y2="'+Y(k[2]).toFixed(1)+'" stroke="'+col+'"/>';
-        s+='<rect x="'+(cx-bw/2).toFixed(1)+'" y="'+bt.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+bh.toFixed(1)+'" rx="1" fill="'+col+'"/>';
-      });
-      return s;
+      var col=up?UP:DOWN, n=pts.length, coords=[];
+      for(var i=0;i<n;i++){
+        coords.push([(2+i*(W-6)/(n-1)).toFixed(1), (H-4-(pts[i]-lo)/(hi-lo)*(H-10)).toFixed(1)]);
+      }
+      var poly=coords.map(function(c){ return c[0]+','+c[1]; }).join(' ');
+      var area='M'+coords.map(function(c){ return c[0]+' '+c[1]; }).join(' L')
+        +' L'+coords[n-1][0]+' '+H+' L'+coords[0][0]+' '+H+' Z';
+      return '<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" fill="none" xmlns="http://www.w3.org/2000/svg">'
+        +'<path d="'+area+'" fill="'+col+'" fill-opacity="0.08"/>'
+        +'<polyline points="'+poly+'" stroke="'+col+'" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg>';
     }
+    // 焦点区 K 线：浅色网格 + 右轴刻度 + 发行价虚线 + 事件标注 + 波峰波谷
     function featuredKlineSVG(D, cs){
-      var X0=38, X1=815, Y0=40, Y1=300;
+      var X0=16, X1=754, Y0=16, Y1=318;
       var lo=Infinity, hi=-Infinity;
       cs.forEach(function(k){ lo=Math.min(lo,k[2]); hi=Math.max(hi,k[3]); });
       var pad=(hi-lo)*0.08 || 1; lo-=pad; hi+=pad;
       function X(i){ return X0 + (X1-X0)*i/(cs.length-1); }
       function Y(v){ return Y0 + (Y1-Y0) * (1-(v-lo)/(hi-lo)); }
       var s='';
-      // 网格 + 刻度
+      // 横向网格 + 右轴刻度
       for(var g=0; g<4; g++){
         var gy=Y0+(Y1-Y0)*(g+0.5)/4;
-        s+='<line x1="'+X0+'" y1="'+gy.toFixed(1)+'" x2="'+X1+'" y2="'+gy.toFixed(1)+'" stroke="#1B212B" stroke-width="1"/>';
-        s+='<text x="6" y="'+(gy+4).toFixed(1)+'" font-size="11" fill="#5A6472">'+Math.round(hi-(gy-Y0)/(Y1-Y0)*(hi-lo))+'</text>';
+        s+='<line x1="'+X0+'" y1="'+gy.toFixed(1)+'" x2="'+X1+'" y2="'+gy.toFixed(1)+'" stroke="'+GRID+'" stroke-width="1"/>';
+        s+='<text x="'+(X1+6)+'" y="'+(gy+3).toFixed(1)+'" font-size="10" fill="'+AXIS+'">'+Math.round(hi-(gy-Y0)/(Y1-Y0)*(hi-lo))+'</text>';
       }
       // 发行价虚线
       var iy=Y(D.dynasty.issuePrice);
-      s+='<line x1="'+X0+'" y1="'+iy.toFixed(1)+'" x2="'+X1+'" y2="'+iy.toFixed(1)+'" stroke="'+GOLD+'" stroke-width="1" stroke-dasharray="4 4" opacity="0.45"/>';
-      s+='<text x="716" y="'+(iy-6).toFixed(1)+'" font-size="11" fill="'+GOLD+'" opacity="0.9">发行价 '+r1(D.dynasty.issuePrice)+'</text>';
+      s+='<line x1="'+X0+'" y1="'+iy.toFixed(1)+'" x2="'+X1+'" y2="'+iy.toFixed(1)+'" stroke="#86868B" stroke-width="1" stroke-dasharray="4 4" opacity="0.6"/>';
+      s+='<text x="'+(X1-4)+'" y="'+(iy-6).toFixed(1)+'" font-size="10" fill="#86868B" text-anchor="end">发行价 '+r1(D.dynasty.issuePrice)+'</text>';
       // K 线（抽稀 46 根）
-      var sk=sample(cs,46), step=(X1-X0)/sk.length, bw=Math.min(14, step*0.55);
+      var sk=sample(cs,46), step=(X1-X0)/sk.length, bw=Math.min(13, step*0.55);
       sk.forEach(function(k,i){
         var cx=(X0+step*(i+0.5)).toFixed(1), col=k[1]>=k[0]?UP:DOWN;
         var bt=Math.min(Y(k[0]),Y(k[1])), bh=Math.max(1.2, Math.abs(Y(k[0])-Y(k[1])));
-        s+='<line x1="'+cx+'" y1="'+Y(k[3]).toFixed(1)+'" x2="'+cx+'" y2="'+Y(k[2]).toFixed(1)+'" stroke="'+col+'"/>';
+        s+='<line x1="'+cx+'" y1="'+Y(k[3]).toFixed(1)+'" x2="'+cx+'" y2="'+Y(k[2]).toFixed(1)+'" stroke="'+col+'" stroke-width="1.5"/>';
         s+='<rect x="'+(cx-bw/2).toFixed(1)+'" y="'+bt.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+bh.toFixed(1)+'" rx="1" fill="'+col+'"/>';
       });
-      // 事件标注：首事件 / 最接近见顶年的事件 / 末事件（去重，最多 3 个）
+      // 事件标注：首事件 / 最接近见顶年的事件 / 末事件（去重，最多 3 个），蓝色虚线
       var evs=D.events||[], picks=[];
       if(evs.length){
         picks.push(evs[0]);
@@ -885,9 +603,8 @@
       }
       picks.slice(0,3).forEach(function(ev){
         var xi=X(Math.max(0, Math.min(cs.length-1, ev.year-D.dynasty.startYear))).toFixed(1);
-        var col=dirColor(ev.dir);
-        s+='<line x1="'+xi+'" y1="64" x2="'+xi+'" y2="'+Y1+'" stroke="'+col+'" stroke-width="1" opacity="0.7"/>';
-        s+='<text x="'+xi+'" y="56" font-size="12" fill="'+col+'" text-anchor="middle">'+ev.title+' · '+ev.term+'</text>';
+        s+='<line x1="'+xi+'" y1="30" x2="'+xi+'" y2="'+Y1+'" stroke="'+BLUE+'" stroke-width="1" stroke-dasharray="4 3" opacity="0.55"/>';
+        s+='<text x="'+xi+'" y="22" font-size="11" fill="'+BLUE+'" text-anchor="middle">'+ev.title+' · '+ev.term+'</text>';
       });
       // 波峰/波谷：锚点局部极值绑定 ±3 年内冲击最大的事件（与盘面页同算法），按幅度取前 4
       var RANK={'巨':4,'大':3,'中':2,'小':1};
@@ -910,44 +627,42 @@
           var idx=m.ev.year-D.dynasty.startYear;
           if(idx<0||idx>=cs.length) return;
           var xi=X(idx), yi=Y(m.type==='peak'?cs[idx][3]:cs[idx][2]);
-          var col=dirColor(m.ev.dir);
-          var ly=m.type==='peak' ? Math.max(16, yi-14-(ri%2)*13) : Math.min(318, yi+20+(ri%2)*13);
-          s+='<circle class="pt-mark" cx="'+xi.toFixed(1)+'" cy="'+yi.toFixed(1)+'" r="4" fill="'+col+'" stroke="#0B0E11" stroke-width="1.5"/>';
+          var col=m.ev.dir==='bear'?DOWN:UP;
+          var ly=m.type==='peak' ? Math.max(40, yi-14-(ri%2)*13) : Math.min(312, yi+20+(ri%2)*13);
+          s+='<circle class="pt-mark" cx="'+xi.toFixed(1)+'" cy="'+yi.toFixed(1)+'" r="4" fill="'+col+'" stroke="#FFFFFF" stroke-width="1.5"/>';
           s+='<text class="pt-mark" x="'+xi.toFixed(1)+'" y="'+ly.toFixed(1)+'" font-size="11" fill="'+col+'" text-anchor="middle">'+(m.type==='peak'?'▲ ':'▼ ')+m.ev.title+'</text>';
         });
 
       // X 轴起止标签
       var mid=Math.round((D.dynasty.startYear+D.dynasty.endYear)/2);
-      s+='<text x="'+X0+'" y="324" font-size="11" fill="#5A6472">'+fmtYear(D.dynasty.startYear)+'</text>';
-      s+='<text x="'+((X0+X1)/2).toFixed(0)+'" y="324" font-size="11" fill="#5A6472" text-anchor="middle">'+fmtYear(mid)+'</text>';
-      s+='<text x="'+X1+'" y="324" font-size="11" fill="#5A6472" text-anchor="end">'+fmtYear(D.dynasty.endYear)+'</text>';
+      s+='<text x="'+X0+'" y="346" font-size="10" fill="'+AXIS+'">'+fmtYear(D.dynasty.startYear)+'</text>';
+      s+='<text x="'+((X0+X1)/2).toFixed(0)+'" y="346" font-size="10" fill="'+AXIS+'" text-anchor="middle">'+fmtYear(mid)+'</text>';
+      s+='<text x="'+X1+'" y="346" font-size="10" fill="'+AXIS+'" text-anchor="end">'+fmtYear(D.dynasty.endYear)+'</text>';
       return s;
     }
     function cardHTML(d, D, i){
+      var grp = UNIFIED[d.code] ? 'unified' : 'split';
+      var delay=' style="animation-delay:'+((i||0)*70)+'ms"';   // 错峰入场
       var meta='<span class="card-meta">'+d.code+' · '+fmtYear(d.startYear)+'—'+fmtYear(d.endYear)
         +(hasData(D) ? ' · 存续'+(d.endYear-d.startYear+1)+'年' : '')+'</span>';
-      var delay=' style="animation-delay:'+((i||0)*70)+'ms"';   // 错峰入场
       if(!hasData(D)){
-        return '<div class="dynasty-card" data-code="'+d.code+'"'+delay+'>'
+        return '<div class="dynasty-card" data-code="'+d.code+'" data-trend="pending" data-group="'+grp+'"'+delay+'>'
           +'<div class="card-head"><div class="card-name-group">'
           +'<span class="card-name">'+d.name+'</span>'+meta+'</div>'
           +'<span class="status-tag pending">筹备中</span></div>'
-          +'<div class="card-price"><span class="card-price-label">终值</span>'
-          +'<span class="card-price-num">—</span>'
+          +'<div class="card-price"><span class="card-price-num">—</span>'
           +'<span class="card-price-chg">数据筹备中</span></div>'
-          +'<svg class="kline" width="408" height="110" viewBox="0 0 408 110" fill="none" xmlns="http://www.w3.org/2000/svg">'
-          +pendingKlineSVG(false)+'</svg></div>';
+          +'<div class="card-spark"><svg width="386" height="52" viewBox="0 0 386 52" fill="none" xmlns="http://www.w3.org/2000/svg">'
+          +pendingKlineSVG(false)+'</svg></div></div>';
       }
-      var st=statsOf(D), c=cls(st.chg), act=d.isActive;
-      return '<div class="dynasty-card" data-code="'+d.code+'"'+delay+'>'
+      var st=statsOf(D), c=cls(st.chg);
+      return '<div class="dynasty-card" data-code="'+d.code+'" data-trend="'+c+'" data-group="'+grp+'"'+delay+'>'
         +'<div class="card-head"><div class="card-name-group">'
         +'<span class="card-name">'+d.name+'</span>'+meta+'</div>'
-        +'<span class="status-tag">'+(act?'在市':'已退市')+'</span></div>'
-        +'<div class="card-price"><span class="card-price-label">终值</span>'
-        +'<span class="card-price-num '+c+'">'+st.last.toFixed(2)+'</span>'
+        +'<span class="status-tag '+c+'">'+(c==='up'?'上涨':'下跌')+'</span></div>'
+        +'<div class="card-price"><span class="card-price-num '+c+'">'+st.last.toFixed(2)+'</span>'
         +'<span class="card-price-chg '+c+'">'+fmtPct(st.chg)+'</span></div>'
-        +'<svg class="kline" width="408" height="110" viewBox="0 0 408 110" fill="none" xmlns="http://www.w3.org/2000/svg">'
-        +miniKlineSVG(sample(st.candles,12))+'</svg></div>';
+        +'<div class="card-spark">'+miniKlineSVG(sample(st.candles,14), st.chg>=0)+'</div></div>';
     }
     function waitForApi(timeout){
       return new Promise(function(resolve){
@@ -972,25 +687,71 @@
       requestAnimationFrame(step);
     }
 
+    // ---- 筛选 chips + 搜索（静态/动态卡片通用） ----
+    var curFilter='all';
+    var searchInput=document.getElementById('searchInput');
+    function applyFilter(){
+      var q=(searchInput.value||'').trim().toLowerCase();
+      Array.prototype.forEach.call(document.querySelectorAll('#cardGrid .dynasty-card'), function(c){
+        var ok=true, t=c.getAttribute('data-trend'), g=c.getAttribute('data-group');
+        if(curFilter==='up') ok=(t==='up');
+        else if(curFilter==='down') ok=(t==='down');
+        else if(curFilter==='unified') ok=(g==='unified');
+        else if(curFilter==='split') ok=(g==='split');
+        if(ok && q) ok=(c.getAttribute('data-code')+' '+c.textContent).toLowerCase().indexOf(q)>=0;
+        c.style.display=ok?'':'none';
+      });
+    }
+    Array.prototype.forEach.call(document.querySelectorAll('#chips .chip'), function(chip){
+      chip.addEventListener('click', function(){
+        Array.prototype.forEach.call(document.querySelectorAll('#chips .chip'), function(x){ x.classList.remove('active'); });
+        chip.classList.add('active');
+        curFilter=chip.getAttribute('data-filter');
+        applyFilter();
+      });
+    });
+    searchInput.addEventListener('input', applyFilter);
+
+    // ---- 焦点区渲染（api / data.js 两种来源共用） ----
+    function renderFeatured(D, code, name){
+      var stEl=document.getElementById('fStatus');
+      document.getElementById('fName').textContent=name;
+      document.getElementById('fCode').textContent=code;
+      document.getElementById('fCta').onclick=function(){ gotoChart(code); };
+      var chartEl=document.getElementById('fKline');
+      if(!hasData(D)){
+        stEl.textContent='筹备中'; stEl.className='status-tag pending';
+        var p0=document.getElementById('fPrice'); p0.textContent='—'; p0.className='price-now';
+        var c0=document.getElementById('fChg'); c0.textContent='数据筹备中'; c0.className='price-chg';
+        document.getElementById('fDesc').textContent='锚点 / 皇帝 / 事件数据入库后，该王朝自动挂牌并生成 K 线。';
+        chartEl.innerHTML=pendingKlineSVG(true);
+        return;
+      }
+      var st=statsOf(D), c=cls(st.chg);
+      stEl.textContent=(c==='up'?'上涨':'下跌'); stEl.className='status-tag '+c;
+      var pEl=document.getElementById('fPrice');
+      pEl.className='price-now '+c; countUp(pEl, st.last, 2);
+      var chgEl=document.getElementById('fChg');
+      chgEl.textContent='较发行 '+fmtPct(st.chg); chgEl.className='price-chg '+c;
+      document.getElementById('fDesc').textContent=
+        '存续 '+st.dur+' 年 · '+(D.emperors||[]).length+' 位帝王 · '+(D.events||[]).length
+        +' 件大事收录 · 国运峰值 '+fmtYear(D.dynasty.peakYear)+'（'+st.hi.toFixed(2)+'）· 最大回撤 '+fmtPct(st.dd);
+      chartEl.innerHTML=featuredKlineSVG(D, st.candles);
+    }
+
     (async function(){
       var api=await waitForApi(2500);
-      if(!api) return;                       // 浏览器演示：保留静态设计稿
+      if(!api){
+        // 浏览器演示：data.js 渲染焦点区，卡片保留静态设计稿
+        if(window.DYNASTY_DATA){
+          renderFeatured(window.DYNASTY_DATA, window.DYNASTY_DATA.dynasty.code, window.DYNASTY_DATA.dynasty.name);
+        }else{
+          document.getElementById('fKline').innerHTML=pendingKlineSVG(true);
+        }
+        return;
+      }
       var list=JSON.parse(await api.list_dynasties());
       if(!list.length) return;
-
-      // 二级导航：隐藏静态演示芯片，插入真实王朝芯片（点击进 K 线页）
-      var subnav=document.querySelector('.subnav');
-      subnav.querySelectorAll('.chip').forEach(function(c,i){ if(i>0) c.remove(); });
-      var more=subnav.querySelector('.chip-more');
-      list.forEach(function(d){
-        var chip=document.createElement('div');
-        chip.className='chip';
-        chip.setAttribute('data-code', d.code);
-        chip.title='查看 '+d.name+' 盘面';
-        chip.innerHTML='<span class="chip-name">'+shortName(d.name)+'</span><span class="chip-code">'+d.code+'</span>';
-        chip.addEventListener('click', function(){ gotoChart(d.code); });
-        subnav.insertBefore(chip, more);
-      });
 
       // 全部王朝数据（王朝数量少，循环拉取开销可忽略）
       var full={};
@@ -998,21 +759,29 @@
         full[list[i].code]=JSON.parse(await api.get_dynasty(list[i].code));
       }
 
-      // 摘要条：挂牌数 / 市况（筹备中不参与涨跌统计）
-      var act=0, up=0, down=0, pend=0;
+      // 概览条：挂牌数 / 国运综合指数（有数据标的的终值均值）/ 涨跌家数 / 大事记收录
+      var act=0, up=0, down=0, pend=0, sumLast=0, sumChg=0, nData=0, nEvents=0;
       list.forEach(function(d){
-        if(!hasData(full[d.code])){ pend++; return; }
+        var D=full[d.code];
+        nEvents+=(D.events||[]).length;
+        if(!hasData(D)){ pend++; return; }
         if(d.isActive) act++;
-        var c=statsOf(full[d.code]).chg; if(c>0)up++; else if(c<0)down++;
+        var c=statsOf(D).chg; if(c>0)up++; else if(c<0)down++;
+        sumLast+=statsOf(D).last; sumChg+=c; nData++;
       });
       countUp(document.getElementById('mListed'), list.length, 0, ' 支');
       document.getElementById('mListedSub').textContent='在市 '+act+' · 退市 '+(list.length-act-pend)
         +(pend?(' · 筹备 '+pend):'');
+      if(nData){
+        countUp(document.getElementById('mIndex'), sumLast/nData, 2);
+        var ic=document.getElementById('mIndexChg'), avg=sumChg/nData;
+        ic.textContent=fmtPct(avg); ic.className='metric-sub-mono '+cls(avg);
+      }
+      document.getElementById('mUp').textContent=up+' 家';
+      document.getElementById('mDown').textContent=down+' 家';
+      countUp(document.getElementById('mEvents'), nEvents, 0, ' 条');
       document.getElementById('subCount').textContent='按上市时间排序 · 共 '+list.length
         +' 支 · 发行价统一 100'+(pend?(' · '+pend+' 支筹备中'):'');
-      document.getElementById('mUp').textContent='涨 '+up;
-      document.getElementById('mDown').textContent='跌 '+down;
-      document.getElementById('mFlat').textContent='平 '+(list.length-up-down-pend);
 
       // 全部王朝卡片（index 用于错峰入场）
       var grid=document.getElementById('cardGrid');
@@ -1021,86 +790,13 @@
         var c=e.target.closest('.dynasty-card');
         if(c) gotoChart(c.getAttribute('data-code'));
       });
+      applyFilter();
 
       // 焦点行情区：在市且有数据者优先，其次任一有数据王朝，全筹备中取第一支
       var feat=(list.find(function(d){return d.isActive && hasData(full[d.code])})
              || list.find(function(d){return hasData(full[d.code])})
              || list[0]);
-      var D=full[feat.code];
-      // 芯片选中态 / 提示文案与焦点王朝同步
-      subnav.querySelectorAll('.chip').forEach(function(ch){
-        var dc=ch.getAttribute('data-code');
-        if(!dc) return;
-        ch.classList.toggle('active', dc===feat.code);
-        ch.title=hasData(full[dc]) ? '查看 '+full[dc].dynasty.name+' 盘面' : '筹备中 · 数据入库后挂牌';
-      });
-      var st=hasData(D)?statsOf(D):null, c=st?cls(st.chg):'';
-      document.getElementById('fBread').textContent=feat.name+' '+feat.code;
-      document.getElementById('fName').textContent=feat.name;
-      document.getElementById('fCode').textContent=feat.code;
-      var stEl=document.getElementById('fStatus');
-      stEl.textContent=feat.isActive?'在市':'已退市';
-
-      // 焦点区筹备中占位态
-      if(!hasData(D)){
-        stEl.textContent='筹备中'; stEl.className='status-tag pending';
-        var p0=document.getElementById('fPrice'); p0.textContent='—'; p0.className='price-now';
-        var chg0=document.getElementById('fChg'); chg0.textContent='数据筹备中'; chg0.className='price-chg';
-        document.getElementById('fKline').innerHTML=pendingKlineSVG(true);
-        document.getElementById('sIssueLabel').textContent='发行价';
-        document.getElementById('sIssue').textContent='—';
-        document.getElementById('sHighLabel').textContent='历史最高';
-        var hi0=document.getElementById('sHigh'); hi0.textContent='—'; hi0.className='stat-value';
-        document.getElementById('sDur').textContent='—';
-        document.getElementById('sLastLabel').textContent='终值';
-        var la0=document.getElementById('sLast'); la0.textContent='—'; la0.className='stat-value';
-        var dw0=document.getElementById('sDraw'); dw0.textContent='—'; dw0.className='stat-value';
-        var re0=document.getElementById('sRet'); re0.textContent='—'; re0.className='stat-value';
-        var ev0=(D.events||[]);
-        document.getElementById('fEventRows').innerHTML= ev0.length ? ev0.map(function(ev){
-          var p=impactPct(D, st.candles, ev.year);
-          var cls = p==null ? '' : (p>=0?'up':'down');
-          var txt = p==null ? ev.mag : fmtPct(p);
-          return '<div class="event-row"><span class="event-year">'+fmtYear(ev.year)+'</span>'
-            +'<span class="event-name">'+ev.title+' · '+ev.term+'</span>'
-            +'<span class="event-impact '+cls+'">'+txt+'</span></div>';
-        }).join('') : '<div class="event-row"><span class="event-name">锚点/事件数据入库后在此展示</span></div>';
-        var fc0=document.querySelector('.featured-card');
-        fc0.style.cursor='pointer';
-        fc0.addEventListener('click', function(){ gotoChart(feat.code); });
-        return;
-      }
-      var pEl=document.getElementById('fPrice');
-      pEl.className='price-now '+c; countUp(pEl, st.last, 2);
-      var chgEl=document.getElementById('fChg');
-      chgEl.textContent='较发行 '+fmtPct(st.chg); chgEl.className='price-chg '+c;
-      document.getElementById('fKline').innerHTML=featuredKlineSVG(D, st.candles);
-      document.getElementById('sIssueLabel').textContent='发行价（'+fmtYear(st.start)+'）';
-      countUp(document.getElementById('sIssue'), st.issue, 2);
-      document.getElementById('sHighLabel').textContent='历史最高（'+fmtYear(st.hiY)+'）';
-      var hiEl=document.getElementById('sHigh');
-      hiEl.className='stat-value up'; countUp(hiEl, st.hi, 2, '', 900);
-      document.getElementById('sDur').textContent=st.dur+' 年';
-      document.getElementById('sLastLabel').textContent='终值（'+fmtYear(st.end)+'）';
-      var laEl=document.getElementById('sLast');
-      laEl.className='stat-value '+c; countUp(laEl, st.last, 2);
-      var dwEl=document.getElementById('sDraw');
-      dwEl.textContent=fmtPct(st.dd); dwEl.className='stat-value down';
-      var reEl=document.getElementById('sRet');
-      reEl.textContent=fmtPct(st.chg); reEl.className='stat-value '+c;
-      document.getElementById('fEventRows').innerHTML=(D.events||[]).map(function(ev){
-        var p=impactPct(D, st.candles, ev.year);
-        var ic = p==null ? (ev.dir==='bear'?'down':ev.dir==='bull'?'up':'') : (p>=0?'up':'down');
-        var tx = p==null ? ev.mag : fmtPct(p);
-        return '<div class="event-row"><span class="event-year">'+fmtYear(ev.year)+'</span>'
-          +'<span class="event-name">'+ev.title+' · '+ev.term+'</span>'
-          +'<span class="event-impact '+ic+'">'+tx+'</span></div>';
-      }).join('');
-
-      // 焦点区点击 → K 线页
-      var fc=document.querySelector('.featured-card');
-      fc.style.cursor='pointer';
-      fc.addEventListener('click', function(){ gotoChart(feat.code); });
+      renderFeatured(full[feat.code], feat.code, feat.name);
     })();
   })();
 </script>

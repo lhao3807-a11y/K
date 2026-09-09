@@ -91,23 +91,22 @@ def test_index_html_is_offline_only():
 
 
 def test_exchange_home_wired_to_js_api_and_navigation():
-    """首页动态化：js_api 驱动 + 卡片/芯片跳转 K 线页深链。"""
+    """首页动态化：js_api 驱动 + 卡片跳转 K 线页深链 + 筛选/搜索。"""
     with open(app.resource_path("dynasty-exchange.html"), encoding="utf-8") as f:
         js = f.read()
     assert "list_dynasties" in js and "get_dynasty(" in js
-    assert "index.html#" in js          # 卡片/芯片 → 盘面页深链
+    assert "index.html#" in js          # 卡片 → 盘面页深链
     assert "buildCandles" in js         # 行情数字由真实数据计算（与盘面页同算法）
-    assert "miniKlineSVG" in js         # 迷你 K 线动态生成
+    assert "miniKlineSVG" in js         # 卡片迷你走势动态生成
     # 跨 0 年王朝（大汉 前202~220）：K 线循环必须跳过 0 年，否则比 exe 多 1 根
     # 且随机序列错位，两页数字不一致
     assert "y=(y===-1?1:y+1)" in js
-    # 历史最高年份 / 事件冲击百分比须经 yearsOf 序列（跳 0）计算
-    assert "function yearsOf" in js and "function impactPct" in js
+    # 历史最高年份须经 yearsOf 序列（跳 0）计算
+    assert "function yearsOf" in js
     assert "hiY=ys[i]" in js
-    # 大事记冲击列显示计算百分比而非 mag 原文
-    assert "impactPct(D, st.candles, ev.year)" in js
-    # 12 支芯片单行放不下：横向滚动而非换行（换行会撑爆 56px 导航条）
-    assert "flex-wrap: nowrap" in js and ".subnav > * { flex-shrink: 0; }" in js
+    # 新 UI：筛选 chips（全部/上涨/下跌/大一统/分裂期）+ 搜索框过滤卡片
+    assert 'data-filter="up"' in js and 'data-filter="split"' in js
+    assert "applyFilter" in js and "searchInput" in js
 
 
 def test_exchange_home_featured_peak_trough_and_motion():

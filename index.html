@@ -1,128 +1,306 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-page-node-id="mwuujpcAHW66U3UinpD9kT">
-<head data-page-node-id="i7EmlqpbikEgS3auSkcjmT">
-<meta charset="UTF-8" data-page-node-id="FapmMo6wFSHm667gRq9HnB">
-<meta name="viewport" content="width=device-width, initial-scale=1.0" data-page-node-id="jKEjmo8aSzp5qwUnMbn5wW">
-<title>大宋王朝 K 线图 · DASONG.960</title>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>王朝 K 线 · DYNASTY EXCHANGE</title>
 <style>
   :root{
-    --bg:#0d1117; --panel:#161c26; --panel2:#1c2431; --line:#2a3342;
-    --txt:#e6e9ef; --mut:#8b93a7;
-    --up:#f23645; --down:#089981; --amber:#f0b90b;
-    --mono:Consolas,'Courier New',monospace;
+    --bg:#FFFFFF; --bg-alt:#F5F5F7; --band:#272729;
+    --text:#1D1D1F; --text-2:#6E6E73; --text-3:#86868B; --axis:#C7CDD6;
+    --blue:#0066CC; --blue-hover:#0077ED;
+    --up:#F6465D; --down:#2EBD85;
+    --line:#E0E0E0; --grid:#F0F0F0;
+    --font-cn:"Noto Sans SC","PingFang SC","Microsoft YaHei","微软雅黑",sans-serif;
+    --mono:"Cascadia Mono","JetBrains Mono",Consolas,"Courier New",monospace;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%}
-  body{background:var(--bg);color:var(--txt);font-family:'Segoe UI','Microsoft YaHei',system-ui,sans-serif;display:flex;flex-direction:column;min-height:100vh}
-  header{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;padding:18px 22px 14px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#10151d,#0d1117)}
-  .tick h1{font-size:22px;font-weight:600;letter-spacing:.5px}
-  .tick .code{font-family:var(--mono);font-size:14px;color:var(--amber);margin-left:10px;background:rgba(240,185,11,.1);padding:2px 8px;border-radius:5px;border:1px solid rgba(240,185,11,.25)}
-  .tick .range{color:var(--mut);font-size:12px;margin-top:6px;font-family:var(--mono)}
-  .stats{display:flex;gap:26px}
-  .stat{text-align:right}
-  .stat label{display:block;color:var(--mut);font-size:11px;margin-bottom:4px}
-  .stat span{font-family:var(--mono);font-size:20px;font-weight:600}
-  .stat span.up{color:var(--up)} .stat span.down{color:var(--down)}
-  #chart{flex:1;min-height:420px;width:100%}
-  .tl-wrap{border-top:1px solid var(--line);background:#0f141b;padding:12px 16px}
-  .tl-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:12px}
-  .tl-title{color:var(--mut);font-size:12px;letter-spacing:1px}
-  .tl-title i{font-style:normal;color:var(--amber);opacity:.8;margin-left:8px}
-  .seg{display:flex;border:1px solid var(--line);border-radius:7px;overflow:hidden;flex:0 0 auto}
-  .seg button{background:var(--panel);border:none;color:var(--mut);font-size:12px;padding:5px 14px;cursor:pointer;font-family:inherit;transition:background .15s,color .15s}
-  .seg button.on{background:var(--amber);color:#0d1117;font-weight:600}
-  .seg button:hover:not(.on){color:var(--txt)}
-  #timeline{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px}
-  #timeline::-webkit-scrollbar{height:6px}
-  #timeline::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px}
-  .ev{flex:0 0 auto;min-width:150px;background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--mut);border-radius:8px;padding:8px 10px;cursor:pointer;transition:transform .12s,border-color .12s}
-  .ev:hover{transform:translateY(-2px);border-color:#3a4763}
-  .ev.active{border-color:var(--amber);background:var(--panel2)}
-  .ev .yr{font-family:var(--mono);font-size:11px;color:var(--mut)}
-  .ev .tt{display:block;font-size:13px;margin:4px 0;line-height:1.3}
-  .ev .tm{font-size:11px;font-weight:600}
-  .ev-bull{border-left-color:var(--up)} .ev-bull .tm{color:var(--up)}
-  .ev-bear{border-left-color:var(--down)} .ev-bear .tm{color:var(--down)}
-  .ev-vol{border-left-color:var(--amber)} .ev-vol .tm{color:var(--amber)}
-  .ev-neutral{border-left-color:var(--mut)} .ev-neutral .tm{color:var(--mut)}
-  #card{position:fixed;top:84px;right:22px;width:340px;background:rgba(22,28,38,.86);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:14px;padding:18px 18px 16px;box-shadow:0 12px 40px rgba(0,0,0,.5);z-index:50;transition:opacity .18s,transform .18s;max-height:60vh;overflow-y:auto}
+  body{background:var(--bg);color:var(--text);font-family:var(--font-cn);-webkit-font-smoothing:antialiased;display:flex;flex-direction:column;min-height:100vh}
+  .up{color:var(--up)} .down{color:var(--down)}
+
+  /* ============ 全局导航（黑色细条） ============ */
+  .nav{display:flex;align-items:center;justify-content:space-between;height:44px;padding:0 32px;background:#000000;flex:none}
+  .logo-group{display:flex;align-items:center;gap:10px}
+  .logo-text{display:flex;flex-direction:column;gap:2px}
+  .logo-cn{font-size:14px;font-weight:600;color:#FFFFFF;line-height:1.2}
+  .logo-en{font-family:var(--mono);font-size:8px;color:#7A7A7A;letter-spacing:2px}
+  .nav-links{display:flex;align-items:center;gap:28px}
+  .nav-link{font-size:12px;color:#999999;cursor:pointer;user-select:none;text-decoration:none}
+  .nav-link:hover{color:#FFFFFF}
+  .nav-link.active{color:#FFFFFF;font-weight:500}
+  .nav-right{display:flex;align-items:center;gap:16px}
+  .backbtn{background:none;border:1px solid #3A3A3C;border-radius:9999px;color:#CCCCCC;font-size:12px;padding:6px 14px;cursor:pointer;font-family:var(--font-cn);transition:color .15s,border-color .15s}
+  .backbtn:hover{color:#FFFFFF;border-color:#FFFFFF}
+  .market-status{display:flex;align-items:center;gap:6px}
+  .status-dot{width:8px;height:8px;border-radius:99px;background:var(--down)}
+  .status-text{font-size:12px;font-weight:500;color:var(--down)}
+  @keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(46,189,133,.45)}50%{opacity:.55;box-shadow:0 0 0 5px rgba(46,189,133,0)}}
+  .status-dot{animation:pulse 2.6s ease-in-out infinite}
+
+  /* ============ 二级导航（磨砂 sticky） ============ */
+  .subnav{
+    position:sticky;top:0;z-index:40;
+    display:flex;align-items:center;justify-content:space-between;
+    height:52px;padding:0 48px;flex:none;
+    background:rgba(246,246,247,.8);
+    backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+    border-bottom:1px solid var(--line);
+  }
+  .subnav-left{display:flex;align-items:center;gap:10px}
+  .subnav-name{font-size:20px;font-weight:600}
+  .subnav-code{font-family:var(--mono);font-size:12px;color:var(--text-3)}
+  .subnav-right{display:flex;align-items:center;gap:22px}
+  .anchor-link{font-size:14px;color:#333333;cursor:pointer;text-decoration:none}
+  .anchor-link:hover{color:var(--blue)}
+  .anchor-link.active{color:var(--blue);font-weight:500}
+  .dynsel{background:#FFFFFF;color:var(--text);border:1px solid var(--line);border-radius:9999px;font-family:var(--font-cn);font-size:13px;padding:7px 12px;cursor:pointer;max-width:220px}
+  .dynsel:focus{outline:none;border-color:var(--blue)}
+  .favbtn{background:var(--blue);border:none;border-radius:9999px;color:#FFFFFF;font-size:13px;font-weight:500;padding:8px 18px;cursor:pointer;font-family:var(--font-cn);transition:background .15s}
+  .favbtn:hover{background:var(--blue-hover)}
+  .favbtn.faved{background:#FFFFFF;color:var(--blue);border:1px solid var(--blue)}
+
+  /* ============ 价格头部 ============ */
+  .price-head{display:flex;flex-direction:column;gap:20px;padding:36px 48px 28px}
+  .breadcrumb{display:flex;align-items:center;gap:8px}
+  .breadcrumb .crumb{font-size:13px;color:var(--text-3);cursor:pointer}
+  .breadcrumb .crumb:hover{color:var(--blue)}
+  .breadcrumb .sep{font-family:var(--mono);font-size:13px;color:var(--axis)}
+  .breadcrumb .current{font-size:13px;font-weight:500;color:var(--blue);cursor:default}
+  .title-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .dynasty-title{font-size:34px;font-weight:600;letter-spacing:-0.5px}
+  .code-badge{background:var(--bg-alt);border-radius:6px;padding:4px 8px;font-family:var(--mono);font-size:12px;color:var(--text-2)}
+  .status-tag{border-radius:6px;padding:4px 8px;font-size:11px;font-weight:500}
+  .status-tag.up{background:rgba(246,70,93,.1);color:var(--up)}
+  .status-tag.down{background:rgba(46,189,133,.1);color:var(--down)}
+  .status-tag.pending{background:var(--bg-alt);color:var(--text-3)}
+  .range-tag{background:var(--bg-alt);border-radius:6px;padding:4px 8px;font-size:11px;color:var(--text-2)}
+  .price-row{display:flex;align-items:baseline;gap:16px}
+  .price-now{font-family:var(--mono);font-size:56px;font-weight:600;line-height:58px}
+  .price-chg{font-family:var(--mono);font-size:18px;font-weight:500}
+  .metrics-row{display:flex;gap:40px;padding-top:4px;flex-wrap:wrap}
+  .metric{display:flex;flex-direction:column;gap:4px}
+  .metric label{font-size:12px;color:var(--text-3)}
+  .metric b{font-family:var(--mono);font-size:14px;font-weight:500;color:var(--text)}
+
+  /* ============ 图表主区 ============ */
+  .chart-row{display:flex;gap:24px;padding:0 48px 48px;align-items:flex-start}
+  .chart-card{flex:1;min-width:0;display:flex;flex-direction:column;gap:12px;background:#FFFFFF;border:1px solid var(--line);border-radius:18px;padding:20px}
+  .chart-toolbar{display:flex;align-items:center;justify-content:space-between}
+  .seg{display:flex;gap:4px;background:var(--bg-alt);border-radius:9999px;padding:4px}
+  .seg button{background:transparent;border:none;color:var(--text-2);font-size:13px;padding:6px 14px;cursor:pointer;font-family:var(--font-cn);border-radius:9999px;transition:background .15s,color .15s}
+  .seg button.on{background:#FFFFFF;color:var(--text);font-weight:500;box-shadow:0 0 0 1px var(--line)}
+  .seg button:hover:not(.on){color:var(--text)}
+  .toolbar-note{font-size:12px;color:var(--text-3)}
+  .toolbar-note i{font-style:normal;color:var(--blue)}
+  #chart{width:100%;height:480px}
+
+  /* ============ 右侧数据面板 ============ */
+  .side-panel{width:320px;flex:none;display:flex;flex-direction:column;gap:12px;background:#FFFFFF;border:1px solid var(--line);border-radius:18px;padding:20px}
+  .panel-title{font-size:16px;font-weight:600}
+  .panel-divider{width:100%;height:1px;background:var(--grid)}
+  .stat-row{display:flex;align-items:center;justify-content:space-between}
+  .stat-label{font-size:13px;color:var(--text-3)}
+  .stat-value{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--text)}
+  .event-row{display:flex;align-items:center;gap:10px;padding:6px 8px;margin:0 -8px;border-radius:8px;cursor:pointer;transition:background .12s}
+  .event-row:hover{background:var(--bg-alt)}
+  .event-row.active{background:#F0F7FF}
+  .event-year{font-family:var(--mono);font-size:12px;color:var(--text-3);flex:none;min-width:34px}
+  .event-name{font-size:13px;color:#333333;flex:1;line-height:1.35}
+  .event-impact{font-family:var(--mono);font-size:12px;font-weight:500;flex:none}
+
+  /* ============ 帝王在位条 ============ */
+  .emperor-sec{display:flex;flex-direction:column;gap:24px;padding:48px 48px 56px;background:var(--bg-alt)}
+  .emperor-head{display:flex;flex-direction:column;gap:6px}
+  .emperor-title{font-size:28px;font-weight:600;letter-spacing:-0.5px}
+  .emperor-sub{font-size:14px;color:var(--text-3)}
+  #empBars{display:flex;flex-direction:column;gap:10px}
+  .emp-row{display:flex;align-items:center;gap:12px;cursor:pointer;padding:4px 8px;margin:0 -8px;border-radius:8px;transition:background .12s}
+  .emp-row:hover{background:#FFFFFF}
+  .emp-name{width:64px;flex:none;font-size:13px;font-weight:500}
+  .emp-track{flex:1;height:20px}
+  .emp-bar{height:20px;border-radius:5px;min-width:4px;transition:width .5s cubic-bezier(.22,.61,.36,1)}
+  .emp-bar.up{background:rgba(246,70,93,.18)}
+  .emp-bar.down{background:rgba(46,189,133,.18)}
+  .emp-bar.flat{background:#E0E0E0}
+  .emp-years{flex:none;font-family:var(--mono);font-size:11px;color:var(--text-3)}
+  .emp-pct{flex:none;width:64px;text-align:right;font-family:var(--mono);font-size:11px;font-weight:500}
+  .emp-empty{font-size:13px;color:var(--text-3)}
+
+  /* ============ 事件详情浮卡 ============ */
+  #card{position:fixed;top:108px;right:22px;width:340px;background:rgba(255,255,255,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--line);border-radius:16px;padding:18px 18px 16px;box-shadow:0 12px 40px rgba(0,0,0,.10);z-index:50;transition:opacity .18s,transform .18s;max-height:64vh;overflow-y:auto}
   #card.hidden{opacity:0;transform:translateY(10px);pointer-events:none}
-  #cardClose{position:absolute;top:10px;right:12px;background:none;border:none;color:var(--mut);font-size:20px;cursor:pointer;line-height:1}
-  #cardClose:hover{color:var(--txt)}
-  .cterm{display:inline-block;font-size:12px;font-weight:700;padding:3px 10px;border-radius:6px;margin-bottom:10px}
-  .cterm.bull{background:rgba(242,54,69,.15);color:var(--up);border:1px solid rgba(242,54,69,.4)}
-  .cterm.bear{background:rgba(8,153,129,.15);color:var(--down);border:1px solid rgba(8,153,129,.4)}
-  .cterm.vol{background:rgba(240,185,11,.15);color:var(--amber);border:1px solid rgba(240,185,11,.4)}
-  .cterm.neutral{background:rgba(139,147,167,.15);color:var(--mut);border:1px solid rgba(139,147,167,.4)}
+  #cardClose{position:absolute;top:10px;right:12px;background:none;border:none;color:var(--text-3);font-size:20px;cursor:pointer;line-height:1}
+  #cardClose:hover{color:var(--text)}
+  .cterm{display:inline-block;font-size:12px;font-weight:600;padding:3px 10px;border-radius:6px;margin-bottom:10px}
+  .cterm.bull{background:rgba(246,70,93,.1);color:var(--up);border:1px solid rgba(246,70,93,.35)}
+  .cterm.bear{background:rgba(46,189,133,.1);color:var(--down);border:1px solid rgba(46,189,133,.35)}
+  .cterm.vol{background:rgba(0,102,204,.08);color:var(--blue);border:1px solid rgba(0,102,204,.3)}
+  .cterm.neutral{background:var(--bg-alt);color:var(--text-2);border:1px solid var(--line)}
   #card h3{font-size:17px;margin-bottom:10px;padding-right:20px}
-  .cmeta{display:flex;gap:14px;margin-bottom:10px;font-family:var(--mono);font-size:12px;color:var(--mut)}
-  .cmeta b{color:var(--txt)}
-  .cprice{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin:4px 0 12px;padding:10px 12px;background:rgba(13,17,23,.55);border:1px solid var(--line);border-radius:9px;font-family:var(--mono)}
+  .cmeta{display:flex;gap:14px;margin-bottom:10px;font-family:var(--mono);font-size:12px;color:var(--text-3)}
+  .cmeta b{color:var(--text)}
+  .cprice{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin:4px 0 12px;padding:10px 12px;background:var(--bg-alt);border:1px solid var(--line);border-radius:9px;font-family:var(--mono)}
   .cprice div{display:flex;flex-direction:column;gap:4px}
-  .cprice label{color:var(--mut);font-size:10px;letter-spacing:.5px}
+  .cprice label{color:var(--text-3);font-size:10px;letter-spacing:.5px}
   .cprice b{font-size:15px;font-weight:600}
   .cprice.hide{display:none}
-  #card p{font-size:13px;line-height:1.75;color:#c6cde0;white-space:pre-line}
-  footer{padding:12px 22px;border-top:1px solid var(--line);color:var(--mut);font-size:11px;background:#0f141b}
-  .dynsel{background:var(--panel);color:var(--txt);border:1px solid var(--line);border-radius:7px;font-family:inherit;font-size:13px;padding:7px 10px;cursor:pointer;align-self:flex-start;max-width:220px}
-  .dynsel:focus{outline:none;border-color:var(--amber)}
-  .dynsel option{background:var(--panel);color:var(--txt)}
-  .backbtn{background:none;border:1px solid var(--line);border-radius:7px;color:var(--mut);font-size:13px;padding:7px 12px;cursor:pointer;font-family:inherit;align-self:flex-start;transition:color .15s,border-color .15s}
-  .backbtn:hover{color:var(--amber);border-color:var(--amber)}
+  #card p{font-size:13px;line-height:1.75;color:#444444;white-space:pre-line}
+
+  /* ============ 页脚 ============ */
+  footer{margin-top:auto;display:flex;align-items:center;justify-content:space-between;padding:24px 48px;border-top:1px solid var(--grid)}
+  footer p{font-size:12px;color:var(--text-3)}
+
+  /* ============ 提示框（ECharts tooltip 内容） ============ */
   .tip{font-family:var(--mono);font-size:12px}
   .tip .y{font-weight:700;margin-bottom:5px;font-size:13px}
   .tip .r{display:flex;justify-content:space-between;gap:22px;line-height:1.6}
-  .tip .evn{margin-top:6px;padding-top:6px;border-top:1px dashed var(--line);color:var(--amber)}
-  @media (max-width:720px){header{flex-direction:column;align-items:flex-start}.stats{width:100%;justify-content:space-between}#card{left:16px;right:16px;width:auto;top:auto;bottom:16px;max-height:52vh}}
+  .tip .evn{margin-top:6px;padding-top:6px;border-top:1px dashed var(--line);color:var(--blue)}
+
+  @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+  .price-head{animation:rise .5s cubic-bezier(.22,.61,.36,1) both}
+  .chart-card{animation:rise .55s .06s cubic-bezier(.22,.61,.36,1) both}
+  .side-panel{animation:rise .55s .12s cubic-bezier(.22,.61,.36,1) both}
+  .emperor-sec{animation:rise .6s .18s cubic-bezier(.22,.61,.36,1) both}
+  @media (prefers-reduced-motion: reduce){*{animation:none !important;transition:none !important}}
+  @media (max-width:1100px){.chart-row{flex-direction:column}.side-panel{width:100%}}
+  @media (max-width:720px){.subnav{padding:0 20px}.price-head,.chart-row,.emperor-sec,footer{padding-left:20px;padding-right:20px}#card{left:16px;right:16px;width:auto;top:auto;bottom:16px;max-height:52vh}}
 </style>
 </head>
-<body data-page-node-id="rEox1yUHMSGYIUwZBmsZoT">
-  <header data-page-node-id="5n57z1Et1Rr2DJnU1Rvtti">
-    <button id="backHome" class="backbtn" title="返回王朝交易所">‹ 交易所</button>
-    <select id="dynSwitch" class="dynsel" style="display:none" title="切换王朝标的"></select>
-    <div class="tick" data-page-node-id="7z5zK6p0wcdqMAdNqnj4kK">
-      <h1 data-page-node-id="8llUxRhEC9GRkEbCwoYNOP"><span id="dynName">--</span> <span class="code" id="dynCode">--</span></h1>
-      <div class="range" id="dynRange" data-page-node-id="QzhilpVSdQ2x8lPPX1zkbL"></div>
+<body>
+
+  <!-- ==================== 全局导航 ==================== -->
+  <header class="nav">
+    <div class="logo-group">
+      <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="26" height="26" rx="7" fill="#0066CC"/>
+        <line x1="9" y1="5" x2="9" y2="21" stroke="#FFFFFF" stroke-width="1.5"/>
+        <rect x="7" y="9" width="4" height="8" rx="1" fill="#FFFFFF"/>
+        <line x1="17" y1="7" x2="17" y2="23" stroke="#FFFFFF" stroke-width="1.5"/>
+        <rect x="15" y="12" width="4" height="7" rx="1" fill="#FFFFFF"/>
+      </svg>
+      <div class="logo-text">
+        <div class="logo-cn">王朝交易所</div>
+        <div class="logo-en">DYNASTY EXCHANGE</div>
+      </div>
     </div>
-    <div class="stats" data-page-node-id="qbiOZGAcCxPJk3qB2rxPjW">
-      <div class="stat" data-page-node-id="fcqOgB8zceSBovdE38UQjS"><label data-page-node-id="8GQp9FmchGi0Mhwuih5eFN">现价</label><span id="px" data-page-node-id="zkH1wl1cV8pxlBg1z7DDnJ">--</span></div>
-      <div class="stat" data-page-node-id="xKHNZYNDQJnPOF6yU8YUvM"><label data-page-node-id="ksTOIcvuXuqBgRhBG2rvLi">较发行价</label><span id="chg" data-page-node-id="nn55miVNtXbVtya3HesA6H">--</span></div>
-      <div class="stat" data-page-node-id="7cENJ1LHhFk3rr34vnil2X"><label data-page-node-id="mNdm7t7J7S4EvQL02BQQ15">历史最高</label><span id="hi" data-page-node-id="pXcay99fi2zSp1LMuq19Tr">--</span></div>
+    <nav class="nav-links">
+      <a class="nav-link active" href="dynasty-exchange.html">王朝</a>
+      <a class="nav-link">人物</a>
+      <a class="nav-link">数据</a>
+      <a class="nav-link">关于</a>
+    </nav>
+    <div class="nav-right">
+      <button id="backHome" class="backbtn" title="返回王朝交易所">‹ 返回交易所</button>
+      <div class="market-status">
+        <div class="status-dot"></div>
+        <span class="status-text">交易中</span>
+      </div>
     </div>
   </header>
 
-  <div id="chart" data-page-node-id="GwdVCaj97y1IL2r1CyDTkv"></div>
-
-  <div class="tl-wrap" data-page-node-id="Py0FBefK55ztdKbI92BfWg">
-    <div class="tl-head" data-page-node-id="qr33q9c5kvqOcYPNTdrWaI">
-      <div class="tl-title" data-page-node-id="icRY9qFzrvKCEpDSNBbn4j">重大事件 · 盘面标注<i id="lbHint"></i></div>
-      <div class="seg" data-page-node-id="PYEfznuyWkA32TC4aIFytE">
-        <button class="on" data-mode="year" data-page-node-id="tuY02wwyLC033Kx1W6RYnf">年 K</button>
-        <button data-mode="emperor" data-page-node-id="xlnjjHvTmJo9Hqmcqqg5oe">皇帝 K</button>
-      </div>
+  <!-- ==================== 二级导航（磨砂） ==================== -->
+  <nav class="subnav">
+    <div class="subnav-left">
+      <span class="subnav-name" id="subName">--</span>
+      <span class="subnav-code" id="subCode">--</span>
     </div>
-    <div id="timeline" data-page-node-id="NH8TUubQUqmc0THbDn7XzI"></div>
-  </div>
+    <div class="subnav-right">
+      <a class="anchor-link active" data-anchor="chartAnchor">K线</a>
+      <a class="anchor-link" data-anchor="emperorAnchor">帝王</a>
+      <a class="anchor-link" data-anchor="eventsAnchor">大事记</a>
+      <select id="dynSwitch" class="dynsel" style="display:none" title="切换王朝标的"></select>
+      <button class="favbtn" id="favBtn">加入自选</button>
+    </div>
+  </nav>
 
-  <div id="card" class="hidden" data-page-node-id="TXoXnGJEO1SjrryFEj2LdV">
-    <button id="cardClose" aria-label="关闭" data-page-node-id="OZZIf8ldQEb5yKr1SwtQp6">×</button>
-    <span class="cterm" id="cTerm" data-page-node-id="EK5lzVLn75Gtcce1bHMMlo"></span>
-    <h3 id="cTitle" data-page-node-id="Os3qfVT3xif7BnIAmzd9IF"></h3>
-    <div class="cmeta" data-page-node-id="s563ZhS7qHXDKUmlFatnAu"><span data-page-node-id="YoNnabxzcRhPKBedy0U16V">年份 <b id="cYear" data-page-node-id="TRV25HR3WLXHePSr5hMjMP"></b></span><span data-page-node-id="s2MEVJRFBV4TAFmvv43UrR"><span id="cMagLabel" data-page-node-id="w0ZmvsKrHCHutVEnWzlAUs">冲击</span> <b id="cMag" data-page-node-id="8EAd2uauUEEz3Z6rLleE0D"></b></span></div>
+  <!-- ==================== 价格头部 ==================== -->
+  <section class="price-head">
+    <div class="breadcrumb">
+      <span class="crumb" id="crumbHome">全部王朝</span><span class="sep">/</span>
+      <span class="current" id="crumbCur">--</span>
+    </div>
+    <div class="title-row">
+      <h1 class="dynasty-title" id="dynName">--</h1>
+      <span class="code-badge" id="dynCode">--</span>
+      <span class="status-tag up" id="dynStatus">--</span>
+      <span class="range-tag" id="dynRange">--</span>
+    </div>
+    <div class="price-row">
+      <span class="price-now" id="px">--</span>
+      <span class="price-chg" id="chg">--</span>
+    </div>
+    <div class="metrics-row">
+      <div class="metric"><label>发行价</label><b id="mIssue">--</b></div>
+      <div class="metric"><label>历史最高</label><b id="mHi">--</b></div>
+      <div class="metric"><label>历史最低</label><b id="mLo">--</b></div>
+      <div class="metric"><label>终值</label><b id="mLast">--</b></div>
+      <div class="metric"><label>存续</label><b id="mDur">--</b></div>
+      <div class="metric"><label>帝王数</label><b id="mEmpN">--</b></div>
+    </div>
+  </section>
+
+  <!-- ==================== 图表主区 ==================== -->
+  <section class="chart-row" id="chartAnchor">
+    <div class="chart-card">
+      <div class="chart-toolbar">
+        <div class="seg">
+          <button class="on" data-mode="year">年 K</button>
+          <button data-mode="emperor">皇帝 K</button>
+        </div>
+        <span class="toolbar-note">指标：MA / 事件 / 发行价<i id="lbHint"></i></span>
+      </div>
+      <div id="chart"></div>
+    </div>
+
+    <aside class="side-panel" id="eventsAnchor">
+      <div class="panel-title">关键数据</div>
+      <div class="panel-divider"></div>
+      <div class="stat-row"><span class="stat-label">开国皇帝</span><span class="stat-value" id="sEmpFirst">--</span></div>
+      <div class="stat-row"><span class="stat-label">末代帝王</span><span class="stat-value" id="sEmpLast">--</span></div>
+      <div class="stat-row"><span class="stat-label">存续时长</span><span class="stat-value" id="sDur">--</span></div>
+      <div class="stat-row"><span class="stat-label">帝王数量</span><span class="stat-value" id="sEmpCount">--</span></div>
+      <div class="stat-row"><span class="stat-label">国运峰值</span><span class="stat-value" id="sPeakYear">--</span></div>
+      <div class="stat-row"><span class="stat-label">峰值价格</span><span class="stat-value" id="sPeakVal">--</span></div>
+      <div class="panel-divider"></div>
+      <div class="panel-title">大事记</div>
+      <div id="timeline"></div>
+    </aside>
+  </section>
+
+  <!-- ==================== 帝王在位条 ==================== -->
+  <section class="emperor-sec" id="emperorAnchor">
+    <div class="emperor-head">
+      <span class="emperor-title">帝王在位条</span>
+      <span class="emperor-sub">条形长度 = 在位时长；颜色 = 任内国运涨跌（红涨绿跌）；点击可查看任内详情</span>
+    </div>
+    <div id="empBars"></div>
+  </section>
+
+  <!-- ==================== 事件详情浮卡 ==================== -->
+  <div id="card" class="hidden">
+    <button id="cardClose" aria-label="关闭">×</button>
+    <span class="cterm" id="cTerm"></span>
+    <h3 id="cTitle"></h3>
+    <div class="cmeta"><span>年份 <b id="cYear"></b></span><span><span id="cMagLabel">冲击</span> <b id="cMag"></b></span></div>
     <div class="cprice hide" id="cPrice"></div>
-    <p id="cDesc" data-page-node-id="mzD9K4woO54iBEOCCxJ5Y8"></p>
+    <p id="cDesc"></p>
   </div>
 
-  <footer data-page-node-id="xT2XXSEL0C0cZ2iUSlppei">国运指数为叙事化演绎，非真实历史数据 · 事件线索参考《上下五千年》，市场标注为人工策划</footer>
+  <footer>
+    <p>王朝交易所 DYNASTY EXCHANGE · 国运指数为叙事化演绎，不构成投资建议</p>
+    <p>事件线索参考《上下五千年》，市场标注为人工策划</p>
+  </footer>
 
   <script src="./echarts.min.js"></script>
   <!-- 演示模式回退数据：桌面端运行时优先走 pywebview js_api 直读 SQLite -->
   <script src="./data.js"></script>
   <script>
   (function(){
-    const mono = "Consolas,'Courier New',monospace";
+    const mono = "'Cascadia Mono','JetBrains Mono',Consolas,'Courier New',monospace";
+    const UP = '#F6465D', DOWN = '#2EBD85', BLUE = '#0066CC';
     const round1 = x => Math.round(x*10)/10;
-    const dirColor = d => d==='bull' ? '#f23645' : d==='bear' ? '#089981' : d==='vol' ? '#f0b90b' : '#8b93a7';
+    const dirColor = d => d==='bull' ? UP : d==='bear' ? DOWN : d==='vol' ? BLUE : '#86868B';
     const fmtYear = y => y<0 ? '前'+(-y) : String(y);   // 公元前年份（DB 负数存储）
 
     function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
@@ -134,10 +312,10 @@
     let D=null, ISSUE=100, START=0, END=0, PEAK=null, rand=null, SPAN_FULL=120;
     let EVENTS=[], EMPERORS=[], ANCHORS=[];
     let years=[], candles=[], yearIndex={}, byYear={};
-    let mode='year', cur=null, chart=null, labelFull=false;
+    let mode='year', cur=null, chart=null, labelFull=false, empData=[];
 
     function showFatal(msg){
-      document.body.innerHTML='<p style="padding:40px;color:#f23645;font-family:Consolas,monospace">'+msg+'</p>';
+      document.body.innerHTML='<p style="padding:40px;color:#F6465D;font-family:Consolas,monospace">'+msg+'</p>';
     }
 
     function interpOn(list,y){
@@ -153,8 +331,8 @@
 
     function ma(data,n){const r=[];for(let i=0;i<data.length;i++){if(i<n-1){r.push('-');continue}let s=0;for(let j=0;j<n;j++)s+=data[i-j][1];r.push(round1(s/n))}return r}
 
-    function buildSeries(){
-      if(mode==='year') return {cats:years.slice(), data:candles.slice(), ma:ma(candles,D.config.maYear), maName:'MA'+D.config.maYear};
+    // 皇帝 K 数据（即位价 / 退位价 / 在位最低 / 在位最高），年 K / 皇帝 K / 在位条共用
+    function buildEmperorData(){
       const cats=[], data=[];
       EMPERORS.forEach(em=>{
         cats.push(em.name);
@@ -168,7 +346,13 @@
         }
         data.push([round1(o),round1(c),round1(lo),round1(hi)]);
       });
-      return {cats, data, ma:ma(data,D.config.maEmperor), maName:'MA'+D.config.maEmperor};
+      return {cats, data};
+    }
+
+    function buildSeries(){
+      if(mode==='year') return {cats:years.slice(), data:candles.slice(), ma:ma(candles,D.config.maYear), maName:'MA'+D.config.maYear};
+      const em=buildEmperorData();
+      return {cats:em.cats, data:em.data, ma:ma(em.data,D.config.maEmperor), maName:'MA'+D.config.maEmperor};
     }
 
     // 波峰/波谷：锚点局部极值 + ±3 年内冲击最大的事件（巨>大>中>小）
@@ -202,16 +386,17 @@
         : '{m|'+e.term+'}';
       return {coord:[x,round1(y)], value:e.title+' —— '+e.term, eventIndex:i,
         symbol:'circle', symbolSize:ext?11:9, z:12,
-        itemStyle:{color:c,borderColor:'#0d1117',borderWidth:1.5},
+        itemStyle:{color:c,borderColor:'#FFFFFF',borderWidth:1.5},
         label:{show:true,position:ext?(ext.type==='peak'?'top':'bottom'):(bear?'bottom':'top'),
           distance:8,align:'center',
           formatter:fmt,
           rich:Object.assign({
-            t:{color:'#e6e9ef',fontSize:10,lineHeight:13,fontFamily:mono},
+            t:{color:'#1D1D1F',fontSize:10,lineHeight:13,fontFamily:mono},
             m:{color:c,fontSize:10,fontWeight:'bold',lineHeight:13,fontFamily:mono}
           }, ext ? {x:{color:c,fontSize:10,fontWeight:'bold',lineHeight:13,fontFamily:mono}} : {}),
-          backgroundColor:'rgba(18,24,33,.94)',
-          borderColor:c,borderWidth:1,padding:[4,7],borderRadius:5}};
+          backgroundColor:'rgba(255,255,255,.95)',
+          borderColor:c,borderWidth:1,padding:[4,7],borderRadius:5,
+          shadowColor:'rgba(0,0,0,.08)',shadowBlur:6}};
     }
 
     function buildMarks(cats,data){
@@ -245,10 +430,10 @@
       const hv=data[hiIdx][3];
       const hiTag='历史最高 '+hv+' · '+cats[hiIdx];
       marks.push({coord:[cats[hiIdx],hv], value:hiTag, symbol:'pin', symbolSize:26, z:20,
-        itemStyle:{color:'#f0b90b'},
+        itemStyle:{color:BLUE},
         label:{show:true,formatter:hiTag,position:'top',distance:6,
-          color:'#0d1117',fontSize:11,fontWeight:'bold',
-          backgroundColor:'#f0b90b',padding:[3,7],borderRadius:4}});
+          color:'#FFFFFF',fontSize:11,fontWeight:'bold',
+          backgroundColor:BLUE,padding:[3,7],borderRadius:4}});
       return marks;
     }
 
@@ -263,7 +448,7 @@
       if(mode==='year'){
         const prev = idx>0 ? cur.data[idx-1][1] : o;       // 前一根收盘，据此算涨跌幅
         const pct  = (c-prev)/prev*100;
-        const col  = c>=prev ? '#f23645' : '#089981';
+        const col  = c>=prev ? UP : DOWN;
         head = cur.cats[idx]+' 年';
         evs  = byYear[Number(cur.cats[idx])]||[];
         // 纯实体 K 线：最高/最低即开收两端，不再单列
@@ -272,7 +457,7 @@
         const em  = EMPERORS[idx];
         const yrs = em.e-em.s+1;                            // 在位年数（首尾年计入）
         const pct = (c-o)/o*100;                            // 即位价 → 退位价
-        const col = c>=o ? '#f23645' : '#089981';
+        const col = c>=o ? UP : DOWN;
         head = em.full+' · '+em.s+'–'+em.e;
         evs  = EVENTS.filter(e=>e.year>=em.s&&e.year<=em.e);
         body = tipRow('在位', yrs+' 年')
@@ -296,34 +481,34 @@
         animationDuration:600,
         grid:{left:56,right:20,top:52,bottom:70},
         xAxis:{type:'category',data:cur.cats,boundaryGap:true,
-          axisLine:{lineStyle:{color:'#2a3342'}},axisTick:{show:false},
-          axisLabel:{color:'#8b93a7',fontFamily:mono,interval:mode==='year'?Math.floor(cur.cats.length/14):0},
+          axisLine:{lineStyle:{color:'#E0E0E0'}},axisTick:{show:false},
+          axisLabel:{color:'#86868B',fontFamily:mono,interval:mode==='year'?Math.floor(cur.cats.length/14):0},
           splitLine:{show:false}},
         yAxis:{scale:true,position:'left',
           // 顶部留 25% 余量，避免历史最高 pin 及其标签被上边缘裁掉
           max:function(v){ return Math.ceil((v.max + (v.max-v.min)*0.25)/5)*5; },
-          axisLabel:{color:'#8b93a7',fontFamily:mono},
-          splitLine:{lineStyle:{color:'#1c2431'}},axisLine:{show:false}},
+          axisLabel:{color:'#86868B',fontFamily:mono},
+          splitLine:{lineStyle:{color:'#F0F0F0'}},axisLine:{show:false}},
         dataZoom:[
           {type:'inside',xAxisIndex:0,start:0,end:100},
-          {type:'slider',xAxisIndex:0,height:18,bottom:8,borderColor:'#2a3342',
-            backgroundColor:'#161c26',fillerColor:'rgba(41,98,255,0.15)',start:0,end:100,
-            handleStyle:{color:'#3a4763'},moveHandleStyle:{color:'#3a4763'},
-            textStyle:{color:'#8b93a7'},
-            dataBackground:{lineStyle:{color:'#3a4763'},areaStyle:{color:'rgba(58,71,99,0.3)'}}}
+          {type:'slider',xAxisIndex:0,height:18,bottom:8,borderColor:'#E0E0E0',
+            backgroundColor:'#F5F5F7',fillerColor:'rgba(0,102,204,0.12)',start:0,end:100,
+            handleStyle:{color:'#C7CDD6'},moveHandleStyle:{color:'#C7CDD6'},
+            textStyle:{color:'#86868B'},
+            dataBackground:{lineStyle:{color:'#C7CDD6'},areaStyle:{color:'rgba(199,205,214,0.25)'}}}
         ],
-        tooltip:{trigger:'axis',axisPointer:{type:'cross',label:{backgroundColor:'#3a4763',color:'#e6e9ef'}},
-          backgroundColor:'rgba(20,26,36,.95)',borderColor:'#2a3342',
-          textStyle:{color:'#e6e9ef',fontSize:12},formatter:tipFormatter},
+        tooltip:{trigger:'axis',axisPointer:{type:'cross',label:{backgroundColor:BLUE,color:'#FFFFFF'}},
+          backgroundColor:'rgba(255,255,255,.97)',borderColor:'#E0E0E0',
+          textStyle:{color:'#1D1D1F',fontSize:12},formatter:tipFormatter},
         series:[
           {id:'k', name:'国运指数',type:'candlestick',data:cur.data,
-            itemStyle:{color:'#f23645',color0:'#089981',borderColor:'#f23645',borderColor0:'#089981'},
+            itemStyle:{color:UP,color0:DOWN,borderColor:UP,borderColor0:DOWN},
             markPoint:{data:marks},
-            markLine:{symbol:'none',lineStyle:{color:'#f0b90b',type:'dashed',width:1},
-              label:{color:'#f0b90b',formatter:'发行价 '+ISSUE,position:'insideEndTop',fontFamily:mono},
+            markLine:{symbol:'none',lineStyle:{color:'#86868B',type:'dashed',width:1},
+              label:{color:'#86868B',formatter:'发行价 '+ISSUE,position:'insideEndTop',fontFamily:mono},
               data:[{yAxis:ISSUE}]}},
           {name:cur.maName,type:'line',data:cur.ma,smooth:true,symbol:'none',
-            lineStyle:{color:'#f0b90b',width:1.3,opacity:.9},z:3}
+            lineStyle:{color:BLUE,width:1.3,opacity:.9},z:3}
         ]
       }, {replaceMerge:['series']});
       updateHint();
@@ -334,7 +519,7 @@
     // ---- 标注详略自适应：缩放跨度 <=SPAN_FULL 年展开完整标注，全览只显示术语 ----
     function updateHint(){
       document.getElementById('lbHint').textContent =
-        labelFull ? '完整标注' : '滚轮放大至 '+SPAN_FULL+' 年内展开完整标注';
+        labelFull ? ' · 完整标注' : ' · 滚轮放大至 '+SPAN_FULL+' 年内展开完整标注';
     }
     function applyMarks(){
       chart.setOption({series:[{id:'k', markPoint:{data: buildMarks(cur.cats, cur.data)}}]});
@@ -372,25 +557,91 @@
     // 年份 -> 对应 K 线（跨公元前/公元后时用 yearIndex 精确映射，避免 0 年错位）
     const candleAt = y => candles[yearIndex[fmtYear(y)]];
 
+    // 事件年单年冲击：事件年收盘 vs 前一交易日收盘
+    function impactPct(year){
+      const i=yearIndex[fmtYear(year)];
+      if(i==null || i<1) return null;
+      return (candles[i][1]-candles[i-1][1])/candles[i-1][1]*100;
+    }
+
     function updateHeaderStats(){
       const last = candles[candles.length-1][1];
       const hi   = Math.max.apply(null, candles.map(c=>c[3]));
+      const lo   = Math.min.apply(null, candles.map(c=>c[2]));
       const chg  = (last-ISSUE)/ISSUE*100;
-      document.getElementById('px').textContent = last.toFixed(1);
+      const col  = chg>=0 ? 'up' : 'down';
+      const pxEl = document.getElementById('px');
+      pxEl.textContent = last.toFixed(1); pxEl.className = 'price-now '+col;
       const chgEl = document.getElementById('chg');
-      chgEl.textContent = (chg>=0?'+':'')+chg.toFixed(1)+'%';
-      chgEl.className = chg>=0?'up':'down';
-      document.getElementById('hi').textContent = hi.toFixed(1);
+      chgEl.textContent = '较发行价 '+(chg>=0?'+':'')+chg.toFixed(1)+'%';
+      chgEl.className = 'price-chg '+col;
+      const stEl = document.getElementById('dynStatus');
+      stEl.textContent = chg>=0 ? '上涨' : '下跌'; stEl.className = 'status-tag '+col;
+      document.getElementById('mIssue').textContent = ISSUE.toFixed(2);
+      const mHi = document.getElementById('mHi');
+      mHi.textContent = hi.toFixed(1); mHi.className = 'up';
+      const mLo = document.getElementById('mLo');
+      mLo.textContent = lo.toFixed(1); mLo.className = 'down';
+      document.getElementById('mLast').textContent = last.toFixed(1);
+      document.getElementById('mDur').textContent = (END-START+1)+' 年';
+      document.getElementById('mEmpN').textContent = EMPERORS.length+' 位';
+      // 侧栏关键数据
+      document.getElementById('sEmpFirst').textContent = EMPERORS.length ? EMPERORS[0].name : '—';
+      document.getElementById('sEmpLast').textContent  = EMPERORS.length ? EMPERORS[EMPERORS.length-1].name : '—';
+      document.getElementById('sDur').textContent      = (END-START+1)+' 年';
+      document.getElementById('sEmpCount').textContent = EMPERORS.length+' 位';
+      document.getElementById('sPeakYear').textContent = PEAK!=null ? fmtYear(PEAK)+' 年' : '—';
+      const spv = document.getElementById('sPeakVal');
+      spv.textContent = hi.toFixed(2); spv.className = 'stat-value up';
     }
 
     function buildTimeline(){
       tl.innerHTML='';
+      if(!EVENTS.length){
+        tl.innerHTML='<div class="emp-empty">锚点/事件数据入库后在此展示</div>';
+        return;
+      }
       EVENTS.forEach((e,i)=>{
         const d=document.createElement('div');
-        d.className='ev ev-'+e.dir; d.dataset.i=i;
-        d.innerHTML='<span class="yr">'+e.year+'</span><span class="tt">'+e.title+'</span><span class="tm">'+e.term+'</span>';
+        d.className='event-row'; d.dataset.i=i;
+        let impact='', ic='';
+        if(candles.length){
+          const p=impactPct(e.year);
+          if(p!=null){ ic=p>=0?'up':'down'; impact=(p>=0?'+':'')+p.toFixed(1)+'%'; }
+        }
+        if(!impact){ impact=e.mag||''; ic=''; }
+        d.innerHTML='<span class="event-year">'+fmtYear(e.year)+'</span>'
+          +'<span class="event-name">'+e.title+' · '+e.term+'</span>'
+          +'<span class="event-impact '+ic+'">'+impact+'</span>';
         d.addEventListener('click',()=>selectEvent(i,true));
         tl.appendChild(d);
+      });
+    }
+
+    // ---- 帝王在位条：条长 = 在位时长，颜色 = 任内涨跌 ----
+    function buildEmperorBars(){
+      const box=document.getElementById('empBars');
+      box.innerHTML='';
+      if(!empData.length){
+        box.innerHTML='<div class="emp-empty">皇帝数据入库后展示在位条</div>';
+        return;
+      }
+      let maxDur=1;
+      EMPERORS.forEach(em=>{ const d=em.e-em.s+1; if(d>maxDur) maxDur=d; });
+      EMPERORS.forEach((em,i)=>{
+        const k=empData[i], dur=em.e-em.s+1;
+        const pct=(k[1]-k[0])/k[0]*100, c=pct>=0?'up':'down';
+        const row=document.createElement('div');
+        row.className='emp-row';
+        row.innerHTML='<span class="emp-name">'+em.name+'</span>'
+          +'<div class="emp-track"><div class="emp-bar '+c+'" style="width:0"></div></div>'
+          +'<span class="emp-years">'+fmtYear(em.s)+'–'+fmtYear(em.e)+' · '+dur+'年</span>'
+          +'<span class="emp-pct '+c+'">'+(pct>=0?'+':'')+pct.toFixed(1)+'%</span>';
+        row.addEventListener('click',()=>showEmperor(i));
+        box.appendChild(row);
+        requestAnimationFrame(()=>requestAnimationFrame(()=>{
+          row.querySelector('.emp-bar').style.width=Math.max(2, dur/maxDur*100)+'%';
+        }));
       });
     }
 
@@ -403,32 +654,42 @@
       const cfg=D.config||{};
       SPAN_FULL=cfg.spanFull||120;
       EVENTS=D.events; EMPERORS=D.emperors; ANCHORS=D.anchors;
-      mode='year'; labelFull=false; cur=null;
+      mode='year'; labelFull=false; cur=null; empData=[];
 
       document.title = D.dynasty.name+' K线图 · '+D.dynasty.code;
       document.getElementById('dynName').textContent = D.dynasty.name;
       document.getElementById('dynCode').textContent = D.dynasty.code;
       document.getElementById('dynRange').textContent = D.dynasty.rangeLabel;
+      document.getElementById('subName').textContent = D.dynasty.name;
+      document.getElementById('subCode').textContent = D.dynasty.code;
+      document.getElementById('crumbCur').textContent = D.dynasty.name;
 
       // ---- 筹备中占位态：锚点 >=2 个才能生成 K 线；数据入库后自动挂牌 ----
       if(!ANCHORS || ANCHORS.length<2){
         candles=[]; years=[]; yearIndex={}; byYear={}; cur=null;
-        document.getElementById('px').textContent='—';
+        ['px','mIssue','mHi','mLo','mLast','mDur','mEmpN',
+         'sEmpFirst','sEmpLast','sDur','sEmpCount','sPeakYear','sPeakVal'].forEach(id=>{
+          const el=document.getElementById(id); el.textContent='—'; el.className=el.className.replace(/\b(up|down)\b/g,'').trim();
+        });
         const chgEl=document.getElementById('chg');
-        chgEl.textContent='筹备中'; chgEl.className='';
-        document.getElementById('hi').textContent='—';
+        chgEl.textContent='数据筹备中'; chgEl.className='price-chg';
+        const stEl=document.getElementById('dynStatus');
+        stEl.textContent='筹备中'; stEl.className='status-tag pending';
         buildTimeline();
+        document.getElementById('empBars').innerHTML='<div class="emp-empty">数据筹备中 · 皇帝数据入库后展示在位条</div>';
         if(chart) chart.dispose();
         chart = echarts.init(document.getElementById('chart'));
         chart.setOption({graphic:[
-          {type:'text',left:'center',top:'44%',style:{text:'数据筹备中',fill:'#8b93a7',font:'600 22px Consolas, monospace'}},
-          {type:'text',left:'center',top:'52%',style:{text:'锚点/皇帝/事件数据入库后，K 线自动生成',fill:'#5a6472',font:'13px Consolas, monospace'}},
+          {type:'text',left:'center',top:'44%',style:{text:'数据筹备中',fill:'#86868B',font:'600 22px '+mono}},
+          {type:'text',left:'center',top:'52%',style:{text:'锚点/皇帝/事件数据入库后，K 线自动生成',fill:'#C7CDD6',font:'13px '+mono}},
         ]});
         return;
       }
 
       buildCandles();
+      empData = buildEmperorData().data;
       buildTimeline();
+      buildEmperorBars();
       updateHeaderStats();
 
       // 粒度按钮复位到年 K
@@ -463,7 +724,7 @@
       const k=candleAt(e.year);                            // 当年 K 线
       const prevYr = e.year===-1 ? 1 : e.year-1;           // 前一纪年（无 0 年）
       const prev = (e.year>START) ? candleAt(prevYr)[1] : k[0];
-      const pct=(k[1]-prev)/prev*100, col=k[1]>=prev?'#f23645':'#089981';
+      const pct=(k[1]-prev)/prev*100, col=k[1]>=prev?UP:DOWN;
       setPrice([['当年开盘',k[0]],['当年收盘',k[1],col],['当年涨跌幅',(pct>=0?'+':'')+pct.toFixed(2)+'%',col]]);
       card.classList.remove('hidden');
       Array.prototype.forEach.call(tl.children,(el,k2)=>el.classList.toggle('active',k2===i));
@@ -477,7 +738,7 @@
     }
 
     function showEmperor(i){
-      const em=EMPERORS[i], k=cur.data[i];
+      const em=EMPERORS[i], k=empData[i];
       const term=document.getElementById('cTerm');
       term.textContent=em.name; term.className='cterm neutral';
       document.getElementById('cTitle').textContent=em.full;
@@ -486,7 +747,7 @@
       const evs=EVENTS.filter(e=>e.year>=em.s&&e.year<=em.e);
       document.getElementById('cMag').textContent=evs.length+' 个';
 
-      const yrs=em.e-em.s+1, pct=(k[1]-k[0])/k[0]*100, col=k[1]>=k[0]?'#f23645':'#089981';
+      const yrs=em.e-em.s+1, pct=(k[1]-k[0])/k[0]*100, col=k[1]>=k[0]?UP:DOWN;
       setPrice([['即位价',k[0]],['退位价',k[1],col],['在位涨跌幅',(pct>=0?'+':'')+pct.toFixed(2)+'%',col]]);
       document.getElementById('cDesc').textContent =
         '在位 '+yrs+' 年（'+em.s+'–'+em.e+'），国运自 '+k[0]+' 收于 '+k[1]+'，'+(pct>=0?'累涨':'累跌')+' '+Math.abs(pct).toFixed(2)+'%'
@@ -509,6 +770,7 @@
     // ---- 一次性全局监听（跨王朝复用） ----
     document.getElementById('cardClose').addEventListener('click',()=>card.classList.add('hidden'));
     document.getElementById('backHome').addEventListener('click',()=>{ window.location.href='dynasty-exchange.html'; });
+    document.getElementById('crumbHome').addEventListener('click',()=>{ window.location.href='dynasty-exchange.html'; });
     window.addEventListener('resize', ()=>{ if(chart) chart.resize(); });
     Array.prototype.forEach.call(document.querySelectorAll('.seg button'),b=>{
       b.addEventListener('click',()=>{
@@ -521,6 +783,31 @@
         render();
       });
     });
+    // 二级导航锚点滚动
+    Array.prototype.forEach.call(document.querySelectorAll('.anchor-link'),a=>{
+      a.addEventListener('click',()=>{
+        Array.prototype.forEach.call(document.querySelectorAll('.anchor-link'),x=>x.classList.remove('active'));
+        a.classList.add('active');
+        const t=document.getElementById(a.dataset.anchor);
+        if(t) t.scrollIntoView({behavior:'smooth',block:'start'});
+      });
+    });
+    // 加入自选（会话内状态，按王朝代码记忆）
+    const favSet=new Set();
+    document.getElementById('favBtn').addEventListener('click',function(){
+      const code=D?D.dynasty.code:'';
+      if(!code) return;
+      const on=!favSet.has(code);
+      if(on) favSet.add(code); else favSet.delete(code);
+      this.textContent=on?'✓ 已自选':'加入自选';
+      this.classList.toggle('faved',on);
+    });
+    function syncFavBtn(){
+      const b=document.getElementById('favBtn');
+      const on=D && favSet.has(D.dynasty.code);
+      b.textContent=on?'✓ 已自选':'加入自选';
+      b.classList.toggle('faved',!!on);
+    }
 
     // ---- 启动：桌面端走 pywebview js_api（SQLite 唯一数据源），浏览器回退 data.js ----
     function waitForApi(timeout){
@@ -548,10 +835,11 @@
           const active=list.find(d=>d.code===want) || list.find(d=>d.isActive) || list[0];
           sel.value=active.code;
           mount(JSON.parse(await api.get_dynasty(active.code)));
+          syncFavBtn();
           sel.addEventListener('change', async ()=>{
             if(location.hash) location.hash='';   // 手动切换后清除深链，避免刷新跳回
             const d=JSON.parse(await api.get_dynasty(sel.value));
-            if(d && !d.error) mount(d);
+            if(d && !d.error){ mount(d); syncFavBtn(); }
           });
           // 同页 hash 变化（如从别处改链直达另一王朝）也响应
           window.addEventListener('hashchange', async ()=>{
@@ -561,6 +849,7 @@
             if(!hit) return;
             sel.value=c;
             mount(JSON.parse(await api.get_dynasty(c)));
+            syncFavBtn();
           });
         }else if(window.DYNASTY_DATA){
           mount(window.DYNASTY_DATA);   // 浏览器演示模式

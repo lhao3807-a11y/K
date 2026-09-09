@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 """dynasty-exchange.html 结构校验测试（纯标准库，无需安装依赖）。
 
+新 UI（浅色极简风）结构基线：
+  黑色导航(logo+搜索) / Hero / 市场概览条 / 焦点行情 / 王朝卡片×6 / 人物预告 / 页脚
+
 用法：
     python tests/test_dynasty_exchange_html.py
 """
@@ -29,19 +32,19 @@ class StructureChecker(HTMLParser):
             "svg": 0,
             "chip": 0,
             "dynasty-card": 0,
-            "tab": 0,
+            "nav-link": 0,
         }
 
     def handle_starttag(self, tag, attrs):
         classes = dict(attrs).get("class", "").split()
         if tag == "svg":
             self.counts["svg"] += 1
-        if "chip" in classes and "subnav" not in classes:
+        if "chip" in classes:
             self.counts["chip"] += 1
         if "dynasty-card" in classes:
             self.counts["dynasty-card"] += 1
-        if "tab" in classes:
-            self.counts["tab"] += 1
+        if "nav-link" in classes:
+            self.counts["nav-link"] += 1
         if tag not in VOID_ELEMENTS:
             self.stack.append(tag)
 
@@ -88,29 +91,35 @@ def run_tests():
     # 2. 关键内容标记
     for marker, desc in [
         ("王朝交易所", "Logo"),
-        ("王朝行情", "第一层 Tab"),
-        ("即将上线", "人物板块徽标"),
-        ("王朝标的", "第二层导航前缀"),
-        ("SONG.960", "大宋代码"),
-        ("全部行情", "二级导航-全部"),
-        ("QIN.221", "秦"),
-        ("HAN.202", "汉"),
-        ("TANG.618", "唐"),
-        ("YUAN.1271", "元"),
-        ("MING.1368", "明"),
-        ("QING.1644", "清"),
-        ("陈桥兵变", "事件标注-上市"),
-        ("靖康之难", "事件标注-崩盘"),
-        ("崖山海战", "事件标注-退市"),
-        ("发行价 100", "发行价基准线"),
+        ("DYNASTY EXCHANGE", "品牌英文"),
+        ("把五千年，看成一条 K 线。", "Hero 主标题"),
+        ("进入行情", "主 CTA"),
+        ("了解玩法", "次 CTA"),
+        ("交易中", "市场状态"),
+        ("搜索王朝", "搜索占位"),
+        ("挂牌王朝", "概览-挂牌"),
+        ("国运综合指数", "概览-指数"),
+        ("上涨家数", "概览-上涨"),
+        ("下跌家数", "概览-下跌"),
+        ("大事记收录", "概览-大事记"),
+        ("焦点行情", "焦点区标签"),
+        ("大宋王朝", "焦点王朝"),
+        ("DASONG.960", "大宋代码"),
+        ("查看详情", "焦点区按钮"),
+        ("王朝行情", "列表标题"),
+        ('data-filter="up"', "筛选-上涨"),
+        ('data-filter="down"', "筛选-下跌"),
+        ('data-filter="unified"', "筛选-大一统"),
+        ('data-filter="split"', "筛选-分裂期"),
         ("大秦王朝", "列表卡-秦"),
         ("大汉王朝", "列表卡-汉"),
         ("大唐王朝", "列表卡-唐"),
-        ("大元王朝", "列表卡-元"),
         ("大明王朝", "列表卡-明"),
         ("大清王朝", "列表卡-清"),
-        ("人物板块 · 筹备中", "人物预告"),
-        ("DYNASTY EXCHANGE", "页脚品牌"),
+        ("人物板块", "人物预告"),
+        ("即将上线", "预告徽标"),
+        ("预约上线提醒", "预告按钮"),
+        ("不构成投资建议", "页脚免责"),
     ]:
         if marker not in html:
             failures.append(f"缺少内容元素：{desc}（{marker}）")
@@ -124,22 +133,19 @@ def run_tests():
         failures.append(f"存在未闭合标签: {checker.stack}")
 
     # 4. 数量校验
-    expect_counts = {
-        "svg": 9,            # logo + 搜索 + 层级 + 锁 + 大宋大图 + 6 张卡片迷你K线 = 10? 见下
-        "dynasty-card": 6,
-        "tab": 2,
-    }
-    # 重新精确计数 svg：logo(1)+search(1)+层级(1)+锁(1)+大宋(1)+卡片(6) = 11
-    svg_expected = 11
+    # svg：logo(1) + 搜索(1) + 焦点K线(1) + 卡片迷你走势(6) = 9
+    svg_expected = 9
     if checker.counts["svg"] != svg_expected:
         failures.append(f"SVG 数量不符：期望 {svg_expected}，实际 {checker.counts['svg']}")
-    if checker.counts["dynasty-card"] != expect_counts["dynasty-card"]:
+    if checker.counts["dynasty-card"] != 6:
         failures.append(f"王朝卡片数量不符：期望 6，实际 {checker.counts['dynasty-card']}")
-    if checker.counts["tab"] != expect_counts["tab"]:
-        failures.append(f"导航 Tab 数量不符：期望 2，实际 {checker.counts['tab']}")
+    if checker.counts["nav-link"] != 4:
+        failures.append(f"导航链接数量不符：期望 4，实际 {checker.counts['nav-link']}")
+    if checker.counts["chip"] != 5:
+        failures.append(f"筛选 chips 数量不符：期望 5，实际 {checker.counts['chip']}")
     chip_active = html.count('class="chip active"')
     if chip_active != 1:
-        failures.append(f"二级导航选中芯片应恰为 1 个，实际 {chip_active}")
+        failures.append(f"筛选 chips 选中态应恰为 1 个，实际 {chip_active}")
 
     if failures:
         print("测试未通过：")
@@ -149,7 +155,7 @@ def run_tests():
 
     print(f"[PASS] {TARGET.name}：结构完整，标签配对正确，"
           f"SVG={checker.counts['svg']} 卡片={checker.counts['dynasty-card']} "
-          f"Tab={checker.counts['tab']} 选中芯片=1")
+          f"导航链接={checker.counts['nav-link']} chips={checker.counts['chip']} 选中=1")
     return 0
 
 
