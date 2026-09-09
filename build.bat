@@ -9,6 +9,7 @@ set PY=C:\Users\20578\.workbuddy\binaries\python\envs\default\Scripts\python.exe
   --add-data "dynasty-exchange.html;." ^
   --add-data "index.html;." ^
   --add-data "data.js;." ^
+  --add-data "kline.js;." ^
   --add-data "echarts.min.js;." ^
   --add-data "database\dynasty.db;database" ^
   app.py
