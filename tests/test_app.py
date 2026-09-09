@@ -91,21 +91,28 @@ def test_index_html_is_offline_only():
     assert "cdn.jsdelivr.net" not in html
 
 
-def test_build_packs_all_page_scripts():
-    """页面引用的本地脚本必须全部出现在打包清单（build.bat 与 spec），
-    否则 exe 内脚本 404、二级页面初始化崩溃（V1.1.0 曾漏掉 kline.js）。"""
+def test_build_packs_all_page_assets():
+    """所有页面引用的本地脚本与页面间链接必须全部出现在打包清单
+    （build.bat 与 spec），否则 exe 内 404、二级页面崩溃
+    （V1.1.0 曾漏掉 kline.js 与 figure.html/figure_data.js）。"""
     import re
     root = pathlib.Path(app.BASE_DIR)
+    pages = [p.name for p in root.glob("*.html")]
+    assert {"index.html", "dynasty-exchange.html", "figure.html"} <= set(pages)
     referenced = set()
-    for page in ("index.html", "dynasty-exchange.html"):
+    for page in pages:
         html = (root / page).read_text(encoding="utf-8")
         referenced |= set(re.findall(r'<script src="\./([^"]+)"></script>', html))
-    assert "kline.js" in referenced  # 页面确实依赖引擎时本测试才有意义
+        # 页面间本地链接（导航/卡片跳转），如 ./figure.html
+        referenced |= {m.lstrip("./") for m in re.findall(
+            r'(?:href|location\.href\s*=\s*)[\'"]\./?([\w-]+\.html)', html)}
+    for must in ("kline.js", "figure.html", "figure_data.js"):
+        assert must in referenced, f"扫描器未捕获 {must}，正则需更新"
     build_bat = (root / "build.bat").read_text(encoding="utf-8")
     spec = (root / "DynastyKline.spec").read_text(encoding="utf-8")
-    for script in referenced:
-        assert f'"{script};."' in build_bat, f"build.bat 缺 {script}"
-        assert f"('{script}', '.')" in spec, f"DynastyKline.spec 缺 {script}"
+    for asset in referenced:
+        assert f'"{asset};."' in build_bat, f"build.bat 缺 {asset}"
+        assert f"('{asset}', '.')" in spec, f"DynastyKline.spec 缺 {asset}"
 
 
 def test_exchange_home_wired_to_js_api_and_navigation():

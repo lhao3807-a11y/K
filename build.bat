@@ -8,7 +8,9 @@ set PY=C:\Users\20578\.workbuddy\binaries\python\envs\default\Scripts\python.exe
   --name "DynastyKline-V1.1.0" ^
   --add-data "dynasty-exchange.html;." ^
   --add-data "index.html;." ^
+  --add-data "figure.html;." ^
   --add-data "data.js;." ^
+  --add-data "figure_data.js;." ^
   --add-data "kline.js;." ^
   --add-data "echarts.min.js;." ^
   --add-data "database\dynasty.db;database" ^
