@@ -47,13 +47,13 @@ def test_api_list_dynasties_has_data_flag():
     lst = json.loads(app.Api().list_dynasties())
     by = {d["code"]: d for d in lst}
     assert by["DASONG.960"]["hasData"] is True
-    # 八大统一王朝（秦→清）已全部录入完整数据，hasData 应为 True
-    for code in ("DAQIN.221", "DAHAN.202", "SUI.581", "TANG.618", "DASONG.960",
-                 "YUAN.1271", "MING.1368", "QING.1644"):
+    # 八大统一王朝 + 两晋（西晋+东晋合并）已录入完整数据，hasData 应为 True
+    for code in ("DAQIN.221", "DAHAN.202", "JIN.266", "SUI.581", "TANG.618",
+                 "DASONG.960", "YUAN.1271", "MING.1368", "QING.1644"):
         if code in by:
             assert by[code]["hasData"] is True, f"{code} 应有完整数据"
-    # 分裂期（三国/两晋/南北朝/五代）仍是纯元数据占位
-    for code in ("SG.220", "JIN.266", "NBC.420", "WUDAI.907"):
+    # 分裂期（三国/南北朝/五代）仍是纯元数据占位
+    for code in ("SG.220", "NBC.420", "WUDAI.907"):
         if code in by:
             assert by[code]["hasData"] is False, f"{code} 应为占位"
     # 按 start_year 升序，覆盖秦→清

@@ -33,6 +33,7 @@ MAG_RE = re.compile(r"^[+±-][大小中巨]$")
 # 模块 -> [(显示名, 常量名), ...]
 REGISTRY = {
     "qin_han":          [("秦", "QIN"), ("汉", "HAN")],
+    "jin":              [("晋", "JIN")],
     "sui_tang":         [("隋", "SUI"), ("唐", "TANG")],
     "yuan_ming_qing":   [("元", "YUAN"), ("明", "MING"), ("清", "QING")],
 }
