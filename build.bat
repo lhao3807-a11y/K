@@ -5,7 +5,7 @@ setlocal
 set PY=C:\Users\20578\.workbuddy\binaries\python\envs\default\Scripts\python.exe
 
 "%PY%" -m PyInstaller --noconfirm --onefile --windowed ^
-  --name "DynastyKline" ^
+  --name "DynastyKline-V1.0.0" ^
   --add-data "dynasty-exchange.html;." ^
   --add-data "index.html;." ^
   --add-data "data.js;." ^
@@ -18,5 +18,5 @@ if errorlevel 1 (
   exit /b 1
 )
 echo.
-echo BUILD OK: dist\DynastyKline.exe
+echo BUILD OK: dist\DynastyKline-V1.0.0.exe
 endlocal

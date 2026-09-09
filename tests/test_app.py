@@ -2,6 +2,7 @@
 """桌面壳（app.py）测试：资源解析、js_api 数据、WebView2 预检、冒烟启动。"""
 import json
 import os
+import pathlib
 import subprocess
 import sys
 
@@ -152,8 +153,8 @@ def test_watchlist_persisted_and_keyboard_nav():
     # 键盘 ←/→ 切换：跳过输入控件焦点，越界不动
     assert "'ArrowLeft'" in chart and "'ArrowRight'" in chart
     assert "tag==='INPUT'||tag==='SELECT'||tag==='TEXTAREA'" in chart
-    # 二级导航键盘提示（桌面数据源就绪时显示）
-    assert 'id="kbdHint"' in chart and "kbdHint').style.display=''" in chart
+    # 「←/→ 切换」提示文字已移除，但键盘切换与两侧箭头功能保留
+    assert "kbdHint" not in chart and "kbd-hint" not in chart
 
 
 def test_nav_watchlist_side_arrows_and_follow_card():

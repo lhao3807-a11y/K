@@ -25,7 +25,9 @@ BASE_DIR = pathlib.Path(__file__).resolve().parent
 # PyInstaller --onefile 模式下，资源解压到 sys._MEIPASS 临时目录
 RESOURCE_BASE = pathlib.Path(getattr(sys, "_MEIPASS", BASE_DIR))
 
-WINDOW_TITLE = "王朝交易所 · DYNASTY EXCHANGE"
+# 版本规范（见 AGENTS.md）：小改动 +0.0.1，大改动 +0.1.0；发版需同步 build.bat / spec 产物名
+APP_VERSION = "1.0.0"
+WINDOW_TITLE = f"DynastyKline—V{APP_VERSION}"
 HOME_PAGE = "dynasty-exchange.html"   # 启动首页（设计稿）；index.html 为行情盘面页
 MIN_SIZE = (960, 640)
 DEFAULT_SIZE = (1280, 860)

@@ -55,8 +55,6 @@
   .anchor-link:hover{color:var(--blue)}
   .anchor-link.active{color:var(--blue);font-weight:500}
   .dynsel{background:#FFFFFF;color:var(--text);border:1px solid var(--line);border-radius:9999px;font-family:var(--font-cn);font-size:13px;padding:7px 12px;cursor:pointer;max-width:220px}
-  .kbd-hint{display:none;font-family:var(--font-mono);font-size:11px;color:#86868B;background:#F5F5F7;border-radius:6px;padding:4px 8px;cursor:default}
-  @media (min-width:1100px){.kbd-hint{display:inline}}
   .dynsel:focus{outline:none;border-color:var(--blue)}
   .favbtn{background:var(--blue);border:none;border-radius:9999px;color:#FFFFFF;font-size:13px;font-weight:500;padding:8px 18px;cursor:pointer;font-family:var(--font-cn);transition:background .15s}
   .favbtn:hover{background:var(--blue-hover)}
@@ -221,7 +219,6 @@
       <a class="anchor-link active" data-anchor="chartAnchor" data-page-node-id="ROI92m313lAncueHH9re1V">K线</a>
       <a class="anchor-link" data-anchor="emperorAnchor" data-page-node-id="epUQX49f7vatIJIQxOA6hS">帝王</a>
       <a class="anchor-link" data-anchor="eventsAnchor" data-page-node-id="CwMDewb8LCdZI2rmf95xHy">大事记</a>
-      <span class="kbd-hint" id="kbdHint" title="键盘 ← / → 切换上/下一个王朝" data-page-node-id="KbdHint001" style="display:none">←/→ 切换</span>
       <select id="dynSwitch" class="dynsel" style="display:none" title="切换王朝标的" data-page-node-id="JhZLnDOlfOyHypws2Y2k4k"></select>
       <button class="favbtn" id="favBtn" data-page-node-id="XiA0vFV5VYOAd7g5XiLLZu">加入自选</button>
     </div>
@@ -315,7 +312,7 @@
   </div>
 
   <footer data-page-node-id="scP97MPBWWDqu1vXY6mBm0">
-    <p data-page-node-id="ZLqzGl744BSLOkE6FsRZzZ">王朝交易所 DYNASTY EXCHANGE · 国运指数为叙事化演绎，不构成投资建议</p>
+    <p data-page-node-id="ZLqzGl744BSLOkE6FsRZzZ">王朝交易所 DYNASTY EXCHANGE V1.0.0 · 国运指数为叙事化演绎，不构成投资建议</p>
     <p data-page-node-id="DfEK75Ikq73mpcEi46OtXQ">事件线索参考《上下五千年》，市场标注为人工策划</p>
   </footer>
 
@@ -640,6 +637,9 @@
           +'<span class="event-name">'+e.title+' · '+e.term+'</span>'
           +'<span class="event-impact '+ic+'">'+impact+'</span>';
         d.addEventListener('click',()=>selectEvent(i,true));
+        // 词条悬停即出浮卡，光标移开词条立即消失
+        d.addEventListener('mouseenter',()=>selectEvent(i,false));
+        d.addEventListener('mouseleave',hideCard);
         tl.appendChild(d);
       });
     }
@@ -796,7 +796,8 @@
     }
 
     // ---- 一次性全局监听（跨王朝复用） ----
-    document.getElementById('cardClose').addEventListener('click',()=>card.classList.add('hidden'));
+    function hideCard(){ card.classList.add('hidden'); cardFollow=false; }
+    document.getElementById('cardClose').addEventListener('click',hideCard);
     document.getElementById('backHome').addEventListener('click',()=>{ window.location.href='dynasty-exchange.html'; });
     document.getElementById('crumbHome').addEventListener('click',()=>{ window.location.href='dynasty-exchange.html'; });
     window.addEventListener('resize', ()=>{ if(chart) chart.resize(); });
@@ -887,7 +888,6 @@
           const list=JSON.parse(await api.list_dynasties());
           if(!list.length){ showFatal('数据库中暂无王朝数据 —— 请先运行：python database/manage.py init'); return; }
           sel.style.display='';
-          document.getElementById('kbdHint').style.display='';
           sel.innerHTML=list.map(d=>'<option value="'+d.code+'">'+d.name+' '+d.code+'</option>').join('');
           // 深链优先：dynasty-exchange.html 跳转时带 #CODE
           const want=decodeURIComponent((location.hash||'').replace('#',''));
