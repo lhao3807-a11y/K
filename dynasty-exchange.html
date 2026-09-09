@@ -792,10 +792,10 @@
       });
       applyFilter();
 
-      // 焦点行情区：在市且有数据者优先，其次任一有数据王朝，全筹备中取第一支
-      var feat=(list.find(function(d){return d.isActive && hasData(full[d.code])})
-             || list.find(function(d){return hasData(full[d.code])})
-             || list[0]);
+      // 焦点行情区：每次进入程序随机挑一支（有数据王朝优先入池），不再固定标的
+      var withData=list.filter(function(d){ return hasData(full[d.code]); });
+      var pool=withData.length?withData:list;
+      var feat=pool[Math.floor(Math.random()*pool.length)];
       renderFeatured(full[feat.code], feat.code, feat.name);
     })();
   })();

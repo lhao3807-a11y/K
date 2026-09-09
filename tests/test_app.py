@@ -109,12 +109,14 @@ def test_exchange_home_wired_to_js_api_and_navigation():
     assert "applyFilter" in js and "searchInput" in js
 
 
-def test_exchange_home_featured_peak_trough_and_motion():
-    """首页焦点区：波峰/波谷标注（与盘面页同算法）+ 动效与交互。"""
+def test_exchange_home_featured_random_and_extreme_marks():
+    """首页焦点区：每次进入随机标的 + 极值锚点标注（与盘面页同算法）+ 动效与交互。"""
     with open(app.resource_path("dynasty-exchange.html"), encoding="utf-8") as f:
         js = f.read()
     assert "extMap" in js and "RANK=" in js   # 极值→事件绑定（巨>大>中>小）
     assert "pt-mark" in js                    # 极值标注样式钩子
+    assert "Math.random()*pool.length" in js  # 焦点标的每次进入随机挑选
+    assert "withData" in js                   # 随机池限定有数据王朝
     assert "countUp" in js                    # 关键数字滚动动画
     assert "animation-delay" in js            # 卡片错峰入场
     assert "prefers-reduced-motion" in js     # 尊重系统减弱动效设置
@@ -131,13 +133,23 @@ def test_chart_page_supports_deep_link_and_back():
 
 
 def test_chart_page_peak_trough_event_marks():
-    """波峰/波谷标注：锚点局部极值绑定邻近最大冲击事件，不随缩放折叠。"""
+    """峰谷锚点：局部极值绑定邻近最大冲击事件，放大锚点标识、不写文字标注。"""
     with open(app.resource_path("index.html"), encoding="utf-8") as f:
         js = f.read()
     assert "function extremeEvents" in js       # 极值检测来自锚点序列
     assert "MAG_RANK" in js                     # 冲击幅度分级 巨>大>中>小
-    assert "波峰" in js and "波谷" in js
+    assert "波峰" not in js and "波谷" not in js  # 只留锚点，不写「波峰/波谷」字样
+    assert "symbolSize:ext?11:9" in js          # 极值锚点比普通事件点更大
     assert "labelFull || ext" in js             # 极值标注始终展开完整两行
+
+
+def test_chart_page_data_panels_below_chart():
+    """盘面页布局：关键数据 / 大事记面板位于 K 线图下方（below-row 双卡），不再侧挂。"""
+    with open(app.resource_path("index.html"), encoding="utf-8") as f:
+        html = f.read()
+    assert 'class="below-row"' in html
+    assert 0 < html.find('id="chart"') < html.find('class="below-row"')  # 数据区在图表区之后
+    assert 'id="statsAnchor"' in html and 'id="eventsAnchor"' in html
 
 
 def test_index_html_boot_uses_js_api_with_demo_fallback():

@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html lang="zh-CN" data-page-node-id="uG97yqYE4yDbMUdDPtsAhl">
+<head data-page-node-id="fb07xGBtWFUXDxN8F6o7wK">
+<meta charset="UTF-8" data-page-node-id="GFqQKf2mFez28DYCPgHRKO">
+<meta name="viewport" content="width=device-width, initial-scale=1.0" data-page-node-id="L6lXKrugGCASNpP0kgtSHc">
 <title>王朝 K 线 · DYNASTY EXCHANGE</title>
 <style>
   :root{
@@ -83,8 +83,9 @@
   .metric label{font-size:12px;color:var(--text-3)}
   .metric b{font-family:var(--mono);font-size:14px;font-weight:500;color:var(--text)}
 
-  /* ============ 图表主区 ============ */
-  .chart-row{display:flex;gap:24px;padding:0 48px 48px;align-items:flex-start}
+  /* ============ 图表主区 + 下方数据区 ============ */
+  .chart-row{display:flex;padding:0 48px 24px}
+  .below-row{display:flex;gap:24px;padding:0 48px 48px;align-items:flex-start}
   .chart-card{flex:1;min-width:0;display:flex;flex-direction:column;gap:12px;background:#FFFFFF;border:1px solid var(--line);border-radius:18px;padding:20px}
   .chart-toolbar{display:flex;align-items:center;justify-content:space-between}
   .seg{display:flex;gap:4px;background:var(--bg-alt);border-radius:9999px;padding:4px}
@@ -95,8 +96,8 @@
   .toolbar-note i{font-style:normal;color:var(--blue)}
   #chart{width:100%;height:480px}
 
-  /* ============ 右侧数据面板 ============ */
-  .side-panel{width:320px;flex:none;display:flex;flex-direction:column;gap:12px;background:#FFFFFF;border:1px solid var(--line);border-radius:18px;padding:20px}
+  /* ============ 图表下方数据面板（关键数据 / 大事记） ============ */
+  .side-panel{flex:1;min-width:0;display:flex;flex-direction:column;gap:12px;background:#FFFFFF;border:1px solid var(--line);border-radius:18px;padding:20px}
   .panel-title{font-size:16px;font-weight:600}
   .panel-divider{width:100%;height:1px;background:var(--grid)}
   .stat-row{display:flex;align-items:center;justify-content:space-between}
@@ -163,133 +164,139 @@
   .side-panel{animation:rise .55s .12s cubic-bezier(.22,.61,.36,1) both}
   .emperor-sec{animation:rise .6s .18s cubic-bezier(.22,.61,.36,1) both}
   @media (prefers-reduced-motion: reduce){*{animation:none !important;transition:none !important}}
-  @media (max-width:1100px){.chart-row{flex-direction:column}.side-panel{width:100%}}
+  @media (max-width:1100px){.below-row{flex-direction:column}}
   @media (max-width:720px){.subnav{padding:0 20px}.price-head,.chart-row,.emperor-sec,footer{padding-left:20px;padding-right:20px}#card{left:16px;right:16px;width:auto;top:auto;bottom:16px;max-height:52vh}}
 </style>
 </head>
-<body>
+<body data-page-node-id="4qaw4xNheC3IQ9QF7RZncB">
 
   <!-- ==================== 全局导航 ==================== -->
-  <header class="nav">
-    <div class="logo-group">
-      <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect width="26" height="26" rx="7" fill="#0066CC"/>
-        <line x1="9" y1="5" x2="9" y2="21" stroke="#FFFFFF" stroke-width="1.5"/>
-        <rect x="7" y="9" width="4" height="8" rx="1" fill="#FFFFFF"/>
-        <line x1="17" y1="7" x2="17" y2="23" stroke="#FFFFFF" stroke-width="1.5"/>
-        <rect x="15" y="12" width="4" height="7" rx="1" fill="#FFFFFF"/>
+  <header class="nav" data-page-node-id="fNHbjGQSfTP0J4FwNAzRPW">
+    <div class="logo-group" data-page-node-id="bUYvNwobIzbkuydusTzJfE">
+      <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg" data-page-node-id="phD2fsgP7aFCh82K2xfeYU">
+        <rect width="26" height="26" rx="7" fill="#0066CC" data-page-node-id="AcIjbx7ewXc0FIu4veSR46"/>
+        <line x1="9" y1="5" x2="9" y2="21" stroke="#FFFFFF" stroke-width="1.5" data-page-node-id="slk89XzIpuDoCWCc3ib3tP"/>
+        <rect x="7" y="9" width="4" height="8" rx="1" fill="#FFFFFF" data-page-node-id="BZBeExrd8IlQaOIZ9M9NbB"/>
+        <line x1="17" y1="7" x2="17" y2="23" stroke="#FFFFFF" stroke-width="1.5" data-page-node-id="toUgHiGD5E5ZIz60o7LXZg"/>
+        <rect x="15" y="12" width="4" height="7" rx="1" fill="#FFFFFF" data-page-node-id="0JEk5fAPhu1Gs0d2Wt7lIT"/>
       </svg>
-      <div class="logo-text">
-        <div class="logo-cn">王朝交易所</div>
-        <div class="logo-en">DYNASTY EXCHANGE</div>
+      <div class="logo-text" data-page-node-id="GyBb0TyxNpn1l7AK7SrqoW">
+        <div class="logo-cn" data-page-node-id="Lo7pLu4dZ25aaTkbp7lQYh">王朝交易所</div>
+        <div class="logo-en" data-page-node-id="2R87XjHUU23WJxGlGvlgml">DYNASTY EXCHANGE</div>
       </div>
     </div>
-    <nav class="nav-links">
-      <a class="nav-link active" href="dynasty-exchange.html">王朝</a>
-      <a class="nav-link">人物</a>
-      <a class="nav-link">数据</a>
-      <a class="nav-link">关于</a>
+    <nav class="nav-links" data-page-node-id="ZVlWyLqnrS1gA2Sm13he45">
+      <a class="nav-link active" href="dynasty-exchange.html" data-page-node-id="RsBXCRp3AxL9pvnpQ1GTOs">王朝</a>
+      <a class="nav-link" data-page-node-id="NjVZjFUSrixWmBLZztryzB">人物</a>
+      <a class="nav-link" data-page-node-id="aC4TanfiIIooWMQuv4lu9g">数据</a>
+      <a class="nav-link" data-page-node-id="CwJ7X954CHCd7HrpEbmzZf">关于</a>
     </nav>
-    <div class="nav-right">
-      <button id="backHome" class="backbtn" title="返回王朝交易所">‹ 返回交易所</button>
-      <div class="market-status">
-        <div class="status-dot"></div>
-        <span class="status-text">交易中</span>
+    <div class="nav-right" data-page-node-id="0mbR3X8vLMyyCVdC2pB5ku">
+      <button id="backHome" class="backbtn" title="返回王朝交易所" data-page-node-id="0csFFTMRQ3IEnH7xDRFgfp">‹ 返回交易所</button>
+      <div class="market-status" data-page-node-id="yGheD79fVm8FmGv0BqnErH">
+        <div class="status-dot" data-page-node-id="XB4cAOKokVcaBJ9dt7kKfN"></div>
+        <span class="status-text" data-page-node-id="VseURZjAoK0xdKpsVSitqq">交易中</span>
       </div>
     </div>
   </header>
 
   <!-- ==================== 二级导航（磨砂） ==================== -->
-  <nav class="subnav">
-    <div class="subnav-left">
-      <span class="subnav-name" id="subName">--</span>
-      <span class="subnav-code" id="subCode">--</span>
+  <nav class="subnav" data-page-node-id="8AENCtDF2paOtOf1abmZrU">
+    <div class="subnav-left" data-page-node-id="1tzdbjgH4kwSeZqcfai0Xc">
+      <span class="subnav-name" id="subName" data-page-node-id="vPl3qvRMhiQ4Bg4wJ64v7y">--</span>
+      <span class="subnav-code" id="subCode" data-page-node-id="rzWXgbTEygBgHhAa6JiWFP">--</span>
     </div>
-    <div class="subnav-right">
-      <a class="anchor-link active" data-anchor="chartAnchor">K线</a>
-      <a class="anchor-link" data-anchor="emperorAnchor">帝王</a>
-      <a class="anchor-link" data-anchor="eventsAnchor">大事记</a>
-      <select id="dynSwitch" class="dynsel" style="display:none" title="切换王朝标的"></select>
-      <button class="favbtn" id="favBtn">加入自选</button>
+    <div class="subnav-right" data-page-node-id="IdauGPvQBNe2IzqPv67tFr">
+      <a class="anchor-link active" data-anchor="chartAnchor" data-page-node-id="ROI92m313lAncueHH9re1V">K线</a>
+      <a class="anchor-link" data-anchor="emperorAnchor" data-page-node-id="epUQX49f7vatIJIQxOA6hS">帝王</a>
+      <a class="anchor-link" data-anchor="eventsAnchor" data-page-node-id="CwMDewb8LCdZI2rmf95xHy">大事记</a>
+      <select id="dynSwitch" class="dynsel" style="display:none" title="切换王朝标的" data-page-node-id="JhZLnDOlfOyHypws2Y2k4k"></select>
+      <button class="favbtn" id="favBtn" data-page-node-id="XiA0vFV5VYOAd7g5XiLLZu">加入自选</button>
     </div>
   </nav>
 
   <!-- ==================== 价格头部 ==================== -->
-  <section class="price-head">
-    <div class="breadcrumb">
-      <span class="crumb" id="crumbHome">全部王朝</span><span class="sep">/</span>
-      <span class="current" id="crumbCur">--</span>
+  <section class="price-head" data-page-node-id="4roRWZkX6eI444gN5yRuwp">
+    <div class="breadcrumb" data-page-node-id="mgCHyDBeZ6AuvK4GaTLyHI">
+      <span class="crumb" id="crumbHome" data-page-node-id="CbQBDXt5EqWNxLrdrCOq0Z">全部王朝</span><span class="sep" data-page-node-id="lWt47ObegxDMCyy70TfApS">/</span>
+      <span class="current" id="crumbCur" data-page-node-id="GxOTfyEVpaqsSlCl8jDnHH">--</span>
     </div>
-    <div class="title-row">
-      <h1 class="dynasty-title" id="dynName">--</h1>
-      <span class="code-badge" id="dynCode">--</span>
-      <span class="status-tag up" id="dynStatus">--</span>
-      <span class="range-tag" id="dynRange">--</span>
+    <div class="title-row" data-page-node-id="QchFF1u3sXk7BcrGHLOQsB">
+      <h1 class="dynasty-title" id="dynName" data-page-node-id="AUJy7YS8ERalaYqVWqy3vE">--</h1>
+      <span class="code-badge" id="dynCode" data-page-node-id="MpnfxzMgtOc8HGOD5FLuOb">--</span>
+      <span class="status-tag up" id="dynStatus" data-page-node-id="9cJEFYoBCHlbbGxPpB5IP9">--</span>
+      <span class="range-tag" id="dynRange" data-page-node-id="Kd3BLZYPC3ADnxT4funQ4A">--</span>
     </div>
-    <div class="price-row">
-      <span class="price-now" id="px">--</span>
-      <span class="price-chg" id="chg">--</span>
+    <div class="price-row" data-page-node-id="eFchNKQ6lMRMQUeBbZHWP2">
+      <span class="price-now" id="px" data-page-node-id="oHwsDFZ0u54BjRERZlDzxh">--</span>
+      <span class="price-chg" id="chg" data-page-node-id="iB6obddOrU6F6t4sGAYDEB">--</span>
     </div>
-    <div class="metrics-row">
-      <div class="metric"><label>发行价</label><b id="mIssue">--</b></div>
-      <div class="metric"><label>历史最高</label><b id="mHi">--</b></div>
-      <div class="metric"><label>历史最低</label><b id="mLo">--</b></div>
-      <div class="metric"><label>终值</label><b id="mLast">--</b></div>
-      <div class="metric"><label>存续</label><b id="mDur">--</b></div>
-      <div class="metric"><label>帝王数</label><b id="mEmpN">--</b></div>
+    <div class="metrics-row" data-page-node-id="4zAW6F0Fp6gIrCpeoiB7Gl">
+      <div class="metric" data-page-node-id="IC7ZXiuqpMqOk561u2THwj"><label data-page-node-id="279qRuAAFvHQHb7hhc7gOk">发行价</label><b id="mIssue" data-page-node-id="qM8StRJtyil1O3K1se5RTW">--</b></div>
+      <div class="metric" data-page-node-id="H0ZtlnO97u5IMxRzKbSGlG"><label data-page-node-id="RsuKKhrB4FydeQ73MXhJ1a">历史最高</label><b id="mHi" data-page-node-id="HEnKoCM6sBfSNgGpWlhEi5">--</b></div>
+      <div class="metric" data-page-node-id="NQrdV5wSVwUL2b4AXFHphI"><label data-page-node-id="YugwTzgXjuFcbkQKgjm9Rx">历史最低</label><b id="mLo" data-page-node-id="HBwGvMyQhYfT8ny5PRGroC">--</b></div>
+      <div class="metric" data-page-node-id="m2z6CeLF0xE0DYoDxDLYJC"><label data-page-node-id="zKgUbJXRhPb45v4CUMioDY">终值</label><b id="mLast" data-page-node-id="U9IyRyO2ioUPyhftSC6ryz">--</b></div>
+      <div class="metric" data-page-node-id="L48HghhFn8Gb9xu5THqcfj"><label data-page-node-id="6f4HFUQB0BJdgtr9YWDx4D">存续</label><b id="mDur" data-page-node-id="Bw5OfLz87c8DEcFXSBGbAi">--</b></div>
+      <div class="metric" data-page-node-id="IFW08tJry5rrPg8NmMa6sj"><label data-page-node-id="06OXHhBk6yE7S6b3T58FMv">帝王数</label><b id="mEmpN" data-page-node-id="Nx1ikkM3S1nt04yyCcE1Y0">--</b></div>
     </div>
   </section>
 
   <!-- ==================== 图表主区 ==================== -->
-  <section class="chart-row" id="chartAnchor">
-    <div class="chart-card">
-      <div class="chart-toolbar">
-        <div class="seg">
-          <button class="on" data-mode="year">年 K</button>
-          <button data-mode="emperor">皇帝 K</button>
+  <section class="chart-row" id="chartAnchor" data-page-node-id="9O4AXg78U6GgjtgxNxcMNe">
+    <div class="chart-card" data-page-node-id="k7lCrsXulSYJvnYbMruF7x">
+      <div class="chart-toolbar" data-page-node-id="nQgVGhtHCoqChQOTPlOjqB">
+        <div class="seg" data-page-node-id="eHelkVjy8aPIAU1tRV29cT">
+          <button class="on" data-mode="year" data-page-node-id="dF6kwx4PgM3DPGX7FB81Gd">年 K</button>
+          <button data-mode="emperor" data-page-node-id="HLCJ2jsjHnD802bzIo1P5C">皇帝 K</button>
         </div>
-        <span class="toolbar-note">指标：MA / 事件 / 发行价<i id="lbHint"></i></span>
+        <span class="toolbar-note" data-page-node-id="xjvAAv4hh1r2WcKAVH1bBJ">指标：MA / 事件 / 发行价<i id="lbHint" data-page-node-id="DhPauVcTPCnakOc8oE53uk"></i></span>
       </div>
-      <div id="chart"></div>
+      <div id="chart" data-page-node-id="AVBwOGjYCP5rL3yT0T0i8c"></div>
     </div>
+  </section>
+
+  <!-- ==================== 图表下方：关键数据 + 大事记 ==================== -->
+  <section class="below-row">
+    <aside class="side-panel" id="statsAnchor">
+      <div class="panel-title" data-page-node-id="jz6DCEWuzwSoM6Oz6CQ1wz">关键数据</div>
+      <div class="panel-divider" data-page-node-id="Qg9wHwcjr2mP6Vw5OdE6Nw"></div>
+      <div class="stat-row" data-page-node-id="F7slw6CQYPfw89tPIv0EiE"><span class="stat-label" data-page-node-id="9Axk3PlzEk1tHSGIxe1Dq0">开国皇帝</span><span class="stat-value" id="sEmpFirst" data-page-node-id="p4NGVQBzfxMivzaXbFKeHa">--</span></div>
+      <div class="stat-row" data-page-node-id="XM0amQgeonFEb89WJCy30T"><span class="stat-label" data-page-node-id="JhH0wELMJEmz1HqpyKoTZO">末代帝王</span><span class="stat-value" id="sEmpLast" data-page-node-id="XQFGlRLDCvqf7kuGpZNJdd">--</span></div>
+      <div class="stat-row" data-page-node-id="AX4uB60u9eGbSiaDEWvAHN"><span class="stat-label" data-page-node-id="EnNC8OZG1zurljXpF5qepE">存续时长</span><span class="stat-value" id="sDur" data-page-node-id="BGkfmGQno4EbHvp0F9U9Lw">--</span></div>
+      <div class="stat-row" data-page-node-id="kUy3fzgEqbABieTbHuAuYQ"><span class="stat-label" data-page-node-id="QaleJdM9QtOlHeNTHIFFcz">帝王数量</span><span class="stat-value" id="sEmpCount" data-page-node-id="T2mg8DojHZuPjfd3BptyB6">--</span></div>
+      <div class="stat-row" data-page-node-id="9ubQB16Ogu2Dj107APJKQT"><span class="stat-label" data-page-node-id="AJapkI8zkj2Rr0y61612SS">国运峰值</span><span class="stat-value" id="sPeakYear" data-page-node-id="7cCmv2tVFYnKULQkeTRDnD">--</span></div>
+      <div class="stat-row" data-page-node-id="xqFNpFaHhMFysOvTEvhDl5"><span class="stat-label" data-page-node-id="nijs8R2jMx99l4im6DOspZ">峰值价格</span><span class="stat-value" id="sPeakVal" data-page-node-id="yzI0fgg5ZJJM3ulepoNimR">--</span></div>
+    </aside>
 
     <aside class="side-panel" id="eventsAnchor">
-      <div class="panel-title">关键数据</div>
-      <div class="panel-divider"></div>
-      <div class="stat-row"><span class="stat-label">开国皇帝</span><span class="stat-value" id="sEmpFirst">--</span></div>
-      <div class="stat-row"><span class="stat-label">末代帝王</span><span class="stat-value" id="sEmpLast">--</span></div>
-      <div class="stat-row"><span class="stat-label">存续时长</span><span class="stat-value" id="sDur">--</span></div>
-      <div class="stat-row"><span class="stat-label">帝王数量</span><span class="stat-value" id="sEmpCount">--</span></div>
-      <div class="stat-row"><span class="stat-label">国运峰值</span><span class="stat-value" id="sPeakYear">--</span></div>
-      <div class="stat-row"><span class="stat-label">峰值价格</span><span class="stat-value" id="sPeakVal">--</span></div>
-      <div class="panel-divider"></div>
       <div class="panel-title">大事记</div>
-      <div id="timeline"></div>
+      <div class="panel-divider" data-page-node-id="RZJMsLYrXh6aDripgiFRYl"></div>
+      <div id="timeline" data-page-node-id="dt70Z1QBjG3ppjdzFYD2k2"></div>
     </aside>
   </section>
 
   <!-- ==================== 帝王在位条 ==================== -->
-  <section class="emperor-sec" id="emperorAnchor">
-    <div class="emperor-head">
-      <span class="emperor-title">帝王在位条</span>
-      <span class="emperor-sub">条形长度 = 在位时长；颜色 = 任内国运涨跌（红涨绿跌）；点击可查看任内详情</span>
+  <section class="emperor-sec" id="emperorAnchor" data-page-node-id="bBU9xuRnSPuMTfio788I8w">
+    <div class="emperor-head" data-page-node-id="jRKpXKWZUYsPpTBuiqD9m1">
+      <span class="emperor-title" data-page-node-id="9DF99zKVp5FKXCBbP0Dxnk">帝王在位条</span>
+      <span class="emperor-sub" data-page-node-id="VxkzlMN1zAgovh4kk0Bmn7">条形长度 = 在位时长；颜色 = 任内国运涨跌（红涨绿跌）；点击可查看任内详情</span>
     </div>
-    <div id="empBars"></div>
+    <div id="empBars" data-page-node-id="qBjIZZYgKkdhNhuuhdY7xR"></div>
   </section>
 
   <!-- ==================== 事件详情浮卡 ==================== -->
-  <div id="card" class="hidden">
-    <button id="cardClose" aria-label="关闭">×</button>
-    <span class="cterm" id="cTerm"></span>
-    <h3 id="cTitle"></h3>
-    <div class="cmeta"><span>年份 <b id="cYear"></b></span><span><span id="cMagLabel">冲击</span> <b id="cMag"></b></span></div>
-    <div class="cprice hide" id="cPrice"></div>
-    <p id="cDesc"></p>
+  <div id="card" class="hidden" data-page-node-id="vqeHO2g3e8zdyNfipKnnoZ">
+    <button id="cardClose" aria-label="关闭" data-page-node-id="XRJGYe036hhe7DvBLEsAEp">×</button>
+    <span class="cterm" id="cTerm" data-page-node-id="ZQ6CQ0dAoV7fKf7P7IjC6D"></span>
+    <h3 id="cTitle" data-page-node-id="3f0UhlVeD4Wbf8VEF5jCfd"></h3>
+    <div class="cmeta" data-page-node-id="HeQlcuCNSwSNpasyDDEJSk"><span data-page-node-id="dGQ6DPqruCY0IEnxBQha4O">年份 <b id="cYear" data-page-node-id="QLFPlP7WzBnIMG9aD6lrrY"></b></span><span data-page-node-id="R6fC3EYKNbHY52MrW1n6sU"><span id="cMagLabel" data-page-node-id="YEYOGcn6Jiz3k54NRK8VUR">冲击</span> <b id="cMag" data-page-node-id="uzFl2HDPd3OQYiKLiJieto"></b></span></div>
+    <div class="cprice hide" id="cPrice" data-page-node-id="2lAbkuC8sj9plCV6xQpYiW"></div>
+    <p id="cDesc" data-page-node-id="br7e7dgorS8VlEwLr7wA2I"></p>
   </div>
 
-  <footer>
-    <p>王朝交易所 DYNASTY EXCHANGE · 国运指数为叙事化演绎，不构成投资建议</p>
-    <p>事件线索参考《上下五千年》，市场标注为人工策划</p>
+  <footer data-page-node-id="scP97MPBWWDqu1vXY6mBm0">
+    <p data-page-node-id="ZLqzGl744BSLOkE6FsRZzZ">王朝交易所 DYNASTY EXCHANGE · 国运指数为叙事化演绎，不构成投资建议</p>
+    <p data-page-node-id="DfEK75Ikq73mpcEi46OtXQ">事件线索参考《上下五千年》，市场标注为人工策划</p>
   </footer>
 
   <script src="./echarts.min.js"></script>
@@ -355,8 +362,8 @@
       return {cats:em.cats, data:em.data, ma:ma(em.data,D.config.maEmperor), maName:'MA'+D.config.maEmperor};
     }
 
-    // 波峰/波谷：锚点局部极值 + ±3 年内冲击最大的事件（巨>大>中>小）
-    // K 线由锚点插值生成，锚点局部极值即走势的波峰/波谷
+    // 峰谷锚点：局部极值 + ±3 年内冲击最大的事件（巨>大>中>小）
+    // K 线由锚点插值生成，锚点局部极值即走势的峰谷位置
     const MAG_RANK = {'巨':4,'大':3,'中':2,'小':1};
     const magSig = e => MAG_RANK[(e.mag||'').slice(1)] || 0;
     function extremeEvents(){
@@ -377,12 +384,11 @@
     }
 
     // 标注点：缩放跨度 <=SPAN_FULL 年时展开「事件名 —— 金融术语」（两行），全览时只显示术语；
-    // 波峰/波谷事件始终展开完整标注并带 ▲/▼ 前缀
+    // 峰/谷极值点只以放大的白圈锚点标识（不写文字标注），始终展开完整标注
     function mkPoint(x,y,e,i,ext){
       const bear = e.dir==='bear', c = dirColor(e.dir);
-      const tag = ext ? (ext.type==='peak' ? '波峰 ▲ · ' : '波谷 ▼ · ') : '';
       const fmt = (labelFull || ext)
-        ? (tag?'{x|'+tag+'}':'')+'{t|'+e.title+'}\n{m|—— '+e.term+'}'
+        ? '{t|'+e.title+'}\n{m|—— '+e.term+'}'
         : '{m|'+e.term+'}';
       return {coord:[x,round1(y)], value:e.title+' —— '+e.term, eventIndex:i,
         symbol:'circle', symbolSize:ext?11:9, z:12,
@@ -390,10 +396,10 @@
         label:{show:true,position:ext?(ext.type==='peak'?'top':'bottom'):(bear?'bottom':'top'),
           distance:8,align:'center',
           formatter:fmt,
-          rich:Object.assign({
+          rich:{
             t:{color:'#1D1D1F',fontSize:10,lineHeight:13,fontFamily:mono},
             m:{color:c,fontSize:10,fontWeight:'bold',lineHeight:13,fontFamily:mono}
-          }, ext ? {x:{color:c,fontSize:10,fontWeight:'bold',lineHeight:13,fontFamily:mono}} : {}),
+          },
           backgroundColor:'rgba(255,255,255,.95)',
           borderColor:c,borderWidth:1,padding:[4,7],borderRadius:5,
           shadowColor:'rgba(0,0,0,.08)',shadowBlur:6}};
