@@ -139,8 +139,6 @@
   /* ============ 事件详情浮卡 ============ */
   #card{position:fixed;top:0;left:0;width:340px;background:rgba(255,255,255,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--line);border-radius:16px;padding:18px 18px 16px;box-shadow:0 12px 40px rgba(0,0,0,.10);z-index:50;transition:opacity .18s,transform .18s;max-height:64vh;overflow-y:auto}
   #card.hidden{opacity:0;transform:translateY(10px);pointer-events:none}
-  #cardClose{position:absolute;top:10px;right:12px;background:none;border:none;color:var(--text-3);font-size:20px;cursor:pointer;line-height:1}
-  #cardClose:hover{color:var(--text)}
   .cterm{display:inline-block;font-size:12px;font-weight:600;padding:3px 10px;border-radius:6px;margin-bottom:10px}
   .cterm.bull{background:rgba(246,70,93,.1);color:var(--up);border:1px solid rgba(246,70,93,.35)}
   .cterm.bear{background:rgba(46,189,133,.1);color:var(--down);border:1px solid rgba(46,189,133,.35)}
@@ -303,7 +301,6 @@
 
   <!-- ==================== 事件详情浮卡 ==================== -->
   <div id="card" class="hidden" data-page-node-id="vqeHO2g3e8zdyNfipKnnoZ">
-    <button id="cardClose" aria-label="关闭" data-page-node-id="XRJGYe036hhe7DvBLEsAEp">×</button>
     <span class="cterm" id="cTerm" data-page-node-id="ZQ6CQ0dAoV7fKf7P7IjC6D"></span>
     <h3 id="cTitle" data-page-node-id="3f0UhlVeD4Wbf8VEF5jCfd"></h3>
     <div class="cmeta" data-page-node-id="HeQlcuCNSwSNpasyDDEJSk"><span data-page-node-id="dGQ6DPqruCY0IEnxBQha4O">年份 <b id="cYear" data-page-node-id="QLFPlP7WzBnIMG9aD6lrrY"></b></span><span data-page-node-id="R6fC3EYKNbHY52MrW1n6sU"><span id="cMagLabel" data-page-node-id="YEYOGcn6Jiz3k54NRK8VUR">冲击</span> <b id="cMag" data-page-node-id="uzFl2HDPd3OQYiKLiJieto"></b></span></div>
@@ -312,7 +309,7 @@
   </div>
 
   <footer data-page-node-id="scP97MPBWWDqu1vXY6mBm0">
-    <p data-page-node-id="ZLqzGl744BSLOkE6FsRZzZ">王朝交易所 DYNASTY EXCHANGE V1.0.0 · 国运指数为叙事化演绎，不构成投资建议</p>
+    <p data-page-node-id="ZLqzGl744BSLOkE6FsRZzZ">王朝交易所 DYNASTY EXCHANGE V1.0.1 · 国运指数为叙事化演绎，不构成投资建议</p>
     <p data-page-node-id="DfEK75Ikq73mpcEi46OtXQ">事件线索参考《上下五千年》，市场标注为人工策划</p>
   </footer>
 
@@ -664,6 +661,9 @@
           +'<span class="emp-years">'+fmtYear(em.s)+'–'+fmtYear(em.e)+' · '+dur+'年</span>'
           +'<span class="emp-pct '+c+'">'+(pct>=0?'+':'')+pct.toFixed(1)+'%</span>';
         row.addEventListener('click',()=>showEmperor(i));
+        // 皇帝条与词条统一悬停式：移入出卡、移开即收
+        row.addEventListener('mouseenter',()=>showEmperor(i));
+        row.addEventListener('mouseleave',hideCard);
         box.appendChild(row);
         requestAnimationFrame(()=>requestAnimationFrame(()=>{
           row.querySelector('.emp-bar').style.width=Math.max(2, dur/maxDur*100)+'%';
@@ -726,7 +726,8 @@
       if(chart) chart.dispose();
       chart = echarts.init(document.getElementById('chart'));
       chart.on('dataZoom', syncLabelMode);
-      chart.on('click', onChartClick);
+      chart.on('mouseover', onChartHover);   // 图表与词条统一悬停式
+      chart.on('mouseout', hideCard);        // 光标离开图形元素即收卡
       render();
     }
 
@@ -785,7 +786,7 @@
       Array.prototype.forEach.call(tl.children,el=>el.classList.remove('active'));
     }
 
-    function onChartClick(p){
+    function onChartHover(p){
       if(p.componentType==='markPoint' && p.data && p.data.eventIndex!=null){ selectEvent(p.data.eventIndex,false); return; }
       if(p.seriesType==='candlestick'){
         if(mode==='year'){
@@ -797,7 +798,6 @@
 
     // ---- 一次性全局监听（跨王朝复用） ----
     function hideCard(){ card.classList.add('hidden'); cardFollow=false; }
-    document.getElementById('cardClose').addEventListener('click',hideCard);
     document.getElementById('backHome').addEventListener('click',()=>{ window.location.href='dynasty-exchange.html'; });
     document.getElementById('crumbHome').addEventListener('click',()=>{ window.location.href='dynasty-exchange.html'; });
     window.addEventListener('resize', ()=>{ if(chart) chart.resize(); });

@@ -178,6 +178,27 @@ def test_nav_watchlist_side_arrows_and_follow_card():
     assert "cardFollow=false" in chart and "closest('#card')" in chart
     # 事件与皇帝两条展示路径都要唤起跟随
     assert chart.count("showCardAtCursor();") == 2
+    # 词条悬停出浮卡、光标离开词条立即消失（大事记 + 皇帝条）
+    assert "function hideCard" in chart
+    assert chart.count("mouseleave',hideCard") == 2
+    assert "mouseenter',()=>selectEvent(i,false)" in chart
+    assert "mouseenter',()=>showEmperor(i)" in chart
+    # 图表侧统一悬停式：K线/事件点 mouseover 唤卡、mouseout 收卡；无 × 关闭钮
+    assert "chart.on('mouseover', onChartHover)" in chart
+    assert "chart.on('mouseout', hideCard)" in chart
+    assert "cardClose" not in chart
+
+
+def test_app_version_matches_release_naming():
+    """版本号与程序名/构建产物/页脚保持同步（版本规范见 AGENTS.md 第 3 条）。"""
+    assert app.APP_VERSION == "1.0.1"
+    assert app.WINDOW_TITLE == "DynastyKline—V1.0.1"
+    root = pathlib.Path(app.BASE_DIR)
+    assert "DynastyKline-V1.0.1" in (root / "build.bat").read_text(encoding="utf-8")
+    assert "DynastyKline-V1.0.1" in (root / "DynastyKline.spec").read_text(encoding="utf-8")
+    for page in ("index.html", "dynasty-exchange.html"):
+        with open(app.resource_path(page), encoding="utf-8") as f:
+            assert "V1.0.1" in f.read(), f"{page} 页脚缺版本号"
 
 
 def test_chart_page_peak_trough_event_marks():
