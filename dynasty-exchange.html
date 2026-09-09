@@ -152,7 +152,7 @@
 
   /* ============ 人物板块预告（深色带） ============ */
   .teaser {
-    display: flex; align-items: center; justify-content: space-between;
+    display: flex; align-items: center; justify-content: space-between; gap: 32px;
     padding: 72px 48px; background: var(--band);
   }
   .teaser-text { display: flex; flex-direction: column; gap: 12px; max-width: 720px; }
@@ -160,6 +160,20 @@
   .teaser-title { font-size: 28px; font-weight: 600; color: #FFFFFF; letter-spacing: -0.5px; }
   .teaser-desc { font-size: 15px; color: #CCCCCC; line-height: 24px; }
   .teaser-btn { flex: none; }
+  .teaser-card {
+    flex: none; width: 300px; display: flex; flex-direction: column; gap: 12px;
+    background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12);
+    border-radius: 14px; padding: 18px 20px; cursor: pointer;
+    transition: background .15s ease, transform .12s ease;
+  }
+  .teaser-card:hover { background: rgba(255,255,255,.11); transform: translateY(-2px); }
+  .teaser-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+  .teaser-card-name { font-size: 17px; font-weight: 600; color: #FFFFFF; }
+  .teaser-card-meta { font-family: var(--font-num); font-size: 11px; color: #999999; margin-top: 3px; }
+  .teaser-card-price { display: flex; align-items: baseline; gap: 10px; }
+  .teaser-price-num { font-family: var(--font-num); font-size: 26px; font-weight: 600; }
+  .teaser-price-chg { font-family: var(--font-num); font-size: 13px; font-weight: 500; }
+  .teaser-spark svg { display: block; }
 
   /* ============ 页脚 ============ */
   .footer {
@@ -216,7 +230,7 @@
     <nav class="nav-links">
       <a class="nav-link active">王朝</a>
       <a class="nav-link" id="navFav" title="查看已加入自选的王朝标的">⭐ 自选</a>
-      <a class="nav-link">人物</a>
+      <a class="nav-link" href="./figure.html">人物</a>
       <a class="nav-link">数据</a>
       <a class="nav-link">关于</a>
     </nav>
@@ -422,16 +436,30 @@
   <!-- ==================== 人物板块预告 ==================== -->
   <section class="teaser" id="teaser">
     <div class="teaser-text">
-      <span class="teaser-label">即将上线 · COMING SOON</span>
+      <span class="teaser-label" id="teaserLabel">已上线 · LIVE</span>
       <span class="teaser-title">人物板块：把帝王将相也挂上盘口</span>
-      <p class="teaser-desc">以人物为标的：政绩定价、声望行情、历史地位指数。从赵匡胤到王安石，逐一上市。</p>
+      <p class="teaser-desc">以人物为标的，以气运为行情。62 年人生、19 件大事，见顶于 742 年奉诏入京 —— 首支挂牌人物：李白。</p>
     </div>
-    <button class="btn btn-primary teaser-btn" id="teaserBtn">预约上线提醒</button>
+    <div class="teaser-card" id="teaserCard">
+      <div class="teaser-card-head">
+        <div>
+          <div class="teaser-card-name" id="tfName">李白</div>
+          <div class="teaser-card-meta" id="tfMeta">LIBAI.701 · 701—762 · 存续 62 年</div>
+        </div>
+        <span class="status-tag down" id="tfTag">下跌</span>
+      </div>
+      <div class="teaser-card-price">
+        <span class="teaser-price-num down" id="tfPrice">78.8</span>
+        <span class="teaser-price-chg down" id="tfChg">−21.20%</span>
+      </div>
+      <div class="teaser-spark" id="tfSpark"></div>
+    </div>
+    <button class="btn btn-primary teaser-btn" id="teaserBtn">查看人物行情</button>
   </section>
 
   <!-- ==================== 页脚 ==================== -->
   <footer class="footer">
-    <p>王朝交易所 DYNASTY EXCHANGE V1.0.1 · 行情为历史演绎，不构成投资建议</p>
+    <p>王朝交易所 DYNASTY EXCHANGE V1.1.0 · 行情为历史演绎，不构成投资建议</p>
     <div class="footer-links">
       <span>数据来源</span><span>玩法说明</span><span>更新日志</span>
     </div>
@@ -442,6 +470,8 @@
 
 <!-- 演示模式回退数据：桌面端运行时优先走 pywebview js_api 直读 SQLite -->
 <script src="./data.js"></script>
+<!-- K 线引擎：王朝与人物共用，与 database/kline.py 逐位一致 -->
+<script src="./kline.js"></script>
 <script>
   // 等比缩放：保持 1440 设计画布，按窗口宽度整体缩放
   (function () {
@@ -467,8 +497,7 @@
     });
     var tb = document.getElementById('teaserBtn');
     tb.addEventListener('click', function () {
-      tb.textContent = '已预约，上线后通知你';
-      tb.disabled = true;
+      window.location.href = './figure.html';
     });
   })();
 
@@ -498,33 +527,17 @@
           +'<text x="192" y="30" font-size="12" fill="#86868B" text-anchor="middle">数据筹备中</text>';
     }
 
-    function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
-    function interpOn(list,y){
-      if(y<=list[0][0]) return list[0][1];
-      for(var i=0;i<list.length-1;i++){
-        var a=list[i], b=list[i+1];
-        if(y>=a[0] && y<=b[0]){ var t=(y-a[0])/(b[0]-a[0]); t=t*t*(3-2*t); return a[1]+(b[1]-a[1])*t; }
-      }
-      return list[list.length-1][1];
-    }
-    // 与 index.html 逐位一致：round1 时机 / 见顶年冲高 / prevClose 取未取整 close / 跳过 0 年
+    var KLINE = window.KLINE;   // 唯一算法源，禁止在本页面另写一份
+    // 算法统一走 kline.js（与 database/kline.py 逐位一致），王朝 / 人物数据结构通吃
     function buildCandles(D){
-      var A=D.anchors, START=D.dynasty.startYear, END=D.dynasty.endYear, PEAK=D.dynasty.peakYear;
-      var rand=mulberry32(D.dynasty.seed), out=[], prevClose=A[0][1];
-      for(var y=START;y<=END;y=(y===-1?1:y+1)){
-        var target=interpOn(A,y);
-        var open = y===START ? A[0][1] : prevClose;
-        var close = target*(1+(rand()-0.5)*0.03) * (y===PEAK ? 1.07 : 1);
-        out.push([r1(open), r1(close), r1(Math.min(open,close)), r1(Math.max(open,close))]);
-        prevClose = close;
-      }
-      return out;
+      var s = D.dynasty || D.figure;
+      return KLINE.buildCandles({start:s.startYear, end:s.endYear, peak:s.peakYear,
+                                 seed:s.seed, anchors:D.anchors, events:D.events});
     }
     // 与 K 线序列一一对应的年份序列（跳 0 年）
     function yearsOf(D){
-      var ys=[], y=D.dynasty.startYear;
-      while(y<=D.dynasty.endYear){ ys.push(y); y=(y===-1?1:y+1); }
-      return ys;
+      var s = D.dynasty || D.figure;
+      return KLINE.yearsOf(s.startYear, s.endYear);
     }
     function statsOf(D){
       var cs=buildCandles(D), issue=D.dynasty.issuePrice, ys=yearsOf(D);
@@ -770,6 +783,26 @@
       chartEl.innerHTML=featuredKlineSVG(D, st.candles);
     }
 
+    // 人物板块预览卡：代码 / 区间 / 现价 / 涨跌 / 迷你走势（复用王朝卡片的渲染函数）
+    function renderTeaserFigure(F){
+      var f=F.figure;
+      if(!f || !F.anchors || F.anchors.length<2) return;
+      var cs=buildCandles(F), last=cs[cs.length-1][1];
+      var chg=(last-f.issuePrice)/f.issuePrice*100, c=cls(chg);
+      var el=function(id){ return document.getElementById(id); };
+      el('tfName').textContent=f.name;
+      el('tfMeta').textContent=f.code+' · '+f.startYear+'—'+f.endYear
+        +' · 存续 '+(f.endYear-f.startYear+1)+' 年';
+      var tag=el('tfTag'); tag.textContent=(chg>=0?'上涨':'下跌');
+      tag.className='status-tag '+c;
+      var p=el('tfPrice'); p.textContent=last.toFixed(2); p.className='teaser-price-num '+c;
+      var g=el('tfChg'); g.textContent=fmtPct(chg); g.className='teaser-price-chg '+c;
+      el('tfSpark').innerHTML=miniKlineSVG(sample(cs,14), chg>=0);
+      var go=function(){ window.location.href='figure.html#'+encodeURIComponent(f.code); };
+      el('teaserCard').onclick=go;
+      el('teaserBtn').onclick=go;
+    }
+
     (async function(){
       var api=await waitForApi(2500);
       if(!api){
@@ -830,6 +863,17 @@
       var pool=withData.length?withData:list;
       var feat=pool[Math.floor(Math.random()*pool.length)];
       renderFeatured(full[feat.code], feat.code, feat.name);
+
+      // 人物板块预览：取首支已挂牌人物，与王朝共用同一套 K 线算法与迷你图渲染
+      try{
+        var figs=JSON.parse(await api.list_figures());
+        var f0=null;
+        for(var k=0;k<figs.length;k++){ if(figs[k].hasData){ f0=figs[k]; break; } }
+        if(f0){
+          var F=JSON.parse(await api.get_figure(f0.code));
+          if(F && !F.error) renderTeaserFigure(F);
+        }
+      }catch(e){ /* 旧库无人物表：保留静态文案 */ }
     })();
   })();
 </script>

@@ -26,7 +26,7 @@ BASE_DIR = pathlib.Path(__file__).resolve().parent
 RESOURCE_BASE = pathlib.Path(getattr(sys, "_MEIPASS", BASE_DIR))
 
 # 版本规范（见 AGENTS.md）：小改动 +0.0.1，大改动 +0.1.0；发版需同步 build.bat / spec 产物名
-APP_VERSION = "1.0.1"
+APP_VERSION = "1.1.0"
 WINDOW_TITLE = f"DynastyKline—V{APP_VERSION}"
 HOME_PAGE = "dynasty-exchange.html"   # 启动首页（设计稿）；index.html 为行情盘面页
 MIN_SIZE = (960, 640)
@@ -142,6 +142,72 @@ class Api:
         return json.dumps({
             "dynasty": dynasty, "events": events,
             "emperors": emperors, "anchors": anchors, "config": config,
+        }, ensure_ascii=False)
+
+    # ---------------- 人物板块（气运指数，与王朝共用同一套 K 线算法） ----------------
+
+    def list_figures(self) -> str:
+        """人物列表（供人物板块首页/切换器使用）。
+
+        hasData：锚点数 >=2 才能生成 K 线；否则前端按"筹备中"占位渲染。
+        """
+        conn = self._connect()
+        try:
+            try:
+                rows = conn.execute(
+                    "SELECT f.code, f.name, f.alias, f.role, f.range_label, "
+                    "       f.start_year, f.end_year, f.is_active, "
+                    "       (SELECT COUNT(*) FROM figure_anchors a "
+                    "        WHERE a.figure_id=f.id) AS n_anchor "
+                    "FROM figures f ORDER BY f.start_year").fetchall()
+            except sqlite3.OperationalError:
+                rows = []          # 旧库未建人物表：返回空列表而非抛错
+        finally:
+            conn.close()
+        return json.dumps([{
+            "code": r["code"], "name": r["name"], "alias": r["alias"],
+            "role": r["role"], "rangeLabel": r["range_label"],
+            "startYear": r["start_year"], "endYear": r["end_year"],
+            "isActive": bool(r["is_active"]),
+            "hasData": r["n_anchor"] >= 2,
+        } for r in rows], ensure_ascii=False)
+
+    def get_figure(self, code: str) -> str:
+        """按代码返回单个人物的完整盘面数据 JSON（结构对齐 get_dynasty）。"""
+        conn = self._connect()
+        try:
+            row = conn.execute(
+                "SELECT * FROM figures WHERE code=? LIMIT 1", (code,)).fetchone()
+            if row is None:
+                return json.dumps({"error": f"unknown figure: {code}"},
+                                  ensure_ascii=False)
+            figure = {
+                "code": row["code"], "name": row["name"], "alias": row["alias"],
+                "role": row["role"], "rangeLabel": row["range_label"],
+                "startYear": row["start_year"], "endYear": row["end_year"],
+                "issuePrice": row["issue_price"], "peakYear": row["peak_year"],
+                "seed": row["seed"], "dynastyCode": row["dynasty_code"],
+                "summary": row["summary"],
+            }
+            events = [dict(r) for r in conn.execute(
+                'SELECT year, title, term, dir, mag, description AS "desc", quote '
+                "FROM figure_events WHERE figure_id=? ORDER BY sort, year",
+                (row["id"],))]
+            periods = [{"name": r["name"], "theme": r["theme"],
+                        "s": r["start_year"], "e": r["end_year"]}
+                       for r in conn.execute(
+                "SELECT name, theme, start_year, end_year FROM figure_periods "
+                "WHERE figure_id=? ORDER BY sort", (row["id"],))]
+            anchors = [list(r) for r in conn.execute(
+                "SELECT year, value FROM figure_anchors WHERE figure_id=? "
+                "ORDER BY sort, year", (row["id"],))]
+            config = {_camel(r["key"]): _coerce(r["value"])
+                      for r in conn.execute("SELECT key, value FROM config")}
+        finally:
+            conn.close()
+        return json.dumps({
+            "figure": figure, "events": events,
+            "periods": periods, "anchors": anchors, "config": config,
         }, ensure_ascii=False)
 
 

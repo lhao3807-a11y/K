@@ -49,7 +49,7 @@ def test_init_counts(env):
     s = run(["--db", db, "show"])
     assert "emperors   18 条" in s
     assert "events     21 条" in s
-    assert "anchors    27 条" in s
+    assert "anchors    34 条" in s
 
 
 def test_export_structure_matches_frontend(env):
@@ -58,7 +58,7 @@ def test_export_structure_matches_frontend(env):
     assert set(d.keys()) == {"dynasty", "emperors", "events", "anchors", "config"}
     assert d["dynasty"]["code"] == "DASONG.960"
     assert d["dynasty"]["startYear"] == 960 and d["dynasty"]["endYear"] == 1279
-    assert d["dynasty"]["issuePrice"] == 100 and d["dynasty"]["peakYear"] == 1082
+    assert d["dynasty"]["issuePrice"] == 100 and d["dynasty"]["peakYear"] == 1081
     assert d["dynasty"]["seed"] == 9601279
     # 事件字段与前端 EVENTS 一一对应
     assert all(set(e) == {"year", "title", "term", "dir", "mag", "desc"} for e in d["events"])
@@ -191,7 +191,7 @@ def test_scaffold_registry_and_idempotent(env, tmp_path):
     out3 = str(tmp_path / "d4.js")
     run(["--db", db, "export", "--out", out3])
     d = load_datajs(out3)
-    assert d["dynasty"]["code"] == "DASONG.960" and len(d["anchors"]) == 27
+    assert d["dynasty"]["code"] == "DASONG.960" and len(d["anchors"]) == 34
 
 
 # ---------- 前端文件 ----------

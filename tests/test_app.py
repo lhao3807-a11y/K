@@ -70,7 +70,7 @@ def test_api_get_dynasty_returns_frontend_schema():
     assert set(d.keys()) == {"dynasty", "emperors", "events", "anchors", "config"}
     assert d["dynasty"]["code"] == "DASONG.960"
     assert d["dynasty"]["startYear"] == 960 and d["dynasty"]["endYear"] == 1279
-    assert d["dynasty"]["issuePrice"] == 100 and d["dynasty"]["peakYear"] == 1082
+    assert d["dynasty"]["issuePrice"] == 100 and d["dynasty"]["peakYear"] == 1081
     assert all(set(e) == {"year", "title", "term", "dir", "mag", "desc"}
                for e in d["events"])
     assert all(set(x) == {"name", "full", "s", "e"} for x in d["emperors"])
@@ -99,9 +99,12 @@ def test_exchange_home_wired_to_js_api_and_navigation():
     assert "index.html#" in js          # 卡片 → 盘面页深链
     assert "buildCandles" in js         # 行情数字由真实数据计算（与盘面页同算法）
     assert "miniKlineSVG" in js         # 卡片迷你走势动态生成
+    assert "kline.js" in js             # K 线算法统一走公共引擎，页面内不得另抄一份
     # 跨 0 年王朝（大汉 前202~220）：K 线循环必须跳过 0 年，否则比 exe 多 1 根
-    # 且随机序列错位，两页数字不一致
-    assert "y=(y===-1?1:y+1)" in js
+    # 且随机序列错位，两页数字不一致。该逻辑现由 kline.js 的 nextYear 统一承担
+    with open(app.resource_path("kline.js"), encoding="utf-8") as f:
+        kjs = f.read()
+    assert "y === -1 ? 1 : y + 1" in kjs
     # 历史最高年份须经 yearsOf 序列（跳 0）计算
     assert "function yearsOf" in js
     assert "hiY=ys[i]" in js
@@ -191,14 +194,14 @@ def test_nav_watchlist_side_arrows_and_follow_card():
 
 def test_app_version_matches_release_naming():
     """版本号与程序名/构建产物/页脚保持同步（版本规范见 AGENTS.md 第 3 条）。"""
-    assert app.APP_VERSION == "1.0.1"
-    assert app.WINDOW_TITLE == "DynastyKline—V1.0.1"
+    assert app.APP_VERSION == "1.1.0"
+    assert app.WINDOW_TITLE == "DynastyKline—V1.1.0"
     root = pathlib.Path(app.BASE_DIR)
-    assert "DynastyKline-V1.0.1" in (root / "build.bat").read_text(encoding="utf-8")
-    assert "DynastyKline-V1.0.1" in (root / "DynastyKline.spec").read_text(encoding="utf-8")
+    assert "DynastyKline-V1.1.0" in (root / "build.bat").read_text(encoding="utf-8")
+    assert "DynastyKline-V1.1.0" in (root / "DynastyKline.spec").read_text(encoding="utf-8")
     for page in ("index.html", "dynasty-exchange.html"):
         with open(app.resource_path(page), encoding="utf-8") as f:
-            assert "V1.0.1" in f.read(), f"{page} 页脚缺版本号"
+            assert "V1.1.0" in f.read(), f"{page} 页脚缺版本号"
 
 
 def test_chart_page_peak_trough_event_marks():

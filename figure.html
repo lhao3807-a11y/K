@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>人物行情 · 李白 | DYNASTY EXCHANGE</title>
+<style>
+  :root {
+    --bg:#FFFFFF; --bg-alt:#F5F5F7; --band:#272729;
+    --text:#1D1D1F; --text-2:#6E6E73; --text-3:#86868B;
+    --axis:#C7CDD6; --blue:#0066CC; --blue-hover:#0077ED;
+    --up:#F6465D; --down:#2EBD85; --line:#E0E0E0; --grid:#F0F0F0;
+    --font-cn:"Noto Sans SC","PingFang SC","Microsoft YaHei","微软雅黑",sans-serif;
+    --font-num:"Cascadia Mono","JetBrains Mono",Consolas,"Courier New",monospace;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { background:var(--bg); }
+  body { font-family:var(--font-cn); color:var(--text); -webkit-font-smoothing:antialiased; }
+  .up { color:var(--up); } .down { color:var(--down); }
+
+  .nav { display:flex; align-items:center; justify-content:space-between; height:44px; padding:0 32px; background:#000; }
+  .logo-group { display:flex; align-items:center; gap:10px; }
+  .logo-cn { font-size:14px; font-weight:600; color:#FFF; line-height:1.2; }
+  .logo-en { font-family:var(--font-num); font-size:8px; color:#7A7A7A; letter-spacing:2px; }
+  .nav-links { display:flex; align-items:center; gap:28px; }
+  .nav-link { font-size:12px; color:#999; cursor:pointer; user-select:none; text-decoration:none; }
+  .nav-link:hover { color:#FFF; }
+  .nav-link.active { color:#FFF; font-weight:500; }
+  .nav-right { display:flex; align-items:center; gap:16px; }
+  .market-status { display:flex; align-items:center; gap:6px; }
+  .status-dot { width:8px; height:8px; border-radius:99px; background:var(--down); }
+  .status-text { font-size:12px; font-weight:500; color:var(--down); }
+
+  .wrap { max-width:1180px; margin:0 auto; padding:0 32px; }
+
+  .hero { display:flex; align-items:flex-start; justify-content:space-between; gap:32px; padding:36px 0 24px; }
+  .name-row { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+  .fig-name { font-size:40px; font-weight:600; letter-spacing:-0.5px; }
+  .code-badge { background:var(--bg-alt); border-radius:6px; padding:4px 8px; font-family:var(--font-num); font-size:12px; color:var(--text-2); }
+  .status-tag { border-radius:6px; padding:4px 8px; font-size:11px; font-weight:500; }
+  .status-tag.up { background:rgba(246,70,93,.1); color:var(--up); }
+  .status-tag.down { background:rgba(46,189,133,.1); color:var(--down); }
+  .fig-alias { font-size:14px; color:var(--text-2); margin-top:8px; }
+  .fig-summary { font-size:14px; color:var(--text-2); line-height:24px; margin-top:12px; max-width:640px; }
+  .price-box { text-align:right; flex:none; }
+  .price-now { font-family:var(--font-num); font-size:44px; font-weight:600; }
+  .price-chg { font-family:var(--font-num); font-size:15px; font-weight:500; margin-top:4px; }
+  .fig-range { font-size:12px; color:var(--text-3); margin-top:6px; }
+
+  .metrics { display:flex; flex-wrap:wrap; gap:0; background:var(--bg-alt); border-radius:12px; padding:18px 8px; }
+  .metric { flex:1 1 120px; display:flex; flex-direction:column; gap:5px; align-items:center; border-right:1px solid var(--line); }
+  .metric:last-child { border-right:none; }
+  .metric-label { font-size:11px; color:var(--text-3); }
+  .metric-value { font-family:var(--font-num); font-size:19px; font-weight:600; }
+
+  .panel { margin-top:28px; }
+  .panel-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+  .panel-title { font-size:20px; font-weight:600; letter-spacing:-0.3px; }
+  .seg { display:flex; border:1px solid var(--line); border-radius:8px; overflow:hidden; }
+  .seg button { border:none; background:#FFF; padding:7px 18px; font-size:13px; font-family:var(--font-cn); color:var(--text-2); cursor:pointer; }
+  .seg button.active { background:var(--text); color:#FFF; }
+  #chart { width:100%; height:420px; }
+
+  .afterlife { display:flex; align-items:center; gap:24px; margin-top:24px; background:var(--bg-alt); border-radius:12px; padding:20px 24px; }
+  .afterlife-text { flex:1; }
+  .afterlife-label { font-family:var(--font-num); font-size:11px; color:var(--blue); letter-spacing:2px; }
+  .afterlife-title { font-size:15px; font-weight:500; margin-top:6px; }
+  .afterlife-desc { font-size:13px; color:var(--text-2); line-height:22px; margin-top:6px; }
+
+  .period-row { display:flex; align-items:center; gap:12px; padding:9px 0; border-bottom:1px solid var(--grid); cursor:pointer; }
+  .period-row:hover { background:var(--bg-alt); }
+  .per-name { width:88px; font-size:13px; font-weight:500; flex:none; }
+  .per-track { flex:1; height:8px; background:var(--grid); border-radius:99px; overflow:hidden; }
+  .per-bar { height:100%; border-radius:99px; width:0; transition:width .5s cubic-bezier(.22,.61,.36,1); }
+  .per-years { width:118px; font-family:var(--font-num); font-size:12px; color:var(--text-3); flex:none; }
+  .per-pct { width:76px; text-align:right; font-family:var(--font-num); font-size:13px; font-weight:500; flex:none; }
+  .per-theme { width:210px; font-size:12px; color:var(--text-3); flex:none; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+  .ev { display:flex; gap:16px; padding:14px 0; border-bottom:1px solid var(--grid); }
+  .ev-year { width:52px; flex:none; font-family:var(--font-num); font-size:13px; color:var(--text-3); padding-top:2px; }
+  .ev-body { flex:1; }
+  .ev-title { font-size:14px; font-weight:500; }
+  .ev-term { display:inline-block; font-size:11px; padding:2px 7px; border-radius:5px; margin-left:8px; vertical-align:1px; }
+  .ev-term.bull { background:rgba(246,70,93,.1); color:var(--up); }
+  .ev-term.bear { background:rgba(46,189,133,.1); color:var(--down); }
+  .ev-term.vol { background:rgba(0,102,204,.1); color:var(--blue); }
+  .ev-term.neutral { background:var(--bg-alt); color:var(--text-3); }
+  .ev-desc { font-size:13px; color:var(--text-2); line-height:22px; margin-top:5px; }
+  .ev-quote { font-size:13px; color:var(--text-3); line-height:22px; margin-top:6px; padding-left:10px; border-left:2px solid var(--line); }
+
+  .footer { display:flex; align-items:center; justify-content:space-between; padding:36px 0 48px; margin-top:36px; border-top:1px solid var(--line); }
+  .footer p { font-size:12px; color:var(--text-3); }
+  .back-link { font-size:13px; color:var(--blue); cursor:pointer; text-decoration:none; }
+  .pending { padding:60px 0; text-align:center; color:var(--text-3); font-size:14px; }
+</style>
+</head>
+<body>
+  <header class="nav">
+    <div class="logo-group">
+      <svg width="26" height="26" viewBox="0 0 26 26" fill="none"><rect width="26" height="26" rx="7" fill="#0066CC"/><line x1="9" y1="5" x2="9" y2="21" stroke="#FFF" stroke-width="1.5"/><rect x="7" y="9" width="4" height="8" rx="1" fill="#FFF"/><line x1="17" y1="7" x2="17" y2="23" stroke="#FFF" stroke-width="1.5"/><rect x="15" y="12" width="4" height="7" rx="1" fill="#FFF"/></svg>
+      <div><div class="logo-cn">王朝交易所</div><div class="logo-en">DYNASTY EXCHANGE</div></div>
+    </div>
+    <nav class="nav-links">
+      <a class="nav-link" href="./dynasty-exchange.html">王朝</a>
+      <a class="nav-link active">人物</a>
+      <a class="nav-link" href="./dynasty-exchange.html#featured">数据</a>
+      <a class="nav-link" href="./dynasty-exchange.html#teaser">关于</a>
+    </nav>
+    <div class="nav-right">
+      <div class="market-status"><div class="status-dot"></div><span class="status-text">交易中</span></div>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <section class="hero">
+      <div>
+        <div class="name-row">
+          <span class="fig-name" id="fName">—</span>
+          <span class="code-badge" id="fCode">—</span>
+          <span class="status-tag down" id="fStatus">—</span>
+        </div>
+        <div class="fig-alias" id="fAlias">—</div>
+        <p class="fig-summary" id="fSummary">—</p>
+      </div>
+      <div class="price-box">
+        <div class="price-now down" id="fPrice">—</div>
+        <div class="price-chg down" id="fChg">—</div>
+        <div class="fig-range" id="fRange">—</div>
+      </div>
+    </section>
+
+    <section class="metrics" id="metrics"></section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <span class="panel-title">气运走势</span>
+        <div class="seg">
+          <button id="btnYear" class="active">年 K</button>
+          <button id="btnPeriod">阶段 K</button>
+        </div>
+      </div>
+      <div id="chart"></div>
+      <div class="pending" id="chartPending" style="display:none">锚点数据入库后自动生成 K 线</div>
+    </section>
+
+    <section class="afterlife">
+      <div class="afterlife-text">
+        <div class="afterlife-label">场外行情 · AFTER HOURS</div>
+        <div class="afterlife-title">762 年摘牌退市，转入场外市场</div>
+        <p class="afterlife-desc" id="afterlifeDesc">—</p>
+      </div>
+      <svg width="230" height="62" viewBox="0 0 230 62" fill="none">
+        <polyline points="6,54 62,46 118,34 174,18 222,6" stroke="#B4B2A9" stroke-width="1.5" stroke-dasharray="4 3" fill="none"/>
+        <circle cx="6" cy="54" r="3.5" fill="#86868B"/>
+        <circle cx="222" cy="6" r="3.5" fill="#B4B2A9"/>
+        <text x="6" y="60" font-size="10" fill="#86868B">762 摘牌</text>
+        <text x="222" y="20" font-size="10" fill="#86868B" text-anchor="end">今</text>
+      </svg>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><span class="panel-title">人生阶段 K</span>
+        <span style="font-size:12px;color:var(--text-3)" id="periodHint">条长 = 阶段年数 · 色 = 段内涨跌</span>
+      </div>
+      <div id="periodBox"></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><span class="panel-title">生平大事记</span>
+        <span style="font-size:12px;color:var(--text-3)" id="evCount"></span>
+      </div>
+      <div id="eventList"></div>
+    </section>
+
+    <footer class="footer">
+      <p>王朝交易所 DYNASTY EXCHANGE V1.1.0 · 人物板块 · 行情为历史演绎，不构成投资建议</p>
+      <a class="back-link" href="./dynasty-exchange.html">← 返回交易所</a>
+    </footer>
+  </div>
+
+<script src="./echarts.min.js"></script>
+<script src="./kline.js"></script>
+<script src="./figure_data.js"></script>
+<script>
+(function(){
+  const UP='#F6465D', DOWN='#2EBD85', BLUE='#0066CC';
+  const KLINE = window.KLINE;
+  const $ = id => document.getElementById(id);
+  const fmtPct = x => (x>=0?'+':'') + x.toFixed(2) + '%';
+  const clsOf = x => x>=0 ? 'up' : 'down';
+
+  let D=null, chart=null, mode='year';
+  let years=[], candles=[], yearIndex={};
+
+  function waitForApi(timeout){
+    return new Promise(res=>{
+      const t0=Date.now();
+      (function check(){
+        if(window.pywebview && window.pywebview.api) return res(window.pywebview.api);
+        if(Date.now()-t0>timeout) return res(null);
+        setTimeout(check,80);
+      })();
+    });
+  }
+
+  function renderHeader(){
+    const f=D.figure, st=KLINE.stats(candles, f.issuePrice), c=clsOf(st.chg);
+    $('fName').textContent=f.name;
+    $('fCode').textContent=f.code;
+    $('fAlias').textContent=[f.alias, f.role].filter(Boolean).join(' · ');
+    $('fSummary').textContent=f.summary||'';
+    $('fRange').textContent=f.rangeLabel||'';
+    const stEl=$('fStatus');
+    stEl.textContent = st.chg>=0 ? '上涨' : '下跌';
+    stEl.className = 'status-tag '+c;
+    const p=$('fPrice'); p.textContent=st.last.toFixed(1); p.className='price-now '+c;
+    const g=$('fChg'); g.textContent='较发行价 '+fmtPct(st.chg); g.className='price-chg '+c;
+
+    const dur=f.endYear-f.startYear+1;
+    const hiYear=years[candles.findIndex(k=>k[3]===st.high)];
+    const loYear=years[candles.findIndex(k=>k[2]===st.low)];
+    const m=[
+      ['发行价', f.issuePrice.toFixed(2), ''],
+      ['历史最高', st.high.toFixed(1), 'up'],
+      ['历史最低', st.low.toFixed(1), 'down'],
+      ['摘牌价', st.last.toFixed(1), c],
+      ['存续', dur+' 年', ''],
+      ['人生阶段', (D.periods||[]).length+' 段', ''],
+      ['最大回撤', fmtPct(st.maxDrawdown), 'down'],
+    ];
+    $('metrics').innerHTML = m.map(x=>
+      '<div class="metric"><span class="metric-label">'+x[0]+'</span>'
+      +'<span class="metric-value '+(x[2]||'')+'">'+x[1]+'</span></div>').join('');
+    $('afterlifeDesc').textContent =
+      '摘牌价 '+st.last.toFixed(1)+'（较发行价 '+fmtPct(st.chg)+'）。'
+      +'然而自中唐以降，其声望曲线再无像样回撤 —— 世俗账面上的破发，'
+      +'在另一个市场里是永不兑现的长线牛股。';
+    window.__hiYear = hiYear; window.__loYear = loYear;
+  }
+
+  function buildSeries(){
+    if(mode==='year') return {cats:years.map(String), data:candles};
+    const spans=(D.periods||[]).map(p=>({s:p.s,e:p.e}));
+    const data=KLINE.aggregate(candles, years, spans);
+    return {cats:(D.periods||[]).map(p=>p.name), data:data};
+  }
+
+  function buildMarks(cats, data){
+    const rank={'巨':4,'大':3,'中':2,'小':1};
+    const evs=(D.events||[]).filter(e=>rank[(e.mag||'').slice(1)]>=3);
+    return evs.map((e,i)=>{
+      let v=null;
+      if(mode==='year'){
+        const idx=yearIndex[e.year];
+        v = idx==null ? null : candles[idx][3];
+      }else{
+        const pi=(D.periods||[]).findIndex(p=>e.year>=p.s && e.year<=p.e);
+        v = pi<0 ? null : data[pi][3];
+      }
+      if(v==null) return null;
+      const col = e.dir==='bear' ? DOWN : UP;
+      return {
+        name:e.title, value:e.term,
+        coord:[mode==='year'?String(e.year):cats[(D.periods||[]).findIndex(p=>e.year>=p.s&&e.year<=p.e)], v],
+        symbol:'circle', symbolSize:9,
+        itemStyle:{color:col},
+        label:{show:true, position: i%2 ? 'bottom':'top', distance:8,
+               formatter:'{c}', fontSize:11, color:col}
+      };
+    }).filter(Boolean);
+  }
+
+  function renderChart(){
+    const s=buildSeries();
+    if(!chart) chart=echarts.init($('chart'));
+    chart.setOption({
+      backgroundColor:'#FFFFFF',
+      animation:false,
+      grid:{left:58,right:26,top:28,bottom:56},
+      tooltip:{trigger:'axis', axisPointer:{type:'cross'},
+        backgroundColor:'#FFFFFF', borderColor:'#E0E0E0', borderWidth:1,
+        textStyle:{color:'#1D1D1F', fontSize:12},
+        formatter:function(ps){
+          const k=ps[0].data;
+          return ps[0].axisValue+'<br/>开 '+k[1]+'　收 '+k[2]
+                 +'<br/>低 '+k[3]+'　高 '+k[4];
+        }},
+      xAxis:{type:'category', data:s.cats,
+        axisLine:{lineStyle:{color:'#C7CDD6'}},
+        axisLabel:{color:'#86868B', fontSize:11, interval:'auto'}},
+      yAxis:{scale:true, splitLine:{lineStyle:{color:'#F0F0F0'}},
+        axisLine:{show:false}, axisLabel:{color:'#86868B', fontSize:11}},
+      dataZoom:[{type:'inside'},{type:'slider', height:16, bottom:14,
+        borderColor:'#E0E0E0', fillerColor:'rgba(0,102,204,.06)'}],
+      series:[{
+        type:'candlestick', data:s.data.map(k=>[k[0],k[1],k[2],k[3]]),
+        itemStyle:{color:UP, color0:DOWN, borderColor:UP, borderColor0:DOWN},
+        markPoint:{symbolSize:9, data:buildMarks(s.cats, s.data)}
+      }]
+    }, true);
+    ['year','period'].forEach(m=>$(m==='year'?'btnYear':'btnPeriod')
+      .classList.toggle('active', m===mode));
+  }
+
+  function renderPeriods(){
+    const spans=(D.periods||[]).map(p=>({s:p.s,e:p.e}));
+    const agg=KLINE.aggregate(candles, years, spans);
+    const maxDur=Math.max.apply(null,(D.periods||[]).map(p=>p.e-p.s+1));
+    $('periodBox').innerHTML=(D.periods||[]).map((p,i)=>{
+      const a=agg[i], pct=(a[1]-a[0])/a[0]*100, c=clsOf(pct), dur=p.e-p.s+1;
+      return '<div class="period-row">'
+        +'<span class="per-name">'+p.name+'</span>'
+        +'<div class="per-track"><div class="per-bar '+c+'" data-w="'
+        +Math.max(2,dur/maxDur*100)+'" style="background:'+(pct>=0?UP:DOWN)+'"></div></div>'
+        +'<span class="per-years">'+p.s+'–'+p.e+' · '+dur+'年</span>'
+        +'<span class="per-pct '+c+'">'+fmtPct(pct)+'</span>'
+        +'<span class="per-theme">'+(p.theme||'')+'</span></div>';
+    }).join('');
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      document.querySelectorAll('.per-bar').forEach(b=>{ b.style.width=b.dataset.w+'%'; });
+    }));
+  }
+
+  function renderEvents(){
+    $('evCount').textContent=(D.events||[]).length+' 件';
+    $('eventList').innerHTML=(D.events||[]).map(e=>
+      '<div class="ev"><span class="ev-year">'+e.year+'</span><div class="ev-body">'
+      +'<div class="ev-title">'+e.title
+      +'<span class="ev-term '+(e.dir||'neutral')+'">'+e.term+'</span></div>'
+      +'<div class="ev-desc">'+e.desc+'</div>'
+      +(e.quote ? '<div class="ev-quote">'+e.quote+'</div>' : '')
+      +'</div></div>').join('');
+  }
+
+  function mount(data){
+    D=data;
+    const f=D.figure;
+    years=KLINE.yearsOf(f.startYear, f.endYear);
+    candles=KLINE.buildCandles({start:f.startYear,end:f.endYear,peak:f.peakYear,
+                            seed:f.seed,anchors:D.anchors,events:D.events});
+    yearIndex={}; years.forEach((y,i)=>yearIndex[y]=i);
+    $('chartPending').style.display='none';
+    renderHeader(); renderChart(); renderPeriods(); renderEvents();
+  }
+
+  function showPending(f){
+    $('fName').textContent=f.name; $('fCode').textContent=f.code;
+    $('fAlias').textContent=[f.alias,f.role].filter(Boolean).join(' · ');
+    $('fSummary').textContent='该人物数据筹备中，暂无可生成的 K 线。';
+    $('fPrice').textContent='—'; $('fChg').textContent='数据筹备中';
+    $('chart').style.display='none';
+    $('chartPending').style.display='';
+  }
+
+  $('btnYear').onclick=()=>{ mode='year'; renderChart(); };
+  $('btnPeriod').onclick=()=>{ mode='period'; renderChart(); };
+  window.addEventListener('resize',()=>{ if(chart) chart.resize(); });
+
+  (async function(){
+    const api=await waitForApi(2500);
+    if(!api){
+      if(window.FIGURE_DATA) mount(window.FIGURE_DATA);
+      else showPending({name:'—',code:'—',alias:'',role:''});
+      return;
+    }
+    const list=JSON.parse(await api.list_figures());
+    if(!list.length){ showPending({name:'人物板块',code:'—',alias:'即将上线',role:''}); return; }
+    const want=decodeURIComponent((location.hash||'').replace('#',''));
+    const pick=list.find(x=>x.code===want) || list.find(x=>x.isActive) || list[0];
+    const full=JSON.parse(await api.get_figure(pick.code));
+    if(full.error){ showPending(pick); return; }
+    if(!full.anchors || full.anchors.length<2){ showPending(full.figure); return; }
+    mount(full);
+  })();
+})();
+</script>
+</body>
+</html>

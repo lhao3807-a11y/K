@@ -132,7 +132,7 @@ def test_verify_curves_script_passes(conn):
     r = subprocess.run([sys.executable, VERIFY], capture_output=True,
                        encoding="utf-8", errors="replace")
     assert r.returncode == 0, f"曲线校验失败：\n{r.stdout}\n{r.stderr}"
-    assert "[ok] 全部王朝国运曲线校验通过" in r.stdout
+    assert "[ok] 全部标的曲线校验通过" in r.stdout
 
 
 def test_only_song_active(conn):

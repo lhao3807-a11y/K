@@ -75,3 +75,74 @@ CREATE TABLE IF NOT EXISTS config (
 CREATE INDEX IF NOT EXISTS idx_emperors_dyn ON emperors(dynasty_id, sort);
 CREATE INDEX IF NOT EXISTS idx_events_dyn   ON events(dynasty_id, sort);
 CREATE INDEX IF NOT EXISTS idx_anchors_dyn  ON anchors(dynasty_id, sort);
+
+-- ============================================================
+-- 人物板块（与王朝板块同构：年 K + 阶段 K，共用同一套 K 线算法）
+--
+--   figures         -> 人物主表（对标 dynasties）
+--   figure_periods  -> 人生阶段（对标 emperors，区间须无缝覆盖）
+--   figure_events   -> 生平事迹（对标 events，多 quote 诗句列）
+--   figure_anchors  -> 气运指数锚点（对标 anchors）
+--
+-- 说明：人物与王朝分表而治，因为人物事件带诗句引用与维度标签、
+--       阶段带一句话主题，塞进王朝表会长出恒为 NULL 的列。
+--       K 线算法本身物理复用 database/kline.py，两板块不会分叉。
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS figures (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  code         TEXT NOT NULL UNIQUE,          -- 证券代码，如 LIBAI.701
+  name         TEXT NOT NULL,                 -- 姓名，如 李白
+  alias        TEXT NOT NULL DEFAULT '',      -- 字号，如 字太白 · 号青莲居士
+  role         TEXT NOT NULL DEFAULT '',      -- 身份，如 诗人 / 帝王 / 名将
+  range_label  TEXT NOT NULL DEFAULT '',      -- 区间文案，如 701 — 762 · 气运指数 · 年 K / 阶段 K
+  start_year   INTEGER NOT NULL,              -- 指数起始年（出生年）
+  end_year     INTEGER NOT NULL,              -- 指数结束年（去世年）
+  issue_price  REAL NOT NULL DEFAULT 100,     -- 发行价（默认 100）
+  peak_year    INTEGER,                       -- 见顶年（如 742 奉诏入京）
+  seed         INTEGER NOT NULL DEFAULT 701762,   -- K线随机种子
+  dynasty_code TEXT NOT NULL DEFAULT '',      -- 所属王朝代码（如 TANG.618，供联动）
+  summary      TEXT NOT NULL DEFAULT '',      -- 一句话简介
+  is_active    INTEGER NOT NULL DEFAULT 0,    -- 1=默认展示的人物
+  notes        TEXT NOT NULL DEFAULT '',
+  created_at   TEXT NOT NULL DEFAULT (datetime('now','localtime')),
+  updated_at   TEXT NOT NULL DEFAULT (datetime('now','localtime'))
+);
+
+CREATE TABLE IF NOT EXISTS figure_periods (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  figure_id    INTEGER NOT NULL REFERENCES figures(id) ON DELETE CASCADE,
+  name         TEXT NOT NULL,                 -- 阶段名，如 供奉翰林
+  theme        TEXT NOT NULL DEFAULT '',      -- 一句话主题，如 仰天大笑出门去
+  start_year   INTEGER NOT NULL,              -- 阶段起始年（含）
+  end_year     INTEGER NOT NULL,              -- 阶段结束年（含）
+  sort         INTEGER NOT NULL DEFAULT 0,
+  notes        TEXT NOT NULL DEFAULT ''
+);
+
+CREATE TABLE IF NOT EXISTS figure_events (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  figure_id    INTEGER NOT NULL REFERENCES figures(id) ON DELETE CASCADE,
+  year         INTEGER NOT NULL,              -- 事件年份
+  title        TEXT NOT NULL,                 -- 事件标题
+  term         TEXT NOT NULL,                 -- 金融术语，如 一字涨停
+  dir          TEXT NOT NULL CHECK (dir IN ('bull','bear','vol','neutral')),
+  mag          TEXT NOT NULL,                 -- 冲击幅度：+大/-中/±小 等
+  description  TEXT NOT NULL DEFAULT '',      -- 事件描述
+  quote        TEXT NOT NULL DEFAULT '',      -- 诗句 / 史料原文佐证
+  sort         INTEGER NOT NULL DEFAULT 0,
+  notes        TEXT NOT NULL DEFAULT ''
+);
+
+CREATE TABLE IF NOT EXISTS figure_anchors (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  figure_id    INTEGER NOT NULL REFERENCES figures(id) ON DELETE CASCADE,
+  year         INTEGER NOT NULL,
+  value        REAL NOT NULL,                 -- 气运指数目标值
+  sort         INTEGER NOT NULL DEFAULT 0,
+  notes        TEXT NOT NULL DEFAULT ''
+);
+
+CREATE INDEX IF NOT EXISTS idx_fig_periods ON figure_periods(figure_id, sort);
+CREATE INDEX IF NOT EXISTS idx_fig_events  ON figure_events(figure_id, sort);
+CREATE INDEX IF NOT EXISTS idx_fig_anchors ON figure_anchors(figure_id, sort);
