@@ -195,7 +195,8 @@ def main() -> int:
         threading.Timer(5.0, lambda: window.destroy()).start()
 
     try:
-        webview.start()
+        # private_mode=False：允许 WebView2 写 localStorage —— 自选列表持久化依赖此开关
+        webview.start(private_mode=False)
         return 0
     except Exception as e:  # noqa: BLE001 —— 兜底给出可读错误而非静默崩溃
         if getattr(sys, "frozen", False):

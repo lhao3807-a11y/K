@@ -141,8 +141,8 @@ def run_tests():
         failures.append(f"王朝卡片数量不符：期望 6，实际 {checker.counts['dynasty-card']}")
     if checker.counts["nav-link"] != 4:
         failures.append(f"导航链接数量不符：期望 4，实际 {checker.counts['nav-link']}")
-    if checker.counts["chip"] != 5:
-        failures.append(f"筛选 chips 数量不符：期望 5，实际 {checker.counts['chip']}")
+    if checker.counts["chip"] != 6:
+        failures.append(f"筛选 chips 数量不符：期望 6，实际 {checker.counts['chip']}")
     chip_active = html.count('class="chip active"')
     if chip_active != 1:
         failures.append(f"筛选 chips 选中态应恰为 1 个，实际 {chip_active}")

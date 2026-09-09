@@ -131,6 +131,7 @@
   .chip.active { background: var(--text); border-color: var(--text); color: #FFFFFF; font-weight: 500; }
   .chip[data-filter="up"] { color: var(--up); }
   .chip[data-filter="down"] { color: var(--down); }
+  .chip[data-filter="fav"] { color: #B7791F; }
   .chip[data-filter="up"].active, .chip[data-filter="down"].active { color: #FFFFFF; }
   .card-grid { display: flex; flex-wrap: wrap; gap: 20px; }
   .dynasty-card {
@@ -311,6 +312,7 @@
         <span class="chip" data-filter="down">下跌</span>
         <span class="chip" data-filter="unified">大一统</span>
         <span class="chip" data-filter="split">分裂期</span>
+        <span class="chip" data-filter="fav" title="详情页点「加入自选」的标的">⭐ 自选</span>
       </div>
     </div>
     <div class="card-grid" id="cardGrid">
@@ -690,6 +692,11 @@
     // ---- 筛选 chips + 搜索（静态/动态卡片通用） ----
     var curFilter='all';
     var searchInput=document.getElementById('searchInput');
+    // 自选列表与详情页共用 localStorage key（⭐ 自选 chip 依据它过滤）
+    var favCodes=(function(){
+      try{ return new Set(JSON.parse(localStorage.getItem('dynasty.watchlist')||'[]')); }
+      catch(e){ return new Set(); }
+    })();
     function applyFilter(){
       var q=(searchInput.value||'').trim().toLowerCase();
       Array.prototype.forEach.call(document.querySelectorAll('#cardGrid .dynasty-card'), function(c){
@@ -698,6 +705,7 @@
         else if(curFilter==='down') ok=(t==='down');
         else if(curFilter==='unified') ok=(g==='unified');
         else if(curFilter==='split') ok=(g==='split');
+        else if(curFilter==='fav') ok=favCodes.has(c.getAttribute('data-code'));
         if(ok && q) ok=(c.getAttribute('data-code')+' '+c.textContent).toLowerCase().indexOf(q)>=0;
         c.style.display=ok?'':'none';
       });

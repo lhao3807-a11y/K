@@ -55,6 +55,8 @@
   .anchor-link:hover{color:var(--blue)}
   .anchor-link.active{color:var(--blue);font-weight:500}
   .dynsel{background:#FFFFFF;color:var(--text);border:1px solid var(--line);border-radius:9999px;font-family:var(--font-cn);font-size:13px;padding:7px 12px;cursor:pointer;max-width:220px}
+  .kbd-hint{display:none;font-family:var(--font-mono);font-size:11px;color:#86868B;background:#F5F5F7;border-radius:6px;padding:4px 8px;cursor:default}
+  @media (min-width:1100px){.kbd-hint{display:inline}}
   .dynsel:focus{outline:none;border-color:var(--blue)}
   .favbtn{background:var(--blue);border:none;border-radius:9999px;color:#FFFFFF;font-size:13px;font-weight:500;padding:8px 18px;cursor:pointer;font-family:var(--font-cn);transition:background .15s}
   .favbtn:hover{background:var(--blue-hover)}
@@ -210,6 +212,7 @@
       <a class="anchor-link active" data-anchor="chartAnchor" data-page-node-id="ROI92m313lAncueHH9re1V">K线</a>
       <a class="anchor-link" data-anchor="emperorAnchor" data-page-node-id="epUQX49f7vatIJIQxOA6hS">帝王</a>
       <a class="anchor-link" data-anchor="eventsAnchor" data-page-node-id="CwMDewb8LCdZI2rmf95xHy">大事记</a>
+      <span class="kbd-hint" id="kbdHint" title="键盘 ← / → 切换上/下一个王朝" data-page-node-id="KbdHint001" style="display:none">←/→ 切换</span>
       <select id="dynSwitch" class="dynsel" style="display:none" title="切换王朝标的" data-page-node-id="JhZLnDOlfOyHypws2Y2k4k"></select>
       <button class="favbtn" id="favBtn" data-page-node-id="XiA0vFV5VYOAd7g5XiLLZu">加入自选</button>
     </div>
@@ -798,13 +801,22 @@
         if(t) t.scrollIntoView({behavior:'smooth',block:'start'});
       });
     });
-    // 加入自选（会话内状态，按王朝代码记忆）
-    const favSet=new Set();
+    // 加入自选（localStorage 持久化：重启 exe 后仍保留，首页「⭐ 自选」筛选共用同一 key）
+    var FAV_KEY='dynasty.watchlist';
+    function loadFavs(){
+      try{ return new Set(JSON.parse(localStorage.getItem(FAV_KEY)||'[]')); }
+      catch(e){ return new Set(); }
+    }
+    function saveFavs(){
+      try{ localStorage.setItem(FAV_KEY, JSON.stringify(Array.from(favSet))); }catch(e){}
+    }
+    const favSet=loadFavs();
     document.getElementById('favBtn').addEventListener('click',function(){
       const code=D?D.dynasty.code:'';
       if(!code) return;
       const on=!favSet.has(code);
       if(on) favSet.add(code); else favSet.delete(code);
+      saveFavs();
       this.textContent=on?'✓ 已自选':'加入自选';
       this.classList.toggle('faved',on);
     });
@@ -835,6 +847,7 @@
           const list=JSON.parse(await api.list_dynasties());
           if(!list.length){ showFatal('数据库中暂无王朝数据 —— 请先运行：python database/manage.py init'); return; }
           sel.style.display='';
+          document.getElementById('kbdHint').style.display='';
           sel.innerHTML=list.map(d=>'<option value="'+d.code+'">'+d.name+' '+d.code+'</option>').join('');
           // 深链优先：dynasty-exchange.html 跳转时带 #CODE
           const want=decodeURIComponent((location.hash||'').replace('#',''));
@@ -856,6 +869,19 @@
             sel.value=c;
             mount(JSON.parse(await api.get_dynasty(c)));
             syncFavBtn();
+          });
+          // 键盘 ←/→ 切换上/下一个王朝标的（与下拉同序；焦点在输入控件时忽略）
+          document.addEventListener('keydown', async ev=>{
+            if(ev.key!=='ArrowLeft' && ev.key!=='ArrowRight') return;
+            const tag=(document.activeElement && document.activeElement.tagName)||'';
+            if(tag==='INPUT'||tag==='SELECT'||tag==='TEXTAREA') return;
+            const i=list.findIndex(d=>d.code===sel.value);
+            const j=ev.key==='ArrowLeft' ? i-1 : i+1;
+            if(j<0 || j>=list.length) return;
+            if(location.hash) location.hash='';
+            sel.value=list[j].code;
+            const d=JSON.parse(await api.get_dynasty(sel.value));
+            if(d && !d.error){ mount(d); syncFavBtn(); }
           });
         }else if(window.DYNASTY_DATA){
           mount(window.DYNASTY_DATA);   // 浏览器演示模式

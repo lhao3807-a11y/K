@@ -132,6 +132,30 @@ def test_chart_page_supports_deep_link_and_back():
     assert "hashchange" in js
 
 
+def test_watchlist_persisted_and_keyboard_nav():
+    """自选持久化（localStorage 共用 key）+ 盘面页 ←/→ 键盘切换标的。"""
+    idx = app.resource_path("index.html")
+    home = app.resource_path("dynasty-exchange.html")
+    with open(idx, encoding="utf-8") as f:
+        chart = f.read()
+    with open(home, encoding="utf-8") as f:
+        home_js = f.read()
+    with open(app.__file__, encoding="utf-8") as f:
+        app_js = f.read()
+    # 两页共用同一存储 key；写入需 try/catch 兜底
+    assert chart.count("'dynasty.watchlist'") == 1 and "'dynasty.watchlist'" in home_js
+    assert "function saveFavs" in chart and "localStorage.setItem" in chart
+    assert "function loadFavs" in chart and "function loadFavs" not in home_js  # 首页只读
+    assert "favCodes.has(c.getAttribute('data-code'))" in home_js               # 首页 chip 过滤
+    # pywebview 默认隐私模式禁用存储，必须显式关闭
+    assert "private_mode=False" in app_js
+    # 键盘 ←/→ 切换：跳过输入控件焦点，越界不动
+    assert "'ArrowLeft'" in chart and "'ArrowRight'" in chart
+    assert "tag==='INPUT'||tag==='SELECT'||tag==='TEXTAREA'" in chart
+    # 二级导航键盘提示（桌面数据源就绪时显示）
+    assert 'id="kbdHint"' in chart and "kbdHint').style.display=''" in chart
+
+
 def test_chart_page_peak_trough_event_marks():
     """峰谷锚点：局部极值绑定邻近最大冲击事件，放大锚点标识、不写文字标注。"""
     with open(app.resource_path("index.html"), encoding="utf-8") as f:
