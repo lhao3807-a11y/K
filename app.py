@@ -26,7 +26,7 @@ BASE_DIR = pathlib.Path(__file__).resolve().parent
 RESOURCE_BASE = pathlib.Path(getattr(sys, "_MEIPASS", BASE_DIR))
 
 # 版本规范（见 AGENTS.md）：小改动 +0.0.1，大改动 +0.1.0；发版需同步 build.bat / spec 产物名
-APP_VERSION = "1.2.0"
+APP_VERSION = "1.3.0"
 WINDOW_TITLE = f"DynastyKline—V{APP_VERSION}"
 HOME_PAGE = "dynasty-exchange.html"   # 启动首页（设计稿）；index.html 为行情盘面页
 MIN_SIZE = (960, 640)
@@ -156,7 +156,7 @@ class Api:
             try:
                 rows = conn.execute(
                     "SELECT f.code, f.name, f.alias, f.role, f.range_label, "
-                    "       f.start_year, f.end_year, f.is_active, "
+                    "       f.start_year, f.end_year, f.is_active, f.dynasty_code, "
                     "       (SELECT COUNT(*) FROM figure_anchors a "
                     "        WHERE a.figure_id=f.id) AS n_anchor "
                     "FROM figures f ORDER BY f.start_year").fetchall()
@@ -168,6 +168,7 @@ class Api:
             "code": r["code"], "name": r["name"], "alias": r["alias"],
             "role": r["role"], "rangeLabel": r["range_label"],
             "startYear": r["start_year"], "endYear": r["end_year"],
+            "dynastyCode": r["dynasty_code"],
             "isActive": bool(r["is_active"]),
             "hasData": r["n_anchor"] >= 2,
         } for r in rows], ensure_ascii=False)

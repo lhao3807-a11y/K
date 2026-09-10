@@ -236,10 +236,46 @@ def test_all_pages_share_single_kline_source():
 
 
 def test_exchange_home_links_to_figure():
+    """首页人物入口：导航/按钮 → 人物交易所着陆页，焦点卡深链个人盘面。"""
     html = _read("dynasty-exchange.html")
-    assert 'href="./figure.html"' in html
-    assert "list_figures" in html          # 首页人物预览卡
+    assert 'href="./figure-exchange.html"' in html
+    assert "'./figure-exchange.html'" in html   # teaser 按钮跳着陆页
+    assert "figure.html#" in html               # 焦点卡深链个人盘面
+    assert "list_figures" in html               # 首页人物预览卡
     assert "teaserCard" in html
+
+
+def test_figure_exchange_landing_page():
+    """人物交易所着陆页：按朝代分板块 + 卡片点击深链个人盘面 + 资产就位。"""
+    html = _read("figure-exchange.html")
+    assert "list_figures" in html and "get_figure(" in html
+    assert "list_dynasties" in html             # 板块名用王朝真实名称
+    assert "FIGURE_DATA" in html                # file:// 演示回退
+    assert "figure.html#" in html               # 卡片 → 个人盘面深链
+    assert "dynastyCode" in html                # 按朝代分组依据
+    assert "miniKlineSVG" in html               # 卡片迷你走势
+    # 引擎统一走 kline.js，页面内不得另抄算法
+    assert '<script src="./kline.js">' in html
+    assert "function mulberry32" not in html
+
+
+def test_list_figures_exposes_dynasty_code():
+    """list_figures 须返回 dynastyCode，供着陆页按朝代分板块。"""
+    sys.path.insert(0, PROJECT)
+    import app
+    api = app.Api()
+    rows = json.loads(api.list_figures())
+    assert rows, "人物列表为空"
+    by_code = {r["code"]: r for r in rows}
+    assert by_code["LIBAI.701"]["dynastyCode"] == "TANG.618"
+    assert by_code["SUSHI.1037"]["dynastyCode"] == "DASONG.960"
+
+
+def test_figure_page_groups_chips_by_dynasty():
+    """figure.html 切换条按朝代分组展示（唐朝 / 宋朝分隔标签）。"""
+    html = _read("figure.html")
+    assert "fig-dyn" in html and "DYN_FALLBACK" in html
+    assert 'href="./figure-exchange.html"' in html  # 返回人物交易所
 
 
 # ---------------- 唐宋十家（2026-09 新增人物板块扩充） ----------------

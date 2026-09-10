@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>人物交易所 · DYNASTY EXCHANGE</title>
+<style>
+  :root {
+    --bg:#FFFFFF; --bg-alt:#F5F5F7; --band:#272729;
+    --text:#1D1D1F; --text-2:#6E6E73; --text-3:#86868B;
+    --axis:#C7CDD6; --blue:#0066CC; --blue-hover:#0077ED;
+    --up:#F6465D; --down:#2EBD85; --line:#E0E0E0; --grid:#F0F0F0;
+    --font-cn:"Noto Sans SC","PingFang SC","Microsoft YaHei","微软雅黑",sans-serif;
+    --font-num:"Cascadia Mono","JetBrains Mono",Consolas,"Courier New",monospace;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { background:var(--bg); }
+  body { font-family:var(--font-cn); color:var(--text); -webkit-font-smoothing:antialiased; }
+  .up { color:var(--up); } .down { color:var(--down); }
+
+  .nav { display:flex; align-items:center; justify-content:space-between; height:44px; padding:0 32px; background:#000; }
+  .logo-group { display:flex; align-items:center; gap:10px; }
+  .logo-cn { font-size:14px; font-weight:600; color:#FFF; line-height:1.2; }
+  .logo-en { font-family:var(--font-num); font-size:8px; color:#7A7A7A; letter-spacing:2px; }
+  .nav-links { display:flex; align-items:center; gap:28px; }
+  .nav-link { font-size:12px; color:#999; cursor:pointer; user-select:none; text-decoration:none; }
+  .nav-link:hover { color:#FFF; }
+  .nav-link.active { color:#FFF; font-weight:500; }
+  .nav-right { display:flex; align-items:center; gap:16px; }
+  .market-status { display:flex; align-items:center; gap:6px; }
+  .status-dot { width:8px; height:8px; border-radius:99px; background:var(--down); }
+  .status-text { font-size:12px; font-weight:500; color:var(--down); }
+
+  .wrap { max-width:1180px; margin:0 auto; padding:0 32px; }
+
+  .hero { padding:64px 0 40px; }
+  .hero-eyebrow { font-family:var(--font-num); font-size:13px; font-weight:500; color:var(--blue); letter-spacing:2px; }
+  .hero-title { font-size:48px; font-weight:600; letter-spacing:-1px; margin-top:14px; }
+  .hero-lead { font-size:16px; color:var(--text-2); margin-top:12px; line-height:26px; }
+
+  .summary { display:flex; align-items:center; background:var(--band); border-radius:16px; padding:22px 8px; margin-bottom:52px; }
+  .metric { flex:1; display:flex; flex-direction:column; gap:6px; align-items:center; }
+  .metric-label { font-size:12px; color:#86868B; }
+  .metric-num { font-family:var(--font-num); font-size:24px; font-weight:600; color:#FFF; }
+  .metric-num.up { color:var(--up); } .metric-num.down { color:var(--down); }
+  .summary-divider { width:1px; height:34px; background:rgba(255,255,255,.12); }
+
+  .block { margin-bottom:56px; }
+  .block-head { display:flex; align-items:baseline; justify-content:space-between; margin-bottom:18px;
+                padding-bottom:14px; border-bottom:1px solid var(--line); }
+  .block-title { font-size:24px; font-weight:600; letter-spacing:-0.3px; }
+  .block-title em { font-style:normal; font-family:var(--font-num); font-size:13px; color:var(--text-3); margin-left:10px; }
+  .block-sub { font-size:12px; color:var(--text-3); }
+
+  .card-grid { display:flex; flex-wrap:wrap; gap:20px; }
+  .figure-card {
+    width:352px; display:flex; flex-direction:column; gap:14px;
+    background:#FFF; border:1px solid var(--line); border-radius:18px; padding:22px;
+    cursor:pointer; transition:transform .15s ease, border-color .15s ease;
+    animation:rise .5s cubic-bezier(.22,.61,.36,1) both;
+  }
+  .figure-card:hover { transform:translateY(-2px); border-color:var(--blue); }
+  @keyframes rise { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:none; } }
+  @media (prefers-reduced-motion: reduce) { .figure-card { animation:none; } }
+  .card-head { display:flex; align-items:flex-start; justify-content:space-between; }
+  .card-name-group { display:flex; flex-direction:column; gap:4px; }
+  .card-name { font-size:18px; font-weight:600; }
+  .card-alias { font-size:12px; color:var(--text-3); }
+  .card-meta { font-family:var(--font-num); font-size:12px; color:var(--text-3); }
+  .status-tag { border-radius:6px; padding:4px 8px; font-size:11px; font-weight:500; }
+  .status-tag.up { background:rgba(246,70,93,.1); color:var(--up); }
+  .status-tag.down { background:rgba(46,189,133,.1); color:var(--down); }
+  .card-price { display:flex; align-items:baseline; gap:10px; }
+  .card-price-num { font-family:var(--font-num); font-size:24px; font-weight:600; }
+  .card-price-chg { font-family:var(--font-num); font-size:13px; font-weight:500; }
+  .card-spark svg { display:block; }
+  .card-summary { font-size:12px; color:var(--text-2); line-height:20px;
+                  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+
+  .footer { display:flex; align-items:center; justify-content:space-between; padding:36px 0 48px; border-top:1px solid var(--line); }
+  .footer p { font-size:12px; color:var(--text-3); }
+  .back-link { font-size:13px; color:var(--blue); cursor:pointer; text-decoration:none; }
+  .pending { padding:80px 0; text-align:center; color:var(--text-3); font-size:14px; }
+</style>
+</head>
+<body>
+  <header class="nav">
+    <div class="logo-group">
+      <svg width="26" height="26" viewBox="0 0 26 26" fill="none"><rect width="26" height="26" rx="7" fill="#0066CC"/><line x1="9" y1="5" x2="9" y2="21" stroke="#FFF" stroke-width="1.5"/><rect x="7" y="9" width="4" height="8" rx="1" fill="#FFF"/><line x1="17" y1="7" x2="17" y2="23" stroke="#FFF" stroke-width="1.5"/><rect x="15" y="12" width="4" height="7" rx="1" fill="#FFF"/></svg>
+      <div><div class="logo-cn">王朝交易所</div><div class="logo-en">DYNASTY EXCHANGE</div></div>
+    </div>
+    <nav class="nav-links">
+      <a class="nav-link" href="./dynasty-exchange.html">王朝</a>
+      <a class="nav-link active">人物</a>
+      <a class="nav-link" href="./dynasty-exchange.html#featured">数据</a>
+      <a class="nav-link" href="./dynasty-exchange.html#teaser">关于</a>
+    </nav>
+    <div class="nav-right">
+      <div class="market-status"><div class="status-dot"></div><span class="status-text">交易中</span></div>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <section class="hero">
+      <div class="hero-eyebrow">FIGURE EXCHANGE · 人物行情终端</div>
+      <h1 class="hero-title">把一段人生，看成一条 K 线。</h1>
+      <p class="hero-lead">以人物为标的，以气运为行情。按朝代板块挂牌，点击人物查看个人盘面 —— 年 K、阶段 K、生平大事记与场外声名。</p>
+    </section>
+
+    <section class="summary">
+      <div class="metric"><div class="metric-label">挂牌人物</div><div class="metric-num" id="mListed">--</div></div>
+      <div class="summary-divider"></div>
+      <div class="metric"><div class="metric-label">朝代板块</div><div class="metric-num" id="mBlocks">--</div></div>
+      <div class="summary-divider"></div>
+      <div class="metric"><div class="metric-label">上涨</div><div class="metric-num up" id="mUp">--</div></div>
+      <div class="summary-divider"></div>
+      <div class="metric"><div class="metric-label">下跌</div><div class="metric-num down" id="mDown">--</div></div>
+    </section>
+
+    <div id="blocks"><div class="pending" id="pending">正在接通行情数据源 …</div></div>
+
+    <footer class="footer">
+      <p>王朝交易所 DYNASTY EXCHANGE V1.3.0 · 人物板块 · 行情为历史演绎，不构成投资建议</p>
+      <a class="back-link" href="./dynasty-exchange.html">← 返回王朝交易所</a>
+    </footer>
+  </div>
+
+<script src="./kline.js"></script>
+<script src="./figure_data.js"></script>
+<script>
+(function(){
+  const KLINE = window.KLINE;
+  const UP='#F6465D', DOWN='#2EBD85';
+  const $ = id => document.getElementById(id);
+  const fmtPct = x => (x>=0?'+':'') + x.toFixed(2) + '%';
+
+  // file:// 回退时无 list_dynasties，用静态映射兜底（新王朝挂牌后以 API 名称为准）
+  const DYN_FALLBACK = { 'TANG.618':'唐朝', 'DASONG.960':'宋朝' };
+
+  function waitForApi(timeout){
+    return new Promise(res=>{
+      const t0=Date.now();
+      (function check(){
+        if(window.pywebview && window.pywebview.api) return res(window.pywebview.api);
+        if(Date.now()-t0>timeout) return res(null);
+        setTimeout(check,80);
+      })();
+    });
+  }
+
+  function miniKlineSVG(cs, up){
+    const W=306, H=52;
+    const pts=cs.map(k=>k[1]);
+    let lo=Math.min.apply(null,pts), hi=Math.max.apply(null,pts);
+    if(hi===lo) hi=lo+1;
+    const col=up?UP:DOWN, n=pts.length, coords=[];
+    for(let i=0;i<n;i++){
+      coords.push([(2+i*(W-6)/(n-1)).toFixed(1), (H-4-(pts[i]-lo)/(hi-lo)*(H-10)).toFixed(1)]);
+    }
+    const poly=coords.map(c=>c[0]+','+c[1]).join(' ');
+    const area='M'+coords.map(c=>c[0]+' '+c[1]).join(' L')
+      +' L'+coords[n-1][0]+' '+H+' L'+coords[0][0]+' '+H+' Z';
+    return '<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" fill="none" xmlns="http://www.w3.org/2000/svg">'
+      +'<path d="'+area+'" fill="'+col+'" fill-opacity="0.08"/>'
+      +'<polyline points="'+poly+'" stroke="'+col+'" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg>';
+  }
+
+  function cardHTML(f, st, i){
+    const c = st.chg>=0 ? 'up' : 'down';
+    const dur = f.endYear-f.startYear+1;
+    const delay=' style="animation-delay:'+((i||0)*60)+'ms"';
+    return '<div class="figure-card" data-code="'+f.code+'"'+delay+'>'
+      +'<div class="card-head"><div class="card-name-group">'
+      +'<span class="card-name">'+f.name+'</span>'
+      +(f.alias?'<span class="card-alias">'+f.alias+'</span>':'')
+      +'<span class="card-meta">'+f.code+' · '+f.startYear+'—'+f.endYear+' · 存续'+dur+'年</span></div>'
+      +'<span class="status-tag '+c+'">'+(c==='up'?'上涨':'下跌')+'</span></div>'
+      +'<div class="card-price"><span class="card-price-num '+c+'">'+st.last.toFixed(2)+'</span>'
+      +'<span class="card-price-chg '+c+'">'+fmtPct(st.chg)+'</span></div>'
+      +'<div class="card-spark">'+miniKlineSVG(st.sample, st.chg>=0)+'</div>'
+      +(f.summary?'<div class="card-summary">'+f.summary+'</div>':'')
+      +'</div>';
+  }
+
+  // rows: [{code,name,...,dynastyCode}]；fullMap: code -> 完整盘面（figure/anchors/events）
+  function renderBlocks(rows, fullMap, dynNames){
+    const tradable = rows.filter(f=>f.hasData && fullMap[f.code]);
+    const groups=[];   // [{code,name,items:[{f,st}]}] 按王朝起始年排序
+    const indexOf={};
+    tradable.forEach(f=>{
+      const dc=f.dynastyCode||'';
+      if(indexOf[dc]==null){
+        indexOf[dc]=groups.length;
+        groups.push({code:dc, name:dynNames[dc]||'其他板块', items:[]});
+      }
+      groups[indexOf[dc]].items.push(f);
+    });
+    groups.sort((a,b)=>{
+      const ya=(fullMap[a.items[0].code].figure||{}).startYear||0;
+      const yb=(fullMap[b.items[0].code].figure||{}).startYear||0;
+      return ya-yb;
+    });
+
+    let up=0, down=0, i=0, html='';
+    groups.forEach(g=>{
+      html+='<section class="block" id="block-'+g.code+'">'
+        +'<div class="block-head"><div>'
+        +'<span class="block-title">'+g.name+'<em>'+g.code+'</em></span>'
+        +'</div><span class="block-sub">'+g.items.length+' 位挂牌人物 · 点击查看个人盘面</span></div>'
+        +'<div class="card-grid">';
+      g.items.forEach(f=>{
+        const full=fullMap[f.code];
+        const years=KLINE.yearsOf(full.figure.startYear, full.figure.endYear);
+        const candles=KLINE.buildCandles({start:full.figure.startYear,end:full.figure.endYear,
+          peak:full.figure.peakYear,seed:full.figure.seed,anchors:full.anchors,events:full.events});
+        const st=KLINE.stats(candles, full.figure.issuePrice||100);
+        if(st.chg>=0) up++; else down++;
+        // 卡片迷你线取尾段 24 根，与王朝卡片口径一致
+        st.sample=candles.slice(-24);
+        html+=cardHTML({code:f.code,name:f.name,alias:f.alias,startYear:full.figure.startYear,
+                        endYear:full.figure.endYear,summary:full.figure.summary}, st, i++);
+      });
+      html+='</div></section>';
+    });
+
+    $('blocks').innerHTML=html || '<div class="pending">暂无挂牌人物，数据入库后自动展示。</div>';
+    $('mListed').textContent=tradable.length+' 位';
+    $('mBlocks').textContent=groups.length+' 个';
+    $('mUp').textContent=up;
+    $('mDown').textContent=down;
+    document.querySelectorAll('.figure-card').forEach(el=>{
+      el.addEventListener('click',()=>{ location.href='./figure.html#'+el.dataset.code; });
+    });
+  }
+
+  (async function(){
+    const api=await waitForApi(2500);
+    if(!api){
+      // file:// 演示回退：figure_data.js 已含全部人物的完整盘面
+      const all=window.FIGURE_DATA||{};
+      const rows=Object.keys(all).map(c=>{
+        const fg=all[c].figure;
+        return {code:c, name:fg.name, dynastyCode:fg.dynastyCode||'', hasData:true};
+      }).sort((a,b)=>(all[a.code].figure.startYear||0)-(all[b.code].figure.startYear||0));
+      const dynNames={};
+      rows.forEach(f=>{ dynNames[f.dynastyCode]=DYN_FALLBACK[f.dynastyCode]||'其他板块'; });
+      $('pending').style.display='none';
+      renderBlocks(rows, all, dynNames);
+      return;
+    }
+    const list=JSON.parse(await api.list_figures());
+    // 王朝名称映射（code -> 名称）
+    let dynNames={};
+    try{
+      dynNames={};
+      JSON.parse(await api.list_dynasties()).forEach(d=>{ dynNames[d.code]=d.name; });
+    }catch(e){ dynNames={}; }
+    // 逐个拉取完整盘面（并行）
+    const fullMap={};
+    await Promise.all(list.filter(f=>f.hasData).map(async f=>{
+      try{
+        const d=JSON.parse(await api.get_figure(f.code));
+        if(d && d.anchors && d.anchors.length>=2) fullMap[f.code]=d;
+      }catch(e){ /* 单人失败不阻塞整页 */ }
+    }));
+    $('pending').style.display='none';
+    renderBlocks(list, fullMap, dynNames);
+  })();
+})();
+</script>
+</body>
+</html>

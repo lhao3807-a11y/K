@@ -39,6 +39,8 @@
   .fig-chip:hover { border-color:var(--blue); color:var(--blue); }
   .fig-chip.active { background:var(--text); border-color:var(--text); color:#FFF; }
   .fig-chip em { font-style:normal; font-family:var(--font-num); font-size:11px; opacity:.55; margin-left:4px; }
+  .fig-chip.fig-dyn { border:none; background:none; padding:6px 6px 6px 2px; font-weight:600; color:var(--text); cursor:default; }
+  .fig-chip.fig-dyn:hover { color:var(--text); }
 
   .hero { display:flex; align-items:flex-start; justify-content:space-between; gap:32px; padding:36px 0 24px; }
   .name-row { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
@@ -181,8 +183,8 @@
     </section>
 
     <footer class="footer" data-page-node-id="OLgZJXG7wFHtTKgWIUcFHd">
-      <p data-page-node-id="uksXOHP8KwUgXT6QmwJC6t">王朝交易所 DYNASTY EXCHANGE V1.2.0 · 人物板块 · 行情为历史演绎，不构成投资建议</p>
-      <a class="back-link" href="./dynasty-exchange.html" data-page-node-id="RGsdBLvEQL8jrwgcC3Y2Bd">← 返回交易所</a>
+      <p data-page-node-id="uksXOHP8KwUgXT6QmwJC6t">王朝交易所 DYNASTY EXCHANGE V1.3.0 · 人物板块 · 行情为历史演绎，不构成投资建议</p>
+      <a class="back-link" href="./figure-exchange.html" data-page-node-id="RGsdBLvEQL8jrwgcC3Y2Bd">← 返回人物交易所</a>
     </footer>
   </div>
 
@@ -343,6 +345,7 @@
   function mount(data){
     D=data;
     const f=D.figure;
+    document.title='人物行情 · '+f.name+' | DYNASTY EXCHANGE';
     years=KLINE.yearsOf(f.startYear, f.endYear);
     candles=KLINE.buildCandles({start:f.startYear,end:f.endYear,peak:f.peakYear,
                             seed:f.seed,anchors:D.anchors,events:D.events});
@@ -368,12 +371,21 @@
     const api=await waitForApi(2500);
     const want=decodeURIComponent((location.hash||'').replace('#',''));
 
-    // 人物切换：chips + 键盘 ←/→（与王朝盘面页同一交互语言）
-    let FIGS=[];                        // 有序人物 [{code,name,isActive,hasData}]
+    // 人物切换：chips（按朝代板块分组）+ 键盘 ←/→（与王朝盘面页同一交互语言）
+    let FIGS=[];                        // 有序人物 [{code,name,dynastyCode,isActive,hasData}]
+    const DYN_FALLBACK={ 'TANG.618':'唐朝', 'DASONG.960':'宋朝' };
     const renderSwitch=(active)=>{
       const box=document.getElementById('figSwitch');
       box.innerHTML='';
+      let lastDyn=null;
       FIGS.forEach(f=>{
+        if(f.dynastyCode && f.dynastyCode!==lastDyn){   // 朝代板块分隔标签
+          lastDyn=f.dynastyCode;
+          const tag=document.createElement('span');
+          tag.className='fig-chip fig-dyn';
+          tag.textContent=DYN_FALLBACK[f.dynastyCode]||f.dynastyCode;
+          box.appendChild(tag);
+        }
         const b=document.createElement('button');
         b.className='fig-chip'+(f.code===active?' active':'');
         b.innerHTML=f.name+'<em>'+f.code+'</em>';
@@ -401,7 +413,8 @@
       const all=window.FIGURE_DATA||{};
       const codes=Object.keys(all).sort((a,b)=>
         (all[a].figure.startYear||0)-(all[b].figure.startYear||0));
-      FIGS=codes.map(c=>({code:c,name:all[c].figure.name,isActive:true,hasData:true}));
+      FIGS=codes.map(c=>({code:c,name:all[c].figure.name,
+        dynastyCode:all[c].figure.dynastyCode||'',isActive:true,hasData:true}));
       if(FIGS.length){
         renderSwitch(want && all[want] ? want : FIGS[0].code);
         mount(all[want] || all[FIGS[0].code]);

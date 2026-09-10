@@ -230,7 +230,7 @@
     <nav class="nav-links" data-page-node-id="IaaON2nGKpDgmuQoYagMtE">
       <a class="nav-link active" data-page-node-id="m26mVbtgjlKwLTD39gdnRd">王朝</a>
       <a class="nav-link" id="navFav" title="查看已加入自选的王朝标的" data-page-node-id="NlAtIwX6vk3PrBZQq8wxkq">⭐ 自选</a>
-      <a class="nav-link" href="./figure.html" data-page-node-id="iHVUvQsf4VRSQ3fHSEgZQM">人物</a>
+      <a class="nav-link" href="./figure-exchange.html" data-page-node-id="iHVUvQsf4VRSQ3fHSEgZQM">人物</a>
       <a class="nav-link" data-page-node-id="87CbgvlvQXQrFX5CCwFGRO">数据</a>
       <a class="nav-link" data-page-node-id="AyBXO1A06RHgoJUbx8Vg9u">关于</a>
     </nav>
@@ -438,7 +438,7 @@
     <div class="teaser-text" data-page-node-id="qGH8vudcIRXbcjEbFTzccy">
       <span class="teaser-label" id="teaserLabel" data-page-node-id="WWWKEpph4cg5wH9a9PTZNH">已上线 · LIVE</span>
       <span class="teaser-title" data-page-node-id="gMhXUqDNKw8NXUWc8zIwCM">人物板块：把帝王将相也挂上盘口</span>
-      <p class="teaser-desc" data-page-node-id="pgrZ3yNKG4mgJhjKDKLCbs">以人物为标的，以气运为行情。62 年人生、19 件大事，见顶于 742 年奉诏入京 —— 首支挂牌人物：李白。</p>
+      <p class="teaser-desc" data-page-node-id="pgrZ3yNKG4mgJhjKDKLCbs">以人物为标的，以气运为行情。按朝代板块挂牌：唐朝、宋朝共 11 位人物已上市，点击进入人物交易所查看个人盘面。</p>
     </div>
     <div class="teaser-card" id="teaserCard" data-page-node-id="8wh8Y1YBfFvRUPPwQrwLCX">
       <div class="teaser-card-head" data-page-node-id="1LACkdAIgBq6EGZhIsAz1u">
@@ -459,7 +459,7 @@
 
   <!-- ==================== 页脚 ==================== -->
   <footer class="footer" data-page-node-id="RMH47jJkIQrocDt5yNCh4Z">
-    <p data-page-node-id="t8qsoLmy3nFZd9quQc6eOK">王朝交易所 DYNASTY EXCHANGE V1.2.0 · 行情为历史演绎，不构成投资建议</p>
+    <p data-page-node-id="t8qsoLmy3nFZd9quQc6eOK">王朝交易所 DYNASTY EXCHANGE V1.3.0 · 行情为历史演绎，不构成投资建议</p>
     <div class="footer-links" data-page-node-id="cCBvCHM0NCoTHgfFafLUy8">
       <span data-page-node-id="fYKGpFUFXBIo1PL0UCCHfn">数据来源</span><span data-page-node-id="CVqoarC8R3giPMUhezYnn9">玩法说明</span><span data-page-node-id="cfM4Gs0ssEFGYQyUvnRcAG">更新日志</span>
     </div>
@@ -497,7 +497,7 @@
     });
     var tb = document.getElementById('teaserBtn');
     tb.addEventListener('click', function () {
-      window.location.href = './figure.html';
+      window.location.href = './figure-exchange.html';
     });
   })();
 
@@ -800,7 +800,7 @@
       el('tfSpark').innerHTML=miniKlineSVG(sample(cs,14), chg>=0);
       var go=function(){ window.location.href='figure.html#'+encodeURIComponent(f.code); };
       el('teaserCard').onclick=go;
-      el('teaserBtn').onclick=go;
+      el('teaserBtn').onclick=function(){ window.location.href='figure-exchange.html'; };
     }
 
     (async function(){
