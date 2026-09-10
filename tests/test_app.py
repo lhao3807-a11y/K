@@ -161,45 +161,60 @@ def test_chart_page_supports_deep_link_and_back():
 
 
 def test_watchlist_persisted_and_keyboard_nav():
-    """自选持久化（localStorage 共用 key）+ 盘面页 ←/→ 键盘切换标的。"""
+    """自选持久化（王朝/人物两个 localStorage key，自选页统一读取）+ 键盘 ←/→ 切换标的。"""
     idx = app.resource_path("index.html")
-    home = app.resource_path("dynasty-exchange.html")
+    fig = app.resource_path("figure.html")
+    fav = app.resource_path("favorites.html")
     with open(idx, encoding="utf-8") as f:
         chart = f.read()
-    with open(home, encoding="utf-8") as f:
-        home_js = f.read()
+    with open(fig, encoding="utf-8") as f:
+        fig_js = f.read()
+    with open(fav, encoding="utf-8") as f:
+        fav_js = f.read()
     with open(app.__file__, encoding="utf-8") as f:
         app_js = f.read()
-    # 两页共用同一存储 key；写入需 try/catch 兜底
-    assert chart.count("'dynasty.watchlist'") == 1 and "'dynasty.watchlist'" in home_js
-    assert "function saveFavs" in chart and "localStorage.setItem" in chart
-    assert "function loadFavs" in chart and "function loadFavs" not in home_js  # 首页只读
-    assert "favCodes.has(c.getAttribute('data-code'))" in home_js               # 首页 chip 过滤
+    # 王朝盘面页写 dynasty.watchlist；人物盘面页写 figure.watchlist
+    assert "'dynasty.watchlist'" in chart and "function saveFavs" in chart
+    assert "'figure.watchlist'" in fig_js and "function saveFavs" in fig_js
+    # 自选板块页统一读取两个 key（跨板块清单）
+    assert "'dynasty.watchlist'" in fav_js and "'figure.watchlist'" in fav_js
+    assert "function loadList" in fav_js and "function saveList" in fav_js
+    # 自选已独立成板块：王朝市场列表内不再有自选 chip / 过滤分支
+    home = app.resource_path("dynasty-exchange.html")
+    with open(home, encoding="utf-8") as f:
+        home_js = f.read()
+    assert 'data-filter="fav"' not in home_js
+    assert "activateFavFilter" not in home_js
     # pywebview 默认隐私模式禁用存储，必须显式关闭
     assert "private_mode=False" in app_js
-    # 键盘 ←/→ 切换：跳过输入控件焦点，越界不动
+    # 两个盘面页都有键盘 ←/→ 切换，且跳过输入控件焦点
     assert "'ArrowLeft'" in chart and "'ArrowRight'" in chart
     assert "tag==='INPUT'||tag==='SELECT'||tag==='TEXTAREA'" in chart
-    # 「←/→ 切换」提示文字已移除，但键盘切换与两侧箭头功能保留
-    assert "kbdHint" not in chart and "kbd-hint" not in chart
+    assert "'ArrowLeft'" in fig_js and "'ArrowRight'" in fig_js
 
 
 def test_nav_watchlist_side_arrows_and_follow_card():
-    """顶层导航「⭐ 自选」+ 盘面页两侧箭头（与键盘同功能）+ 详情浮卡跟随鼠标。"""
+    """顶层导航「自选」进入独立板块 + 盘面页两侧箭头（与键盘同功能）+ 详情浮卡跟随鼠标。"""
     with open(app.resource_path("index.html"), encoding="utf-8") as f:
         chart = f.read()
     with open(app.resource_path("dynasty-exchange.html"), encoding="utf-8") as f:
         home = f.read()
-    # 两页顶层导航均有自选入口；详情页经 #fav 深链回首页并激活自选筛选
+    with open(app.resource_path("figure.html"), encoding="utf-8") as f:
+        fig = f.read()
+    # 顶层导航自选入口统一指向独立板块页
     assert 'id="navFav"' in chart and 'id="navFav"' in home
-    assert 'href="dynasty-exchange.html#fav"' in chart
-    assert "location.hash==='#fav'" in home and "function activateFavFilter" in home
-    assert 'id="gridEmpty"' in home                      # 自选为空/搜索无结果时的空态提示
-    # 两侧箭头与键盘共用 stepTo，下拉/键盘/箭头统一走 switchTo
+    assert 'href="favorites.html"' in chart
+    assert 'href="./favorites.html"' in home
+    assert 'id="gridEmpty"' in home                      # 搜索无结果时的空态提示
+    # 王朝盘面页：两侧箭头与键盘共用 stepTo，下拉/键盘/箭头统一走 switchTo
     assert 'id="navPrev"' in chart and 'id="navNext"' in chart
     assert "function stepTo" in chart and "function switchTo" in chart
     assert "np.addEventListener('click',()=>stepTo(-1))" in chart
     assert "nn.addEventListener('click',()=>stepTo(1))" in chart
+    # 人物盘面页：同款两侧箭头 + stepTo（←/→ 键盘切换）
+    assert 'id="navPrev"' in fig and 'id="navNext"' in fig
+    assert "function stepTo" in fig and "function selectFigure" in fig
+    assert "np.onclick=()=>stepTo(-1)" in fig and "nn.onclick=()=>stepTo(1)" in fig
     # 浮卡随鼠标：显示时定位到光标处，光标悬入卡面即停止跟随
     assert "function moveCard" in chart and "function showCardAtCursor" in chart
     assert "cardFollow=false" in chart and "closest('#card')" in chart
@@ -218,15 +233,15 @@ def test_nav_watchlist_side_arrows_and_follow_card():
 
 def test_app_version_matches_release_naming():
     """版本号与程序名/构建产物/页脚保持同步（版本规范见 AGENTS.md 第 3 条）。"""
-    assert app.APP_VERSION == "1.3.0"
-    assert app.WINDOW_TITLE == "DynastyKline—V1.3.0"
+    assert app.APP_VERSION == "1.4.0"
+    assert app.WINDOW_TITLE == "DynastyKline—V1.4.0"
     root = pathlib.Path(app.BASE_DIR)
-    assert "DynastyKline-V1.3.0" in (root / "build.bat").read_text(encoding="utf-8")
-    assert "DynastyKline-V1.3.0" in (root / "DynastyKline.spec").read_text(encoding="utf-8")
+    assert "DynastyKline-V1.4.0" in (root / "build.bat").read_text(encoding="utf-8")
+    assert "DynastyKline-V1.4.0" in (root / "DynastyKline.spec").read_text(encoding="utf-8")
     for page in ("index.html", "dynasty-exchange.html", "figure.html",
-                 "figure-exchange.html"):
+                 "figure-exchange.html", "favorites.html"):
         with open(app.resource_path(page), encoding="utf-8") as f:
-            assert "V1.3.0" in f.read(), f"{page} 页脚缺版本号"
+            assert "V1.4.0" in f.read(), f"{page} 页脚缺版本号"
 
 
 def test_chart_page_peak_trough_event_marks():

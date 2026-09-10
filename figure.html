@@ -101,6 +101,26 @@
   .footer p { font-size:12px; color:var(--text-3); }
   .back-link { font-size:13px; color:var(--blue); cursor:pointer; text-decoration:none; }
   .pending { padding:60px 0; text-align:center; color:var(--text-3); font-size:14px; }
+
+  .favbtn { background:var(--blue); border:none; border-radius:9999px; color:#FFF; font-size:13px;
+            font-weight:500; padding:8px 18px; cursor:pointer; font-family:var(--font-cn);
+            transition:background .15s; margin-top:12px; }
+  .favbtn:hover { background:var(--blue-hover); }
+  .favbtn.faved { background:#FFF; color:var(--blue); border:1px solid var(--blue); }
+
+  .nav-arrow { position:fixed; top:50%; transform:translateY(-50%); width:44px; height:44px;
+    border-radius:9999px; background:rgba(255,255,255,.9); border:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:40;
+    box-shadow:0 4px 16px rgba(0,0,0,.08); padding:0; transition:border-color .15s,background .15s;
+    backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); }
+  .nav-arrow.left { left:16px; }
+  .nav-arrow.right { right:16px; }
+  .nav-arrow:hover { background:#FFF; border-color:var(--blue); }
+  .nav-arrow svg { display:block; }
+  @media (max-width:1200px){ .nav-arrow { display:none !important; } }
+
+  .chart-legend { display:flex; align-items:center; gap:14px; font-size:12px; color:var(--text-3); }
+  .chart-legend i { font-style:normal; margin-right:4px; }
 </style>
 </head>
 <body data-page-node-id="JFsQAEmesJLdSahO2fzaFE">
@@ -112,6 +132,7 @@
     <nav class="nav-links" data-page-node-id="9BvaGRYxh1tRjApr4RIFQA">
       <a class="nav-link" href="./dynasty-exchange.html" data-page-node-id="walaCJgqNuWQRGagj9kjwP">王朝</a>
       <a class="nav-link active" data-page-node-id="NKnRzpLCY3xD3EAFonhfsW">人物</a>
+      <a class="nav-link" href="./favorites.html" data-page-node-id="NavFavF0001">自选</a>
       <a class="nav-link" href="./dynasty-exchange.html#featured" data-page-node-id="4aFMFaqQjwVxRXTzKZ2yPr">数据</a>
       <a class="nav-link" href="./dynasty-exchange.html#teaser" data-page-node-id="1OQtQ088SHWyd7s2OkpW24">关于</a>
     </nav>
@@ -136,6 +157,7 @@
         <div class="price-now down" id="fPrice" data-page-node-id="zRgKMeH9X2JeXJWLqGbChK">—</div>
         <div class="price-chg down" id="fChg" data-page-node-id="gQTGhGpU1ZhtCHxGZHk6IH">—</div>
         <div class="fig-range" id="fRange" data-page-node-id="E3jr6AZf6OuqMRAGQWgB0v">—</div>
+        <button class="favbtn" id="favBtn" title="加入自选后可在自选板块统一查看" data-page-node-id="FavBtnFig001">加入自选</button>
       </div>
     </section>
 
@@ -144,6 +166,10 @@
     <section class="panel" data-page-node-id="D66PcaDSIxGnyt5R44QfS9">
       <div class="panel-head" data-page-node-id="LnXeLa42zF3baiT6JylWse">
         <span class="panel-title" data-page-node-id="icwo2uLz5MTRm1W3dCMBKi">气运走势</span>
+        <div class="chart-legend" id="chartLegend" data-page-node-id="ChartLegend01">
+          <span><i style="color:var(--blue)">◆</i>锚点（定价依据）</span>
+          <span><i style="color:var(--up)">●</i><i style="color:var(--down)">●</i>大事记（红涨绿跌）</span>
+        </div>
         <div class="seg" data-page-node-id="e9Gehi9qFhLhur8YFhvhew">
           <button id="btnYear" class="active" data-page-node-id="CdcVxEZ6I73PaXeW4u9iDM">年 K</button>
           <button id="btnPeriod" data-page-node-id="JlLJbojE9q2U0PpU0LQULA">阶段 K</button>
@@ -183,10 +209,18 @@
     </section>
 
     <footer class="footer" data-page-node-id="OLgZJXG7wFHtTKgWIUcFHd">
-      <p data-page-node-id="uksXOHP8KwUgXT6QmwJC6t">王朝交易所 DYNASTY EXCHANGE V1.3.0 · 人物板块 · 行情为历史演绎，不构成投资建议</p>
+      <p data-page-node-id="uksXOHP8KwUgXT6QmwJC6t">王朝交易所 DYNASTY EXCHANGE V1.4.0 · 人物板块 · 行情为历史演绎，不构成投资建议</p>
       <a class="back-link" href="./figure-exchange.html" data-page-node-id="RGsdBLvEQL8jrwgcC3Y2Bd">← 返回人物交易所</a>
     </footer>
   </div>
+
+  <!-- ==================== 两侧切换箭头（与键盘 ←/→ 同功能） ==================== -->
+  <button class="nav-arrow left" id="navPrev" title="上一个人物 (←)" aria-label="上一个人物" style="display:none" data-page-node-id="FigNavPrev01">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8L10 13" stroke="#333333" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+  <button class="nav-arrow right" id="navNext" title="下一个人物 (→)" aria-label="下一个人物" style="display:none" data-page-node-id="FigNavNext01">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3L11 8L6 13" stroke="#333333" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
 
 <script src="./echarts.min.js"></script>
 <script src="./kline.js"></script>
@@ -255,10 +289,32 @@
     return {cats:(D.periods||[]).map(p=>p.name), data:data};
   }
 
+  // 标注层：① 锚点（菱形+数值，标明曲线拐点的定价依据，仅年 K）
+  //         ② 大事记（巨/大档，红涨绿跌，两种模式都在）
   function buildMarks(cats, data){
     const rank={'巨':4,'大':3,'中':2,'小':1};
+    const marks=[];
+    if(mode==='year'){
+      const anchors=D.anchors||[];
+      anchors.forEach((a,i)=>{
+        const idx=yearIndex[a[0]];
+        if(idx==null) return;
+        const prev = i>0 ? anchors[i-1][1] : a[1];
+        const isPeak = a[1]>=prev;               // 相对前一锚点判断峰/谷，决定标签方向
+        marks.push({
+          name:'锚点 '+a[0], value:a[1],
+          coord:[String(a[0]), a[1]],
+          symbol:'diamond', symbolSize:8, z:9,
+          itemStyle:{color:'#FFFFFF', borderColor:BLUE, borderWidth:1.5},
+          label:{show:true, position:isPeak?'top':'bottom', distance:5,
+            formatter:'{a|'+a[1]+'}',
+            rich:{a:{color:BLUE, fontSize:10, fontFamily:'"Cascadia Mono","JetBrains Mono",Consolas,monospace',
+                     lineHeight:12}}}
+        });
+      });
+    }
     const evs=(D.events||[]).filter(e=>rank[(e.mag||'').slice(1)]>=3);
-    return evs.map((e,i)=>{
+    evs.forEach((e,i)=>{
       let v=null;
       if(mode==='year'){
         const idx=yearIndex[e.year];
@@ -267,17 +323,27 @@
         const pi=(D.periods||[]).findIndex(p=>e.year>=p.s && e.year<=p.e);
         v = pi<0 ? null : data[pi][3];
       }
-      if(v==null) return null;
+      if(v==null) return;
       const col = e.dir==='bear' ? DOWN : UP;
-      return {
+      marks.push({
         name:e.title, value:e.term,
         coord:[mode==='year'?String(e.year):cats[(D.periods||[]).findIndex(p=>e.year>=p.s&&e.year<=p.e)], v],
-        symbol:'circle', symbolSize:9,
-        itemStyle:{color:col},
-        label:{show:true, position: i%2 ? 'bottom':'top', distance:8,
-               formatter:'{c}', fontSize:11, color:col}
-      };
-    }).filter(Boolean);
+        symbol:'circle', symbolSize:9, z:12,
+        itemStyle:{color:col, borderColor:'#FFFFFF', borderWidth:1.5},
+        label:{show:true, position: e.dir==='bear' ? 'bottom' : 'top',
+               distance: i%2 ? 22 : 8,   // 相邻事件错开避让
+               formatter:'{a|'+e.title+'}\n{b|—— '+e.term+'}',
+               align:'center',
+               rich:{a:{color:'#1D1D1F', fontSize:10, lineHeight:13,
+                        fontFamily:'"Cascadia Mono","JetBrains Mono",Consolas,monospace'},
+                     b:{color:col, fontSize:10, fontWeight:'bold', lineHeight:13,
+                        fontFamily:'"Cascadia Mono","JetBrains Mono",Consolas,monospace'}},
+               backgroundColor:'rgba(255,255,255,.95)', borderColor:col, borderWidth:1,
+               padding:[4,7], borderRadius:5,
+               shadowColor:'rgba(0,0,0,.08)', shadowBlur:6}
+      });
+    });
+    return marks;
   }
 
   function renderChart(){
@@ -286,7 +352,7 @@
     chart.setOption({
       backgroundColor:'#FFFFFF',
       animation:false,
-      grid:{left:58,right:26,top:28,bottom:56},
+      grid:{left:58,right:26,top:48,bottom:56},
       tooltip:{trigger:'axis', axisPointer:{type:'cross'},
         backgroundColor:'#FFFFFF', borderColor:'#E0E0E0', borderWidth:1,
         textStyle:{color:'#1D1D1F', fontSize:12},
@@ -310,6 +376,9 @@
     }, true);
     ['year','period'].forEach(m=>$(m==='year'?'btnYear':'btnPeriod')
       .classList.toggle('active', m===mode));
+    // 锚点为年 K 专属标注层，切到阶段 K 时隐藏对应图例
+    const lg=$('chartLegend');
+    if(lg && lg.firstElementChild) lg.firstElementChild.style.display = mode==='year' ? '' : 'none';
   }
 
   function renderPeriods(){
@@ -367,76 +436,149 @@
   $('btnPeriod').onclick=()=>{ mode='period'; renderChart(); };
   window.addEventListener('resize',()=>{ if(chart) chart.resize(); });
 
+  // ---------- 自选（localStorage 持久化；自选板块页共用这两个 key） ----------
+  const FAV_KEY='figure.watchlist';
+  function loadFavs(){
+    try{ return new Set(JSON.parse(localStorage.getItem(FAV_KEY)||'[]')); }
+    catch(e){ return new Set(); }
+  }
+  function saveFavs(set){
+    try{ localStorage.setItem(FAV_KEY, JSON.stringify(Array.from(set))); }catch(e){}
+  }
+  const favSet=loadFavs();
+  function syncFavBtn(){
+    const b=$('favBtn'); if(!b || !D) return;
+    const on=favSet.has(D.figure.code);
+    b.textContent = on ? '已加自选' : '加入自选';
+    b.classList.toggle('faved', on);
+  }
+  $('favBtn').addEventListener('click',()=>{
+    if(!D) return;
+    const code=D.figure.code;
+    if(favSet.has(code)) favSet.delete(code); else favSet.add(code);
+    saveFavs(favSet);
+    syncFavBtn();
+  });
+
+  // ---------- 人物切换：chips / 键盘 ←→ / 两侧箭头 统一走 selectFigure ----------
+  let apiRef=null, curCode=null, FIGS=[];   // FIGS: [{code,name,dynastyCode,isActive,hasData}]
+  const DYN_FALLBACK={ 'TANG.618':'唐朝', 'DASONG.960':'宋朝' };
+
+  const renderSwitch=(active)=>{
+    const box=document.getElementById('figSwitch');
+    if(!box) return;
+    box.innerHTML='';
+    let lastDyn=null;
+    FIGS.forEach(f=>{
+      if(f.dynastyCode && f.dynastyCode!==lastDyn){   // 朝代板块分隔标签
+        lastDyn=f.dynastyCode;
+        const tag=document.createElement('span');
+        tag.className='fig-chip fig-dyn';
+        tag.textContent=DYN_FALLBACK[f.dynastyCode]||f.dynastyCode;
+        box.appendChild(tag);
+      }
+      const b=document.createElement('button');
+      b.className='fig-chip'+(f.code===active?' active':'');
+      b.innerHTML=f.name+'<em>'+f.code+'</em>';
+      if(!f.hasData) b.style.opacity='.45';
+      b.onclick=()=>{ if(f.hasData) selectFigure(f.code); };
+      box.appendChild(b);
+    });
+  };
+
+  async function fetchFigure(code){
+    if(apiRef){
+      const full=JSON.parse(await apiRef.get_figure(code));
+      if(!full.error && full.anchors && full.anchors.length>=2) return full;
+      return null;
+    }
+    const all=window.FIGURE_DATA||{};
+    return all[code] || null;
+  }
+
+  // 同页切换：不重载页面，只重取数据重绘（hash 同步深链，便于分享/刷新定位）
+  async function selectFigure(code){
+    if(!code || code===curCode) return;
+    const meta=FIGS.find(f=>f.code===code);
+    if(meta && !meta.hasData){ showPending(meta); curCode=code; return; }
+    const full=await fetchFigure(code);
+    if(!full){ if(meta) showPending(meta); return; }
+    curCode=code;
+    document.getElementById('chart').style.display='';
+    mode='year';
+    mount(full);
+    renderSwitch(code);
+    syncFavBtn();
+    if(decodeURIComponent((location.hash||'').replace('#',''))!==code){
+      location.hash='#'+code;
+    }
+  }
+
+  function stepTo(dir){
+    const tradable=FIGS.filter(f=>f.hasData);
+    if(!tradable.length) return;
+    const i=tradable.findIndex(f=>f.code===curCode);
+    const j=(Math.max(i,0)+dir+tradable.length)%tradable.length;
+    if(tradable[j].code!==curCode) selectFigure(tradable[j].code);
+  }
+
+  // 键盘 ←/→（焦点在输入控件时忽略）
+  document.addEventListener('keydown',ev=>{
+    if(ev.key!=='ArrowLeft' && ev.key!=='ArrowRight') return;
+    const tag=(document.activeElement && document.activeElement.tagName)||'';
+    if(tag==='INPUT'||tag==='SELECT'||tag==='TEXTAREA') return;
+    stepTo(ev.key==='ArrowLeft' ? -1 : 1);
+  });
+  // 同页 hash 变化（外部改链深链到另一人物）也要响应
+  window.addEventListener('hashchange',()=>{
+    const c=decodeURIComponent((location.hash||'').replace('#',''));
+    if(c && c!==curCode) selectFigure(c);
+  });
+
   (async function(){
-    const api=await waitForApi(2500);
+    apiRef=await waitForApi(2500);
     const want=decodeURIComponent((location.hash||'').replace('#',''));
 
-    // 人物切换：chips（按朝代板块分组）+ 键盘 ←/→（与王朝盘面页同一交互语言）
-    let FIGS=[];                        // 有序人物 [{code,name,dynastyCode,isActive,hasData}]
-    const DYN_FALLBACK={ 'TANG.618':'唐朝', 'DASONG.960':'宋朝' };
-    const renderSwitch=(active)=>{
-      const box=document.getElementById('figSwitch');
-      box.innerHTML='';
-      let lastDyn=null;
-      FIGS.forEach(f=>{
-        if(f.dynastyCode && f.dynastyCode!==lastDyn){   // 朝代板块分隔标签
-          lastDyn=f.dynastyCode;
-          const tag=document.createElement('span');
-          tag.className='fig-chip fig-dyn';
-          tag.textContent=DYN_FALLBACK[f.dynastyCode]||f.dynastyCode;
-          box.appendChild(tag);
-        }
-        const b=document.createElement('button');
-        b.className='fig-chip'+(f.code===active?' active':'');
-        b.innerHTML=f.name+'<em>'+f.code+'</em>';
-        if(!f.hasData) b.style.opacity='.45';
-        b.onclick=()=>{ if(f.code!==active && f.hasData){ location.hash='#'+f.code; location.reload(); } };
-        box.appendChild(b);
-      });
-    };
-    const stepFigure=(dir)=>{
-      if(!FIGS.length) return;
-      const tradable=FIGS.filter(f=>f.hasData);
-      if(!tradable.length) return;
-      const cur=decodeURIComponent((location.hash||'').replace('#',''));
-      const pos=tradable.findIndex(f=>f.code===cur);
-      const next=tradable[(Math.max(pos,0)+dir+tradable.length)%tradable.length];
-      if(next && next.code!==cur){ location.hash='#'+next.code; location.reload(); }
-    };
-    window.addEventListener('keydown',e=>{
-      if(['INPUT','SELECT','TEXTAREA'].includes(document.activeElement&&document.activeElement.tagName)) return;
-      if(e.key==='ArrowLeft') stepFigure(-1);
-      else if(e.key==='ArrowRight') stepFigure(1);
-    });
-
-    if(!api){
+    if(!apiRef){
+      // file:// 演示回退：figure_data.js 含全部人物完整盘面
       const all=window.FIGURE_DATA||{};
       const codes=Object.keys(all).sort((a,b)=>
         (all[a].figure.startYear||0)-(all[b].figure.startYear||0));
       FIGS=codes.map(c=>({code:c,name:all[c].figure.name,
         dynastyCode:all[c].figure.dynastyCode||'',isActive:true,hasData:true}));
+      showArrows();
       if(FIGS.length){
-        renderSwitch(want && all[want] ? want : FIGS[0].code);
-        mount(all[want] || all[FIGS[0].code]);
+        const pick = (want && all[want]) ? want : FIGS[0].code;
+        const full=all[pick];
+        curCode=pick; mount(full); renderSwitch(pick); syncFavBtn();
       } else {
         showPending({name:'—',code:'—',alias:'',role:''});
       }
       return;
     }
-    const list=JSON.parse(await api.list_figures());
+
+    const list=JSON.parse(await apiRef.list_figures());
     if(!list.length){ showPending({name:'人物板块',code:'—',alias:'即将上线',role:''}); return; }
     FIGS=list;
+    showArrows();
     const pick=list.find(x=>x.code===want && x.hasData)
              || list.find(x=>x.code===want)
              || list.find(x=>x.isActive && x.hasData)
              || list.find(x=>x.hasData)
              || list[0];
-    renderSwitch(pick.code);
-    const full=JSON.parse(await api.get_figure(pick.code));
-    if(full.error){ showPending(pick); return; }
-    if(!full.anchors || full.anchors.length<2){ showPending(full.figure); return; }
-    mount(full);
+    const full=await fetchFigure(pick.code);
+    if(!full){ showPending(pick); curCode=pick.code; renderSwitch(pick.code); return; }
+    curCode=pick.code; mount(full); renderSwitch(pick.code); syncFavBtn();
   })();
+
+  function showArrows(){
+    if(FIGS.filter(f=>f.hasData).length<2) return;   // 单个标的时不显示箭头
+    const np=document.getElementById('navPrev'), nn=document.getElementById('navNext');
+    if(!np || !nn) return;
+    np.style.display=''; nn.style.display='';
+    np.onclick=()=>stepTo(-1);
+    nn.onclick=()=>stepTo(1);
+  }
 })();
 </script>
 </body>

@@ -131,7 +131,6 @@
   .chip.active { background: var(--text); border-color: var(--text); color: #FFFFFF; font-weight: 500; }
   .chip[data-filter="up"] { color: var(--up); }
   .chip[data-filter="down"] { color: var(--down); }
-  .chip[data-filter="fav"] { color: #B7791F; }
   .chip[data-filter="up"].active, .chip[data-filter="down"].active { color: #FFFFFF; }
   .card-grid { display: flex; flex-wrap: wrap; gap: 20px; }
   .grid-empty { width: 100%; padding: 56px 0; text-align: center; font-size: 14px; color: #86868B; }
@@ -229,7 +228,7 @@
     </div>
     <nav class="nav-links" data-page-node-id="IaaON2nGKpDgmuQoYagMtE">
       <a class="nav-link active" data-page-node-id="m26mVbtgjlKwLTD39gdnRd">王朝</a>
-      <a class="nav-link" id="navFav" title="查看已加入自选的王朝标的" data-page-node-id="NlAtIwX6vk3PrBZQq8wxkq">⭐ 自选</a>
+      <a class="nav-link" id="navFav" href="./favorites.html" title="王朝与人物自选统一在此查看" data-page-node-id="NlAtIwX6vk3PrBZQq8wxkq">自选</a>
       <a class="nav-link" href="./figure-exchange.html" data-page-node-id="iHVUvQsf4VRSQ3fHSEgZQM">人物</a>
       <a class="nav-link" data-page-node-id="87CbgvlvQXQrFX5CCwFGRO">数据</a>
       <a class="nav-link" data-page-node-id="AyBXO1A06RHgoJUbx8Vg9u">关于</a>
@@ -328,7 +327,6 @@
         <span class="chip" data-filter="down" data-page-node-id="OHGbIZN6TGxc9PyjhgRoBA">下跌</span>
         <span class="chip" data-filter="unified" data-page-node-id="23nzAadOBaFEpzPeDDNmGk">大一统</span>
         <span class="chip" data-filter="split" data-page-node-id="D9PkBAO2WsjHAhFTndSCNp">分裂期</span>
-        <span class="chip" data-filter="fav" title="详情页点「加入自选」的标的" data-page-node-id="NMsqdN2nOlU9911dwvhj9o">⭐ 自选</span>
       </div>
     </div>
     <div class="card-grid" id="cardGrid" data-page-node-id="XcHg4tDzcaBrbYAWzUIB9v">
@@ -459,7 +457,7 @@
 
   <!-- ==================== 页脚 ==================== -->
   <footer class="footer" data-page-node-id="RMH47jJkIQrocDt5yNCh4Z">
-    <p data-page-node-id="t8qsoLmy3nFZd9quQc6eOK">王朝交易所 DYNASTY EXCHANGE V1.3.0 · 行情为历史演绎，不构成投资建议</p>
+    <p data-page-node-id="t8qsoLmy3nFZd9quQc6eOK">王朝交易所 DYNASTY EXCHANGE V1.4.0 · 行情为历史演绎，不构成投资建议</p>
     <div class="footer-links" data-page-node-id="cCBvCHM0NCoTHgfFafLUy8">
       <span data-page-node-id="fYKGpFUFXBIo1PL0UCCHfn">数据来源</span><span data-page-node-id="CVqoarC8R3giPMUhezYnn9">玩法说明</span><span data-page-node-id="cfM4Gs0ssEFGYQyUvnRcAG">更新日志</span>
     </div>
@@ -708,11 +706,6 @@
     // ---- 筛选 chips + 搜索（静态/动态卡片通用） ----
     var curFilter='all';
     var searchInput=document.getElementById('searchInput');
-    // 自选列表与详情页共用 localStorage key（⭐ 自选 chip 依据它过滤）
-    var favCodes=(function(){
-      try{ return new Set(JSON.parse(localStorage.getItem('dynasty.watchlist')||'[]')); }
-      catch(e){ return new Set(); }
-    })();
     function applyFilter(){
       var q=(searchInput.value||'').trim().toLowerCase();
       var visible=0;
@@ -722,7 +715,6 @@
         else if(curFilter==='down') ok=(t==='down');
         else if(curFilter==='unified') ok=(g==='unified');
         else if(curFilter==='split') ok=(g==='split');
-        else if(curFilter==='fav') ok=favCodes.has(c.getAttribute('data-code'));
         if(ok && q) ok=(c.getAttribute('data-code')+' '+c.textContent).toLowerCase().indexOf(q)>=0;
         c.style.display=ok?'':'none';
         if(ok) visible++;
@@ -730,22 +722,9 @@
       var empty=document.getElementById('gridEmpty');
       if(empty){
         empty.style.display=visible?'none':'';
-        empty.textContent = curFilter==='fav'
-          ? '暂无自选标的 —— 打开任意王朝详情页，点右上角「加入自选」即可收藏'
-          : '没有匹配的标的，换个筛选或关键词试试';
+        empty.textContent='没有匹配的标的，换个筛选或关键词试试';
       }
     }
-    // 顶层导航「⭐ 自选」：激活自选筛选并滚到行情列表（详情页经 #fav 深链直达）
-    function activateFavFilter(){
-      curFilter='fav';
-      Array.prototype.forEach.call(document.querySelectorAll('#chips .chip'), function(x){
-        x.classList.toggle('active', x.getAttribute('data-filter')==='fav');
-      });
-      applyFilter();
-      var sec=document.getElementById('listSection');
-      if(sec) sec.scrollIntoView({behavior:'smooth',block:'start'});
-    }
-    document.getElementById('navFav').addEventListener('click', activateFavFilter);
     Array.prototype.forEach.call(document.querySelectorAll('#chips .chip'), function(chip){
       chip.addEventListener('click', function(){
         Array.prototype.forEach.call(document.querySelectorAll('#chips .chip'), function(x){ x.classList.remove('active'); });
@@ -855,8 +834,6 @@
         if(c) gotoChart(c.getAttribute('data-code'));
       });
       applyFilter();
-      // 详情页顶层导航「⭐ 自选」经 #fav 深链直达自选列表
-      if(location.hash==='#fav') activateFavFilter();
 
       // 焦点行情区：每次进入程序随机挑一支（有数据王朝优先入池），不再固定标的
       var withData=list.filter(function(d){ return hasData(full[d.code]); });

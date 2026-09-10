@@ -356,9 +356,43 @@ def test_tangsong_export_contains_all():
 
 
 def test_figure_html_switcher():
-    """figure.html 须具备多人物切换 UI（chips + 键盘 ←/→）。"""
+    """figure.html 多人物切换 UI：chips + 键盘 ←/→ + 两侧箭头，同页切换不重载。"""
     html = _read("figure.html")
     assert 'id="figSwitch"' in html
     assert "fig-chip" in html
-    assert "stepFigure" in html and "ArrowRight" in html and "ArrowLeft" in html
-    assert "location.hash" in html
+    # 统一切换入口 selectFigure/stepTo：chips、键盘、两侧箭头共用
+    assert "function selectFigure" in html and "function stepTo" in html
+    assert "ArrowRight" in html and "ArrowLeft" in html
+    assert 'id="navPrev"' in html and 'id="navNext"' in html
+    assert "np.onclick=()=>stepTo(-1)" in html and "nn.onclick=()=>stepTo(1)" in html
+    # 同页切换：只重取数据重绘，不再 reload（旧实现靠 hash+reload，体验割裂）
+    assert "location.reload" not in html
+    assert "location.hash='#'+code" in html          # hash 仅用于深链同步
+    assert "hashchange" in html                      # 外部改链也能切人
+
+
+def test_figure_page_anchor_marks():
+    """人物 K 线须标注锚点：年 K 模式下锚点（菱形+数值）与大事记（圆点）同图层。"""
+    html = _read("figure.html")
+    assert "锚点" in html
+    # 锚点标记：菱形 + 蓝色描边 + 数值标签
+    assert "symbol:'diamond'" in html
+    assert "D.anchors" in html and "'锚点 '+a[0]" in html
+    # 图例说明锚点/事件两层标注
+    assert 'id="chartLegend"' in html
+    # 锚点仅年 K 专属（阶段 K 下锚点与阶段一一对应关系不成立）
+    assert "mode==='year'" in html
+
+
+def test_favorites_standalone_page():
+    """自选独立板块：跨王朝/人物两个 key，可移除、可深链回各自盘面。"""
+    html = _read("favorites.html")
+    assert "'dynasty.watchlist'" in html and "'figure.watchlist'" in html
+    assert "index.html#" in html and "figure.html#" in html     # 深链回盘面
+    assert "list_dynasties" in html and "list_figures" in html   # 程序内走 js_api
+    assert "FIGURE_DATA" in html and "DYNASTY_DATA" in html      # 浏览器直开回退
+    assert "rm-btn" in html and "clearAll" in html               # 移除单项 / 清空
+    assert "miniKlineSVG" in html                                # 卡片迷你走势
+    # 引擎统一走 kline.js
+    assert '<script src="./kline.js">' in html
+    assert "function mulberry32" not in html

@@ -26,7 +26,7 @@ BASE_DIR = pathlib.Path(__file__).resolve().parent
 RESOURCE_BASE = pathlib.Path(getattr(sys, "_MEIPASS", BASE_DIR))
 
 # 版本规范（见 AGENTS.md）：小改动 +0.0.1，大改动 +0.1.0；发版需同步 build.bat / spec 产物名
-APP_VERSION = "1.3.0"
+APP_VERSION = "1.4.0"
 WINDOW_TITLE = f"DynastyKline—V{APP_VERSION}"
 HOME_PAGE = "dynasty-exchange.html"   # 启动首页（设计稿）；index.html 为行情盘面页
 MIN_SIZE = (960, 640)
