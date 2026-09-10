@@ -33,6 +33,13 @@
 
   .wrap { max-width:1180px; margin:0 auto; padding:0 32px; }
 
+  .fig-switch { display:flex; gap:8px; overflow-x:auto; padding:14px 0 0; scrollbar-width:none; }
+  .fig-switch::-webkit-scrollbar { display:none; }
+  .fig-chip { flex:none; border:1px solid var(--line); background:#FFF; border-radius:99px; padding:6px 14px; font-size:13px; font-family:var(--font-cn); color:var(--text-2); cursor:pointer; white-space:nowrap; transition:all .15s; }
+  .fig-chip:hover { border-color:var(--blue); color:var(--blue); }
+  .fig-chip.active { background:var(--text); border-color:var(--text); color:#FFF; }
+  .fig-chip em { font-style:normal; font-family:var(--font-num); font-size:11px; opacity:.55; margin-left:4px; }
+
   .hero { display:flex; align-items:flex-start; justify-content:space-between; gap:32px; padding:36px 0 24px; }
   .name-row { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
   .fig-name { font-size:40px; font-weight:600; letter-spacing:-0.5px; }
@@ -112,6 +119,7 @@
   </header>
 
   <div class="wrap" data-page-node-id="BBvTLlqD73dnAqJ9WredkS">
+    <div class="fig-switch" id="figSwitch" data-page-node-id="PfigSwitchUI0000000000000"></div>
     <section class="hero" data-page-node-id="PDViH0NRRWM0NqrGbL1ndi">
       <div data-page-node-id="TJeEkAwgkPf06CkMynOKHy">
         <div class="name-row" data-page-node-id="6kTGJr1Z9nz8hdc4wiBtfW">
@@ -173,7 +181,7 @@
     </section>
 
     <footer class="footer" data-page-node-id="OLgZJXG7wFHtTKgWIUcFHd">
-      <p data-page-node-id="uksXOHP8KwUgXT6QmwJC6t">王朝交易所 DYNASTY EXCHANGE V1.1.0 · 人物板块 · 行情为历史演绎，不构成投资建议</p>
+      <p data-page-node-id="uksXOHP8KwUgXT6QmwJC6t">王朝交易所 DYNASTY EXCHANGE V1.2.0 · 人物板块 · 行情为历史演绎，不构成投资建议</p>
       <a class="back-link" href="./dynasty-exchange.html" data-page-node-id="RGsdBLvEQL8jrwgcC3Y2Bd">← 返回交易所</a>
     </footer>
   </div>
@@ -358,15 +366,59 @@
 
   (async function(){
     const api=await waitForApi(2500);
+    const want=decodeURIComponent((location.hash||'').replace('#',''));
+
+    // 人物切换：chips + 键盘 ←/→（与王朝盘面页同一交互语言）
+    let FIGS=[];                        // 有序人物 [{code,name,isActive,hasData}]
+    const renderSwitch=(active)=>{
+      const box=document.getElementById('figSwitch');
+      box.innerHTML='';
+      FIGS.forEach(f=>{
+        const b=document.createElement('button');
+        b.className='fig-chip'+(f.code===active?' active':'');
+        b.innerHTML=f.name+'<em>'+f.code+'</em>';
+        if(!f.hasData) b.style.opacity='.45';
+        b.onclick=()=>{ if(f.code!==active && f.hasData){ location.hash='#'+f.code; location.reload(); } };
+        box.appendChild(b);
+      });
+    };
+    const stepFigure=(dir)=>{
+      if(!FIGS.length) return;
+      const tradable=FIGS.filter(f=>f.hasData);
+      if(!tradable.length) return;
+      const cur=decodeURIComponent((location.hash||'').replace('#',''));
+      const pos=tradable.findIndex(f=>f.code===cur);
+      const next=tradable[(Math.max(pos,0)+dir+tradable.length)%tradable.length];
+      if(next && next.code!==cur){ location.hash='#'+next.code; location.reload(); }
+    };
+    window.addEventListener('keydown',e=>{
+      if(['INPUT','SELECT','TEXTAREA'].includes(document.activeElement&&document.activeElement.tagName)) return;
+      if(e.key==='ArrowLeft') stepFigure(-1);
+      else if(e.key==='ArrowRight') stepFigure(1);
+    });
+
     if(!api){
-      if(window.FIGURE_DATA) mount(window.FIGURE_DATA);
-      else showPending({name:'—',code:'—',alias:'',role:''});
+      const all=window.FIGURE_DATA||{};
+      const codes=Object.keys(all).sort((a,b)=>
+        (all[a].figure.startYear||0)-(all[b].figure.startYear||0));
+      FIGS=codes.map(c=>({code:c,name:all[c].figure.name,isActive:true,hasData:true}));
+      if(FIGS.length){
+        renderSwitch(want && all[want] ? want : FIGS[0].code);
+        mount(all[want] || all[FIGS[0].code]);
+      } else {
+        showPending({name:'—',code:'—',alias:'',role:''});
+      }
       return;
     }
     const list=JSON.parse(await api.list_figures());
     if(!list.length){ showPending({name:'人物板块',code:'—',alias:'即将上线',role:''}); return; }
-    const want=decodeURIComponent((location.hash||'').replace('#',''));
-    const pick=list.find(x=>x.code===want) || list.find(x=>x.isActive) || list[0];
+    FIGS=list;
+    const pick=list.find(x=>x.code===want && x.hasData)
+             || list.find(x=>x.code===want)
+             || list.find(x=>x.isActive && x.hasData)
+             || list.find(x=>x.hasData)
+             || list[0];
+    renderSwitch(pick.code);
     const full=JSON.parse(await api.get_figure(pick.code));
     if(full.error){ showPending(pick); return; }
     if(!full.anchors || full.anchors.length<2){ showPending(full.figure); return; }

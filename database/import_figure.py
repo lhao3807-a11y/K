@@ -34,6 +34,10 @@ MAG_RE = re.compile(r"^[+±-][大小中巨]$")
 # 模块 -> [(显示名, 常量名), ...]
 REGISTRY = {
     "libai": [("李白", "LIBAI")],
+    "tang": [("杜甫", "DUFU"), ("王维", "WANGWEI"), ("白居易", "BAIJUYI"),
+             ("韩愈", "HANYU"), ("柳宗元", "LIUZONGYUAN")],
+    "song": [("苏轼", "SUSHI"), ("王安石", "WANGANSHI"), ("李清照", "LIQINGZHAO"),
+             ("岳飞", "YUEFEI"), ("文天祥", "WENTIANXIANG")],
 }
 
 
@@ -155,41 +159,48 @@ def upsert(conn, name, data):
     print(f"      阶段 {len(periods)} / 事件 {len(evs)} / 锚点 {len(anchors)}")
 
 
-def export_js(conn, code, path):
-    """导出单个人的完整盘面数据为 figure_data.js（浏览器直开的演示回退）。"""
-    row = conn.execute("SELECT * FROM figures WHERE code=?", (code,)).fetchone()
-    if row is None:
-        print(f"[!] 导出跳过：未找到人物 {code}")
+def export_js(conn, path):
+    """导出全部 is_active=1 人物的完整盘面数据为 figure_data.js。
+
+    结构：window.FIGURE_DATA = { "<code>": {figure/periods/events/anchors/...} }
+    （浏览器直开的演示回退；figure.html 按 hash 或首个 code 取用）
+    """
+    rows = conn.execute(
+        "SELECT * FROM figures WHERE is_active=1 ORDER BY start_year").fetchall()
+    if not rows:
+        print("[!] 导出跳过：无 is_active=1 的人物")
         return False
-    payload = {
-        "figure": {
-            "code": row["code"], "name": row["name"], "alias": row["alias"],
-            "role": row["role"], "rangeLabel": row["range_label"],
-            "startYear": row["start_year"], "endYear": row["end_year"],
-            "issuePrice": row["issue_price"], "peakYear": row["peak_year"],
-            "seed": row["seed"], "dynastyCode": row["dynasty_code"],
-            "summary": row["summary"],
-        },
-        "periods": [{"name": r["name"], "theme": r["theme"],
-                     "s": r["start_year"], "e": r["end_year"]}
-                    for r in conn.execute(
-            "SELECT name,theme,start_year,end_year FROM figure_periods "
-            "WHERE figure_id=? ORDER BY sort", (row["id"],))],
-        "events": [dict(r) for r in conn.execute(
-            'SELECT year,title,term,dir,mag,description AS "desc",quote '
-            "FROM figure_events WHERE figure_id=? ORDER BY sort, year", (row["id"],))],
-        "anchors": [list(r) for r in conn.execute(
-            "SELECT year,value FROM figure_anchors WHERE figure_id=? "
-            "ORDER BY sort, year", (row["id"],))],
-        "config": {},
-    }
+    payload = {}
+    for row in rows:
+        payload[row["code"]] = {
+            "figure": {
+                "code": row["code"], "name": row["name"], "alias": row["alias"],
+                "role": row["role"], "rangeLabel": row["range_label"],
+                "startYear": row["start_year"], "endYear": row["end_year"],
+                "issuePrice": row["issue_price"], "peakYear": row["peak_year"],
+                "seed": row["seed"], "dynastyCode": row["dynasty_code"],
+                "summary": row["summary"],
+            },
+            "periods": [{"name": r["name"], "theme": r["theme"],
+                         "s": r["start_year"], "e": r["end_year"]}
+                        for r in conn.execute(
+                "SELECT name,theme,start_year,end_year FROM figure_periods "
+                "WHERE figure_id=? ORDER BY sort", (row["id"],))],
+            "events": [dict(r) for r in conn.execute(
+                'SELECT year,title,term,dir,mag,description AS "desc",quote '
+                "FROM figure_events WHERE figure_id=? ORDER BY sort, year", (row["id"],))],
+            "anchors": [list(r) for r in conn.execute(
+                "SELECT year,value FROM figure_anchors WHERE figure_id=? "
+                "ORDER BY sort, year", (row["id"],))],
+            "config": {},
+        }
     with open(path, "w", encoding="utf-8") as f:
-        f.write("// 自动生成：python database/import_figure.py（数据源 database/dynasty.db）\n")
+        f.write("// 自动生成：python database/import_figure.py --export（数据源 database/dynasty.db）\n")
         f.write("// 请勿手改本文件，修改请编辑数据库后重新导入\n")
         f.write("window.FIGURE_DATA = ")
         f.write(json.dumps(payload, ensure_ascii=False, indent=2))
         f.write(";\n")
-    print(f"[ok] 已导出 {path}")
+    print(f"[ok] 已导出 {len(payload)} 位人物 -> {path}")
     return True
 
 
@@ -256,12 +267,7 @@ def main():
         conn.commit()
         print(f"\n[ok] 导入完成（{len(payload)} 位人物）。")
         if args.export:
-            act = conn.execute(
-                "SELECT code FROM figures WHERE is_active=1 ORDER BY start_year "
-                "LIMIT 1").fetchone()
-            if act:
-                export_js(conn, act["code"],
-                          os.path.join(BASE_DIR, "..", "figure_data.js"))
+            export_js(conn, os.path.join(BASE_DIR, "..", "figure_data.js"))
         print("     python database/verify_curves.py   # 校验国运 / 气运曲线")
     finally:
         conn.close()

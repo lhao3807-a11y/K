@@ -240,3 +240,89 @@ def test_exchange_home_links_to_figure():
     assert 'href="./figure.html"' in html
     assert "list_figures" in html          # 首页人物预览卡
     assert "teaserCard" in html
+
+
+# ---------------- 唐宋十家（2026-09 新增人物板块扩充） ----------------
+
+TANGSONG_TEN = [
+    "DUFU.712", "WANGWEI.701", "BAIJUYI.772", "HANYU.768", "LIUZONGYUAN.773",
+    "SUSHI.1037", "WANGANSHI.1021", "LIQINGZHAO.1084", "YUEFEI.1103",
+    "WENTIANXIANG.1236",
+]
+
+
+def test_tangsong_ten_in_db(conn):
+    """十位唐宋人物全部入库且基本字段齐全。"""
+    for code in TANGSONG_TEN:
+        row = conn.execute(
+            "SELECT * FROM figures WHERE code=?", (code,)).fetchone()
+        assert row is not None, f"缺少人物 {code}"
+        assert row["name"] and row["summary"] and row["seed"]
+        assert row["start_year"] < row["end_year"]
+        assert row["dynasty_code"] in ("TANG.618", "DASONG.960")
+        assert row["issue_price"] == 100
+        assert row["start_year"] <= row["peak_year"] <= row["end_year"]
+
+
+@pytest.mark.parametrize("code", TANGSONG_TEN)
+def test_tangsong_data_quality(conn, code):
+    """每人：锚点充足、阶段无缝覆盖全区间、事件升序且带诗句引用。"""
+    f = conn.execute("SELECT * FROM figures WHERE code=?", (code,)).fetchone()
+    anchors = conn.execute(
+        "SELECT year,value FROM figure_anchors WHERE figure_id=? ORDER BY sort",
+        (f["id"],)).fetchall()
+    assert len(anchors) >= 10, f"{code} 锚点过少"
+    assert all(a["value"] > 0 for a in anchors)
+    ys = [a["year"] for a in anchors]
+    assert ys == sorted(ys) == [y for y in ys]   # 升序且无重复
+
+    periods = conn.execute(
+        "SELECT name,start_year,end_year FROM figure_periods "
+        "WHERE figure_id=? ORDER BY sort", (f["id"],)).fetchall()
+    cur = f["start_year"]
+    for p in periods:
+        assert p["start_year"] == cur, f"{code} 阶段断裂于 {p['name']}"
+        cur = p["end_year"] + 1
+    assert cur - 1 == f["end_year"], f"{code} 阶段未覆盖到 {f['end_year']}"
+
+    events = conn.execute(
+        "SELECT year,title,dir,mag,quote FROM figure_events "
+        "WHERE figure_id=? ORDER BY year,sort", (f["id"],)).fetchall()
+    assert len(events) >= 10, f"{code} 事件过少"
+    ev_ys = [e["year"] for e in events]
+    assert ev_ys == sorted(ev_ys)
+    # 同年不可同时 bull 与 bear（红绿一致性前提）
+    by_year = {}
+    for e in events:
+        by_year.setdefault(e["year"], set()).add(e["dir"])
+    for y, dirs in by_year.items():
+        assert not ({"bull", "bear"} <= dirs), f"{code} 事件年 {y} 红绿同置"
+    # 诗句引用覆盖率 >= 70%（IPO/退市等无诗可引的留空可容忍）
+    quoted = sum(1 for e in events if e["quote"])
+    assert quoted / len(events) >= 0.7, f"{code} 诗句引用覆盖不足"
+
+
+def test_tangsong_export_contains_all():
+    """figure_data.js 须包含全部 11 位人物（多人映射结构）。"""
+    import json
+    with open(os.path.join(PROJECT, "figure_data.js"), encoding="utf-8") as fh:
+        text = fh.read()
+    assert text.lstrip().startswith("//")
+    payload = json.loads(text.split("=", 1)[1].rstrip().rstrip(";"))
+    codes = set(payload.keys())
+    assert "LIBAI.701" in codes
+    assert set(TANGSONG_TEN) <= codes
+    for code in codes:
+        d = payload[code]
+        assert d["figure"]["code"] == code
+        assert len(d["anchors"]) >= 10
+        assert d["events"] and d["periods"]
+
+
+def test_figure_html_switcher():
+    """figure.html 须具备多人物切换 UI（chips + 键盘 ←/→）。"""
+    html = _read("figure.html")
+    assert 'id="figSwitch"' in html
+    assert "fig-chip" in html
+    assert "stepFigure" in html and "ArrowRight" in html and "ArrowLeft" in html
+    assert "location.hash" in html
