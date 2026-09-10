@@ -248,15 +248,15 @@ def test_nav_watchlist_side_arrows_and_follow_card():
 
 def test_app_version_matches_release_naming():
     """版本号与程序名/构建产物/页脚保持同步（版本规范见 AGENTS.md 第 3 条）。"""
-    assert app.APP_VERSION == "1.4.1"
-    assert app.WINDOW_TITLE == "DynastyKline—V1.4.1"
+    assert app.APP_VERSION == "1.4.2"
+    assert app.WINDOW_TITLE == "DynastyKline—V1.4.2"
     root = pathlib.Path(app.BASE_DIR)
-    assert "DynastyKline-V1.4.1" in (root / "build.bat").read_text(encoding="utf-8")
-    assert "DynastyKline-V1.4.1" in (root / "DynastyKline.spec").read_text(encoding="utf-8")
+    assert "DynastyKline-V1.4.2" in (root / "build.bat").read_text(encoding="utf-8")
+    assert "DynastyKline-V1.4.2" in (root / "DynastyKline.spec").read_text(encoding="utf-8")
     for page in ("index.html", "dynasty-exchange.html", "figure.html",
                  "figure-exchange.html", "favorites.html"):
         with open(app.resource_path(page), encoding="utf-8") as f:
-            assert "V1.4.1" in f.read(), f"{page} 页脚缺版本号"
+            assert "V1.4.2" in f.read(), f"{page} 页脚缺版本号"
 
 
 def test_chart_page_peak_trough_event_marks():
