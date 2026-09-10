@@ -193,6 +193,21 @@ def test_watchlist_persisted_and_keyboard_nav():
     assert "'ArrowLeft'" in fig_js and "'ArrowRight'" in fig_js
 
 
+def test_favorites_cards_render_from_candles():
+    """回归：自选卡片必须用 pack 函数返回的 candles 画迷你走势。
+
+    KLINE.stats() 返回 {last,high,low,chg,maxDrawdown}，不含 candles ——
+    曾因读 full.st.candles 抛 TypeError，导致卡片网格渲染中断、无法进详情。
+    """
+    fav = app.resource_path("favorites.html")
+    with open(fav, encoding="utf-8") as f:
+        js = f.read()
+    assert "full.st.candles" not in js          # 禁止读 stats 里不存在的字段
+    assert "candles:candles" in js              # pack 函数须随 stats 一并返回 candles
+    assert "full.candles[full.candles.length-1][1]" in js   # 摘牌价取自 candles
+    assert "miniKlineSVG(full.candles.slice(-24)" in js     # 迷你走势取自 candles
+
+
 def test_nav_watchlist_side_arrows_and_follow_card():
     """顶层导航「自选」进入独立板块 + 盘面页两侧箭头（与键盘同功能）+ 详情浮卡跟随鼠标。"""
     with open(app.resource_path("index.html"), encoding="utf-8") as f:
@@ -233,15 +248,15 @@ def test_nav_watchlist_side_arrows_and_follow_card():
 
 def test_app_version_matches_release_naming():
     """版本号与程序名/构建产物/页脚保持同步（版本规范见 AGENTS.md 第 3 条）。"""
-    assert app.APP_VERSION == "1.4.0"
-    assert app.WINDOW_TITLE == "DynastyKline—V1.4.0"
+    assert app.APP_VERSION == "1.4.1"
+    assert app.WINDOW_TITLE == "DynastyKline—V1.4.1"
     root = pathlib.Path(app.BASE_DIR)
-    assert "DynastyKline-V1.4.0" in (root / "build.bat").read_text(encoding="utf-8")
-    assert "DynastyKline-V1.4.0" in (root / "DynastyKline.spec").read_text(encoding="utf-8")
+    assert "DynastyKline-V1.4.1" in (root / "build.bat").read_text(encoding="utf-8")
+    assert "DynastyKline-V1.4.1" in (root / "DynastyKline.spec").read_text(encoding="utf-8")
     for page in ("index.html", "dynasty-exchange.html", "figure.html",
                  "figure-exchange.html", "favorites.html"):
         with open(app.resource_path(page), encoding="utf-8") as f:
-            assert "V1.4.0" in f.read(), f"{page} 页脚缺版本号"
+            assert "V1.4.1" in f.read(), f"{page} 页脚缺版本号"
 
 
 def test_chart_page_peak_trough_event_marks():
